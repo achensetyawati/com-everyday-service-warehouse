@@ -195,5 +195,143 @@ namespace Com.MM.Service.Warehouse.WebApi.Controllers.v1.InventoryControllers
             }
         }
         #endregion
+
+        #region Stock Availability
+        [HttpGet("stock-availability")]
+        public IActionResult GetAllStockByStorageId(string storageId)
+        {
+            try
+            {
+                var data = facade.GetAllStockByStorageId(storageId);
+                Dictionary<string, object> Result = 
+                    new ResultFormatter(ApiVersion, General.OK_STATUS_CODE, General.OK_MESSAGE)
+                    .Ok(data);
+                return Ok(Result);
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result = 
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE);
+            }
+        }
+
+        [HttpGet("nearest-storage-stock")]
+        public async Task<IActionResult> GetNearestStorageStock(string storageCode, string itemCode)
+        {
+            try
+            {
+                var viewModel = await facade.GetNearestStorageStock(storageCode, itemCode);
+
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.OK_STATUS_CODE, General.OK_MESSAGE)
+                    .Ok(viewModel);
+                return Ok(Result);
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+        #endregion
+
+        #region Monthly Stock
+        [HttpGet("monthly-stock")]
+        public IActionResult GetOverallMonthlyStock(string month, string year)
+        {
+            try
+            {
+                var viewModel = facade.GetOverallMonthlyStock(year, month);
+
+                Dictionary<string, object> Result =
+                       new ResultFormatter(ApiVersion, General.OK_STATUS_CODE, General.OK_MESSAGE)
+                       .Ok(viewModel);
+                return Ok(Result);
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+
+        [HttpGet("monthly-stock/storage")]
+        public IActionResult GetOverallStorageStock(string code, string month, string year)
+        {
+            try
+            {
+                var viewModel = facade.GetOverallStorageStock(code, year, month);
+
+                Dictionary<string, object> Result =
+                       new ResultFormatter(ApiVersion, General.OK_STATUS_CODE, General.OK_MESSAGE)
+                       .Ok(viewModel);
+                return Ok(Result);
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+
+        [HttpGet("monthly-stock/download")]
+        public IActionResult GenerateOverallStorageStockExcel(string code, string month, string year)
+        {
+            try
+            {
+                byte[] xlsInBytes;
+
+                string filename;
+
+                var xls = facade.GenerateExcelForLatestStockByStorage(code, year, month);
+
+                filename = String.Format("Report Monthly Stock - {0} - {1}.xlsx", code, DateTime.UtcNow.ToString("MM-yyyy"));
+
+                xlsInBytes = xls.ToArray();
+
+                var file = File(xlsInBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
+                return file;
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+
+        }
+        #endregion
+
+        #region By RO
+        [HttpGet("by-ro")]
+        public IActionResult GetInventoryStockByRo(string ro)
+        {
+            try
+            {
+                var data = facade.GetInventoryReportByRo(ro);
+
+                Dictionary<string, object> Result =
+                      new ResultFormatter(ApiVersion, General.OK_STATUS_CODE, General.OK_MESSAGE)
+                      .Ok(data);
+                return Ok(Result);
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+        #endregion
     }
 }
