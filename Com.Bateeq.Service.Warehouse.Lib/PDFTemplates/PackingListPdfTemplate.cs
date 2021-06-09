@@ -53,6 +53,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.PDFTemplates
             header.Alignment = Element.ALIGN_RIGHT;
             document.Header = header;
 
+            
+
             #region Header
 
             string titleString = "BON PACKING LIST\n\n";
@@ -115,8 +117,11 @@ namespace Com.Bateeq.Service.Warehouse.Lib.PDFTemplates
             cellInternNoteHeaderLeft.Phrase = new Phrase("", normal_font);
             tableInternNoteHeader.AddCell(cellInternNoteHeaderLeft);
 
-            cellInternNoteHeaderRight.Phrase = new Phrase("Keterangan" + "      : " + "" + "\n\n", normal_font);
+            cellInternNoteHeaderRight.Phrase = new Phrase("Keterangan" + "      : " + viewModel.isReceived + "\n\n", normal_font);
             tableInternNoteHeader.AddCell(cellInternNoteHeaderRight);
+
+            cellInternNoteHeaderLeft.Phrase = new Phrase("", normal_font);
+            tableInternNoteHeader.AddCell(cellInternNoteHeaderLeft);
 
 
 
