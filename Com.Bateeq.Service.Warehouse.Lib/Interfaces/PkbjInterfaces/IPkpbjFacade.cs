@@ -1,4 +1,5 @@
 ﻿using Com.Bateeq.Service.Warehouse.Lib.Models.SPKDocsModel;
+using Com.Bateeq.Service.Warehouse.Lib.Models.TransferModel;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.SpkDocsViewModel;
 using Microsoft.Extensions.Primitives;
 using System;
@@ -15,6 +16,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Interfaces.PkbjInterfaces
         Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadExpedition(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}");
         SPKDocs ReadById(int id);
         SPKDocs ReadByReference(string reference);
+        //TransferOutDoc ReadByReference(string reference);
         Task<int> Create(SPKDocs model, string username, int clientTimeZoneOffset = 7);
         Tuple<bool, List<object>> UploadValidate(ref List<SPKDocsCsvViewModel> Data, List<KeyValuePair<string, StringValues>> Body);
         List<string> CsvHeader { get; }
