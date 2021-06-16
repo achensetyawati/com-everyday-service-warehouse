@@ -49,7 +49,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                                                          //join d in dbContext.SPKDocsItems on c.Id equals d.SPKDocsId
                                                          join f in dbContext.ExpeditionItems on a.Code equals f.Reference
                                                          join g in dbContext.Expeditions on f.ExpeditionId equals g.Id
-                                                         where a.Code.Contains("EFR-KB/RTP") orderby(g.Date) descending
+                                                         where a.Code.Contains("EFR-KB/RTP")
                                                          select new TransferOutReadViewModel
                                                          {
                                                              _id = (int)a.Id,
@@ -302,7 +302,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                             b.ItemName,
                             b.Quantity,
                             b.DomesticCOGS,
-                            b.DomesticSale,
                             b.Remark
                         };
             DataTable result = new DataTable();
@@ -323,8 +322,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
             {
                 foreach (var item in Query)
                 {
-                    //result.Rows.Add(item.Code, item.SourceCode, item.DestinationCode, item.ItemCode, item.ItemName, item.Quantity, item.DomesticCOGS, item.Remark);
-                    result.Rows.Add(item.Code, item.SourceCode, item.DestinationCode, item.ItemCode, item.ItemName, item.Quantity, item.DomesticSale, item.Remark);
+
+                    result.Rows.Add(item.Code, item.SourceCode, item.DestinationCode, item.ItemCode, item.ItemName, item.Quantity, item.DomesticCOGS, item.Remark);
                 }
             }
 
