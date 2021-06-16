@@ -39,7 +39,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 
         public Tuple<List<TransferInDoc>, int, Dictionary<string, string>> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            IQueryable<TransferInDoc> Query = this.dbSet.Include(m => m.Items).Where(x=>x.DestinationCode != "GDG.05" && !x.SourceCode.Contains("FNG")).OrderByDescending(x => x.CreatedUtc);
+            IQueryable<TransferInDoc> Query = this.dbSet.Include(m => m.Items).Where(x=>x.DestinationCode != "GDG.05");
 
             List<string> searchAttributes = new List<string>()
             {
@@ -63,15 +63,11 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 
         public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadPending(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            //IQueryable<SPKDocs> Query = this.dbSetSpk.Include(m => m.Items).Where(i => i.IsDistributed == true && i.IsReceived == false);
-            //IQueryable<SPKDocs> Query = this.dbSetSpk.Include(m => m.Items).Where(i => i.IsDistributed == true && i.IsReceived == false && i.DestinationName != "FINISHING" && i.SourceName != "FINISHING");
-            IQueryable<SPKDocs> Query = this.dbSetSpk.Include(m => m.Items).Where(i => i.IsDistributed == true && i.IsReceived == false && i.DestinationName != "FINISHING" && i.SourceName != "FINISHING").OrderByDescending(x => x.CreatedUtc);
+            IQueryable<SPKDocs> Query = this.dbSetSpk.Include(m => m.Items).Where(i=>i.IsDistributed == true && i.IsReceived == false);
 
             List<string> searchAttributes = new List<string>()
             {
-                "Code",
-                "Reference",
-                "PackingList"
+                "Code"
             };
 
             foreach(var i in Query)
