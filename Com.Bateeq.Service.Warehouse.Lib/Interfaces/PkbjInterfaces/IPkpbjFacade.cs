@@ -23,5 +23,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Interfaces.PkbjInterfaces
         Task UploadData(SPKDocs data, string username);
         Task<SPKDocsViewModel> MapToViewModel(List<SPKDocsCsvViewModel> data, double source, string sourcec, string sourcen, double destination, string destinationc, string destinationn, DateTimeOffset date);
         Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadPackingRTT(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}");
+        Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadPackingList(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}");
     }
 }
