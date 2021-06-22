@@ -17,7 +17,6 @@ using Com.Bateeq.Service.Warehouse.Lib.ViewModels.PkbjByUserViewModel;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
 using Com.Bateeq.Service.Warehouse.Lib.PDFTemplates;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces.PkbjInterfaces;
-using Com.Bateeq.Service.Warehouse.Lib.ViewModels.TransferViewModels;
 //using Com.DanLiris.Service.Purchasing.Lib.PDFTemplates;
 
 namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.PkpbjControllers
@@ -105,6 +104,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.PkpbjControllers
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
 
         [HttpGet("packingList")]
         public IActionResult GetPackingList(int page = 1, int size = 25, string order = "{}", string keyword = null, string filter = "{}")
@@ -231,6 +231,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.PkpbjControllers
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
 
         [HttpGet("expedition")]
         public IActionResult GetExpedition(int page = 1, int size = 25, string order = "{}", string keyword = null, string filter = "{}")
@@ -443,8 +444,6 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.PkpbjControllers
                 var model = facade.ReadByReference(reference);
                 model.Password = "";
                 var viewModel = mapper.Map<SPKDocsViewModel>(model);
-
-                //var viewModel = mapper.Map<TransferOutDocViewModel>(model);
                 if (viewModel == null)
                 {
                     throw new Exception("Invalid Id");

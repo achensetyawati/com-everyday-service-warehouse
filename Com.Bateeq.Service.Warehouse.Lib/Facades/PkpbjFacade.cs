@@ -46,8 +46,9 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
         public Tuple<List<SPKDocs>, int, Dictionary<string, string>> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            //IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items).Where(x => !x.PackingList.Contains("EFR-FN"));
-            //IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items).Where(i => i.DestinationCode.Contains("GDG"));
+
+            //IQueryable<SPKDocs> Query = this.dbSet.Include(x=>x.Items).Where(x => !x.PackingList.Contains("EFR-FN"));
+            
             IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items);
 
             List<string> searchAttributes = new List<string>()
@@ -69,6 +70,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
             return Tuple.Create(Data, TotalData, OrderDictionary);
         }
+
 
         public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadPackingList(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
@@ -120,6 +122,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
             return Tuple.Create(Data, TotalData, OrderDictionary);
         }
+
 
         public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadForUpload(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
@@ -175,7 +178,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                 .FirstOrDefault();
             return a;
         }
-
         public SPKDocs ReadByReference(string reference)
         {
             var model = dbSet.Where(m => m.Reference == reference && m.DestinationCode != "GDG.05")
@@ -183,15 +185,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                  .FirstOrDefault();
             return model;
         }
-
-        //public TransferOutDoc ReadByReference(string reference)
-        //{
-        //    var modelTfOut = dbSetTransferOut.Where(m => m.Code == reference && m.DestinationCode != "GDG.05")
-        //         .Include(m => m.Items)
-        //         .FirstOrDefault();
-        //    return modelTfOut;
-        //}
-
         public string GenerateCode(string ModuleId)
         {
             var uid = ObjectId.GenerateNewId().ToString();
