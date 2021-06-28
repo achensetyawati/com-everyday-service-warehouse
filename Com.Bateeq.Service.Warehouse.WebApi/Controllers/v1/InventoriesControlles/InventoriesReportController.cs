@@ -3,6 +3,8 @@ using Com.Bateeq.Service.Warehouse.Lib.Facades;
 //using Com.Bateeq.Service.Warehouse.Lib.Facades.InventoryFacades;
 using Com.Bateeq.Service.Warehouse.Lib.Helpers;
 using Com.Bateeq.Service.Warehouse.Lib.Services;
+using Com.Bateeq.Service.Warehouse.Lib.ViewModels.InventoryViewModel;
+using Com.Bateeq.Service.Warehouse.Lib.ViewModels.NewIntegrationViewModel;
 using Com.Bateeq.Service.Warehouse.WebApi.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +32,14 @@ namespace Com.MM.Service.Warehouse.WebApi.Controllers.v1.InventoryControllers
             this.mapper = mapper;
             this.facade = facade;
             this.identityService = identityService;
+        }
+
+
+        protected void VerifyUser()
+        {
+            identityService.Username = User.Claims.ToArray().SingleOrDefault(p => p.Type.Equals("username")).Value;
+            identityService.Token = Request.Headers["Authorization"].FirstOrDefault().Replace("Bearer ", "");
+            identityService.TimezoneOffset = Convert.ToInt32(Request.Headers["x-timezone-offset"]);
         }
 
         #region By User
@@ -81,7 +91,7 @@ namespace Com.MM.Service.Warehouse.WebApi.Controllers.v1.InventoryControllers
                 var xls = facade.GenerateExcelReportByUser(storageId, filter);
 
 
-                filename = String.Format("Repoort Monthly Stock{0}.xlsx", DateTime.UtcNow.ToString("dd-MMM-yyyy"));
+                filename = String.Format("Report Monthly Stock - {0} .xlsx", DateTime.UtcNow.ToString("dd-MMM-yyyy"));
 
                 xlsInBytes = xls.ToArray();
                 var file = File(xlsInBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
@@ -120,6 +130,39 @@ namespace Com.MM.Service.Warehouse.WebApi.Controllers.v1.InventoryControllers
                     message = General.OK_MESSAGE,
                     statusCode = General.OK_STATUS_CODE
                 });
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+
+        [HttpGet("by-search/download")]
+        public IActionResult GetReportXls(string itemCode, int offset, string username)
+        {
+            offset = Convert.ToInt32(Request.Headers["x-timezone-offset"]);
+            identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
+
+            try
+            {
+                byte[] xlsInBytes;
+                //int offset = Convert.ToInt32(Request.Headers["x-timezone-offset"]);
+                //DateTime DateFrom = dateFrom == null ? new DateTime(1970, 1, 1) : Convert.ToDateTime(dateFrom);
+                //DateTime DateTo = dateTo == null ? DateTime.Now : Convert.ToDateTime(dateTo);
+                string filename;
+
+                var xls = facade.GenerateReportBySearchExcel(itemCode, offset, username);
+
+
+                filename = String.Format("Report Cari Barang - {0}.xlsx", DateTime.UtcNow.ToString("dd-MMM-yyyy"));
+
+                xlsInBytes = xls.ToArray();
+                var file = File(xlsInBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
+                return file;
+
             }
             catch (Exception e)
             {
@@ -196,6 +239,47 @@ namespace Com.MM.Service.Warehouse.WebApi.Controllers.v1.InventoryControllers
         }
         #endregion
 
+        #region Age Inventory
+        [HttpGet("age")]
+        public IActionResult GetInventoryAge(int storageId, string keyword)
+        {
+            try
+            {
+                var viewModel = facade.GetInventoryAge(storageId, keyword);
+                
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.OK_STATUS_CODE, General.OK_MESSAGE)
+                    .Ok(viewModel);
+                return Ok(Result);
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+
+        [HttpGet("age/download")]
+        public IActionResult GetAgeXls (int storageId, string keyword)
+        {
+            byte[] xlsInBytes;
+            //int offset = Convert.ToInt32(Request.Headers["x-timezone-offset"]);
+            //DateTime DateFrom = dateFrom == null ? new DateTime(1970, 1, 1) : Convert.ToDateTime(dateFrom);
+            //DateTime DateTo = dateTo == null ? DateTime.Now : Convert.ToDateTime(dateTo);
+            string filename;
+
+            var xls = facade.GenerateExcelInventoryAge(storageId, keyword);
+
+            filename = String.Format("Report Inventory Age - {0}.xlsx", DateTime.UtcNow.ToString("dd-MMM-yyyy"));
+
+            xlsInBytes = xls.ToArray();
+            var file = File(xlsInBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
+            return file;
+        }
+        #endregion
+
         #region Stock Availability
         [HttpGet("stock-availability")]
         public IActionResult GetAllStockByStorageId(string storageId)
@@ -203,14 +287,14 @@ namespace Com.MM.Service.Warehouse.WebApi.Controllers.v1.InventoryControllers
             try
             {
                 var data = facade.GetAllStockByStorageId(storageId);
-                Dictionary<string, object> Result = 
+                Dictionary<string, object> Result =
                     new ResultFormatter(ApiVersion, General.OK_STATUS_CODE, General.OK_MESSAGE)
                     .Ok(data);
                 return Ok(Result);
             }
             catch (Exception e)
             {
-                Dictionary<string, object> Result = 
+                Dictionary<string, object> Result =
                     new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
                     .Fail();
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE);
@@ -312,16 +396,27 @@ namespace Com.MM.Service.Warehouse.WebApi.Controllers.v1.InventoryControllers
         #endregion
 
         #region By RO
+
+        // public List<InventoryByRoReportViewModel> readByRO(string Keyword = null, string Filter = "{}")
+        //{
+        //  IQueryable<InventoryByRoReportViewModel> Query = this.dbSet;
+        //}
+
+
         [HttpGet("by-ro")]
         public IActionResult GetInventoryStockByRo(string ro)
         {
             try
             {
+                VerifyUser();
+
                 var data = facade.GetInventoryReportByRo(ro);
 
+                //SalesDocByRoViewModel sales = facade.getSalesPerRo(viewModel.sales.ItemArticleRealizationOrder);
+                
                 Dictionary<string, object> Result =
-                      new ResultFormatter(ApiVersion, General.OK_STATUS_CODE, General.OK_MESSAGE)
-                      .Ok(data);
+                    new ResultFormatter(ApiVersion, General.OK_STATUS_CODE, General.OK_MESSAGE)
+                    .Ok(data);
                 return Ok(Result);
             }
             catch (Exception e)
@@ -332,6 +427,37 @@ namespace Com.MM.Service.Warehouse.WebApi.Controllers.v1.InventoryControllers
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
+        [HttpGet("by-ro/download")]
+        public IActionResult GetXls(string ro)
+        {
+            try
+            {
+                VerifyUser();
+
+                byte[] xlsInBytes;
+                //int offset = Convert.ToInt32(Request.Headers["x-timezone-offset"]);
+                //DateTime DateFrom = dateFrom == null ? new DateTime(1970, 1, 1) : Convert.ToDateTime(dateFrom);
+                //DateTime DateTo = dateTo == null ? DateTime.Now : Convert.ToDateTime(dateTo);
+                string filename;
+
+                var xls = facade.GenerateExcelStokByRO(ro);
+
+                filename = String.Format("Report Stock By RO - {0}.xlsx", DateTime.UtcNow.ToString("dd-MMM-yyyy"));
+
+                xlsInBytes = xls.ToArray();
+                var file = File(xlsInBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
+                return file;
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+        
         #endregion
     }
 }
