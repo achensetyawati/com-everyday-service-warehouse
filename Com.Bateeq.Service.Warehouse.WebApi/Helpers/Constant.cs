@@ -18,6 +18,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Helpers
         public const string CUSTOMSREPORT_ENDPOINT = "CustomsReportEndpoint";
         public const string SALES_ENDPOINT = "SalesEndpoint";
         public const string AUTH_ENDPOINT = "AuthEndpoint";
+        public const string POS_ENDPOINT = "POSEndPoint";
         public const string USERNAME = "AdminUsername";
         public const string PASSWORD = "Password";
         public const string GARMENT_PRODUCTION_ENDPOINT = "GarmentProductionEndpoint";
