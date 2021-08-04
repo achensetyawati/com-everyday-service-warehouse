@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Com.Bateeq.Service.Warehouse.Lib.Interfaces.SPKInterfaces;
 
 namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.SpkDocsControllers
 {
@@ -21,16 +22,16 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.SpkDocsControllers
     public class SPKDocstReportController : Controller
     {
         private string ApiVersion = "1.0.0";
-        private readonly IMapper mapper;
         private readonly SPKDocsFacade facade;
+        private readonly ISPKDoc Ifacade;
         private readonly IdentityService identityService;
         private readonly IServiceProvider serviceProvider;
 
-        public SPKDocstReportController(IMapper mapper, SPKDocsFacade facade, IServiceProvider serviceProvider)
+        public SPKDocstReportController(SPKDocsFacade facade, ISPKDoc iFacade, IServiceProvider serviceProvider)
         {
             this.serviceProvider = serviceProvider;
-            this.mapper = mapper;
             this.facade = facade;
+            this.Ifacade = iFacade;
             this.identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));
         }
         #region By User
@@ -103,7 +104,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.SpkDocsControllers
                 identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
                 identityService.Token = Request.Headers["Authorization"].FirstOrDefault().Replace("Bearer ", "");
 
-                await facade.Create(ViewModel, identityService.Username, identityService.Token);
+                await Ifacade.Create(ViewModel, identityService.Username, identityService.Token);
 
                 Dictionary<string, object> Result =
                     new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)

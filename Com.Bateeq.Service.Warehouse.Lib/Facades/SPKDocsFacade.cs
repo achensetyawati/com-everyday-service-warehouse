@@ -22,11 +22,12 @@ using HashidsNet;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.NewIntegrationViewModel;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
 using System.Net.Http;
+using Com.Bateeq.Service.Warehouse.Lib.Interfaces.SPKInterfaces;
 using Com.Moonlay.Models;
 
 namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 {
-    public class SPKDocsFacade
+    public class SPKDocsFacade : ISPKDoc
     {
         private string USER_AGENT = "Facade";
 
@@ -157,7 +158,22 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
         }
         #endregion
 
-        public async Task<int> Create(SPKDocsFromFinihsingOutsViewModel viewModel, string username, string token, int clientTimeZoneOffset = 7)
+        public Tuple<List<SPKDocs>, int, Dictionary<string, string>> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
+        {
+            throw new NotImplementedException();
+        }
+
+        public SPKDocs ReadById(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public SPKDocs ReadByReference(string reference)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<int> Create(SPKDocsFromFinihsingOutsViewModel viewModel, string username, string token)
         {
             int Created = 0;
 
@@ -189,7 +205,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                 var barcode = GenerateBarcode(idx,sizeId);
                                 var itemx = GetItem(barcode);
 
-                                if (itemx.Count() == 0 || itemx == null) //barcode belum terdaftar, insert ke tabel items (BMS) terlebih dahulu
+                                if (itemx == null || itemx.Count() == 0) //barcode belum terdaftar, insert ke tabel items (BMS) terlebih dahulu
                                 {
                                     ItemCoreViewModelUsername itemCore = new ItemCoreViewModelUsername
                                     {
@@ -227,19 +243,19 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                         InternationalWholesale = 0,
                                         InternationalRetail = 0,
                                         InternationalSale = 0,
-                                        ImageFile = viewModel.ImgFile,
+                                        ImageFile = "",
                                         _id = 0,
                                         Username = username,
                                         Token = token
                                     };
 
-                                    string itemsUri = "items/finished-goods";
+                                    string itemsUri = "items/finished-goods/item";
                                     var httpClient = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
                                     var response = await httpClient.PostAsync($"{APIEndpoint.Core}{itemsUri}", new StringContent(JsonConvert.SerializeObject(itemCore).ToString(), Encoding.UTF8, General.JsonMediaType));
 
                                     response.EnsureSuccessStatusCode();
 
-                                    var item2 = GetItem(barcode);
+                                    var item2 = GetItem2(barcode);
 
                                     sPKDocsItems.Add(new SPKDocsItem
                                     {
@@ -282,7 +298,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                             var barcode = GenerateBarcode(itemIdx, sizeId);
                             var itemx = GetItem(barcode);
 
-                            if (itemx.Count() == 0 || itemx == null) //barcode belum terdaftar, insert ke tabel items (BMS) terlebih dahulu
+                            if (itemx == null || itemx.Count() == 0) //barcode belum terdaftar, insert ke tabel items (BMS) terlebih dahulu
                             {
                                 ItemCoreViewModelUsername itemCore = new ItemCoreViewModelUsername
                                 {
@@ -332,7 +348,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
                                 response.EnsureSuccessStatusCode();
 
-                                var item2 = GetItem(barcode);
+                                var item2 = GetItem2(barcode);
 
                                 sPKDocsItems.Add(new SPKDocsItem
                                 {
@@ -424,12 +440,39 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
         public string GenerateBarcode(int idx, int sizeId)
         {
-            string code = "barcode "+idx+sizeId;
+            string code = ""+idx+sizeId;
             return code;
         }
 
         private List<ItemCoreViewModel> GetItem(string itemCode)
         {
+            if (itemCode.Length <5)
+            {
+                return null;
+            }
+            else
+            {
+                string itemUri = "items/finished-goods/Code";
+                IHttpClientService httpClient = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
+
+                var response = httpClient.GetAsync($"{APIEndpoint.Core}{itemUri}/{itemCode}").Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = response.Content.ReadAsStringAsync().Result;
+                    Dictionary<string, object> result = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
+                    List<ItemCoreViewModel> viewModel = JsonConvert.DeserializeObject<List<ItemCoreViewModel>>(result.GetValueOrDefault("data").ToString());
+                    //return viewModel.OrderByDescending(s => s.Date).FirstOrDefault(s => s.Date < doDate.AddDays(1)); ;
+                    return viewModel;
+                }
+                else
+                {
+                    return null;
+                }   
+            }
+        }
+        
+        private List<ItemCoreViewModel> GetItem2(string itemCode)
+        {   
             string itemUri = "items/finished-goods/Code";
             IHttpClientService httpClient = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
 
@@ -445,7 +488,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             else
             {
                 return null;
-            }
+            } 
         }
 
         public string GeneratePackingList() // nomor urut/EFR-FN/bulan/tahun

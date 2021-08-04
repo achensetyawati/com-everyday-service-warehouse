@@ -6,7 +6,7 @@ using Com.Bateeq.Service.Warehouse.Lib.ViewModels.NewIntegrationViewModel;
 
 namespace Com.Bateeq.Service.Warehouse.Lib.ViewModels.SpkDocsViewModel
 {
-    public class SPKDocsFromFinihsingOutsViewModel : BaseViewModel, IValidatableObject
+    public class SPKDocsFromFinihsingOutsViewModel : BaseViewModel
     {   
         public DateTimeOffset FinishingOutDate { get; set; }
         public DestinationViewModel UnitTo { get; set; }
@@ -29,22 +29,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.ViewModels.SpkDocsViewModel
         public List<SPKDocItemsFromFinihsingOutsViewModel> Items { get; set; }
         public string ImagePath { get; set; }
         public string ImgFile { get; set; }
-
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            if (this.FinishingOutDate.Equals(DateTimeOffset.MinValue) || this.FinishingOutDate == null)
-            {
-                yield return new ValidationResult("Date is required", new List<string> { "date" });
-            }
-            if (this.UnitTo == null)
-            {
-                yield return new ValidationResult("Destination is required", new List<string> { "destination" });
-            }
-            if (this.Unit == null)
-            {
-                yield return new ValidationResult("Source is required", new List<string> { "source" });
-            }
-        }
     }
 
     public class Comodity
