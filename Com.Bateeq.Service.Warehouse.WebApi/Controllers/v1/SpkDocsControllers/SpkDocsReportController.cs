@@ -1,17 +1,13 @@
 ﻿using AutoMapper;
 using Com.Bateeq.Service.Warehouse.Lib.Facades;
-using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Services;
-using Com.Bateeq.Service.Warehouse.Lib.ViewModels.SpkDocsViewModel;
 using Com.Bateeq.Service.Warehouse.WebApi.Helpers;
-using Com.Moonlay.NetCore.Lib.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Com.Bateeq.Service.Warehouse.Lib.Interfaces.SPKInterfaces;
 
 namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.SpkDocsControllers
 {
@@ -22,17 +18,15 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.SpkDocsControllers
     public class SPKDocstReportController : Controller
     {
         private string ApiVersion = "1.0.0";
+        private readonly IMapper mapper;
         private readonly SPKDocsFacade facade;
-        private readonly ISPKDoc Ifacade;
         private readonly IdentityService identityService;
-        private readonly IServiceProvider serviceProvider;
 
-        public SPKDocstReportController(SPKDocsFacade facade, ISPKDoc iFacade, IServiceProvider serviceProvider)
+        public SPKDocstReportController(IMapper mapper, SPKDocsFacade facade, IdentityService identityService)
         {
-            this.serviceProvider = serviceProvider;
+            this.mapper = mapper;
             this.facade = facade;
-            this.Ifacade = iFacade;
-            this.identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));
+            this.identityService = identityService;
         }
         #region By User
         [HttpGet("by-user")]
@@ -95,29 +89,5 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.SpkDocsControllers
             }
         }
         #endregion
-
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] SPKDocsFromFinihsingOutsViewModel ViewModel)
-        {
-            try
-            {
-                identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
-                identityService.Token = Request.Headers["Authorization"].FirstOrDefault().Replace("Bearer ", "");
-
-                await Ifacade.Create(ViewModel, identityService.Username, identityService.Token);
-
-                Dictionary<string, object> Result =
-                    new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
-                    .Ok();
-                return Created(String.Concat(Request.Path, "/", 0), Result);
-            }
-            catch (Exception e)
-            {
-                Dictionary<string, object> Result =
-                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
-                    .Fail();
-                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
-            }
-        }
     }
 }

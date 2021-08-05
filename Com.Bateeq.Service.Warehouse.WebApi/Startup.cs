@@ -101,8 +101,9 @@ namespace Com.Bateeq.Service.Warehouse.WebApi
                 .AddTransient<TransferStockFacade>()
                 .AddTransient<IAdjustmentDoc, AdjustmentFacade>()
                 .AddTransient<ISODoc, SOFacade>()
-                .AddTransient<SPKDocsFacade>(); ;
-                
+                .AddTransient<SPKDocsFacade>()
+                .AddTransient<ISPKDoc, SPKDocsControllerFacade>();
+
         }
 
         private void AddTransient<T>()
