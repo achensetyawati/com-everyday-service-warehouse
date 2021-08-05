@@ -38,7 +38,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.SPKDocsControllerTests
 
             return serviceProvider;
         }
-        private SPKDocstReportController GetController( Mock<ISPKDoc> iSpkdocsFacade)
+        private SPKDocsController GetController(Mock<ISPKDoc> iSpkdocsFacade)
         {
             var user = new Mock<ClaimsPrincipal>();
             var claims = new Claim[]
@@ -49,7 +49,9 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.SPKDocsControllerTests
 
             var servicePMock = GetServiceProvider();
 
-            SPKDocstReportController controller = new SPKDocstReportController(null, iSpkdocsFacade.Object, servicePMock.Object)
+            var asst = new Mock<IdentityService>();
+
+            SPKDocsController controller = new SPKDocsController((IdentityService)servicePMock.Object.GetService(typeof(IdentityService)), iSpkdocsFacade.Object)
             {
                 ControllerContext = new ControllerContext()
                 {
@@ -73,17 +75,17 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.SPKDocsControllerTests
                 return new SPKDocsFromFinihsingOutsViewModel
                 {
                     FinishingOutDate = DateTimeOffset.Now,
-                    UnitTo = new DestinationViewModel
+                    UnitTo = new UnitObj
                     {
-                        _id = 1,
+                        Id = 1,
                         code = "code",
                         name = "name"
                     },
-                    Unit = new SourceViewModel
+                    Unit = new UnitObj
                     {
                         code = "code",
                         name = "name",
-                        _id = 1
+                        Id = 1
                     },
                     PackingList = "0001/FER/08/21",
                     Password = "pass",

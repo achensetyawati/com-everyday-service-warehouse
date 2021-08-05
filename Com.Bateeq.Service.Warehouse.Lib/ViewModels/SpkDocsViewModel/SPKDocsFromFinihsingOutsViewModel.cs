@@ -9,8 +9,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.ViewModels.SpkDocsViewModel
     public class SPKDocsFromFinihsingOutsViewModel : BaseViewModel
     {   
         public DateTimeOffset FinishingOutDate { get; set; }
-        public DestinationViewModel UnitTo { get; set; }
-        public SourceViewModel Unit { get; set; }
+        public UnitObj UnitTo { get; set; }
+        public UnitObj Unit { get; set; }
         public string PackingList { get; set; }
         public string Password { get; set; }
         public bool IsDifferentSize { get; set; }
@@ -34,6 +34,13 @@ namespace Com.Bateeq.Service.Warehouse.Lib.ViewModels.SpkDocsViewModel
     public class Comodity
     {
         public int id { get; set; }
+        public string code { get; set; }
+        public string name { get; set; }
+    }
+
+    public class UnitObj
+    {
+        public long Id { get; set; }
         public string code { get; set; }
         public string name { get; set; }
     }

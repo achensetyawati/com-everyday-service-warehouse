@@ -78,17 +78,17 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocControllerFacades
                 return new SPKDocsFromFinihsingOutsViewModel
                 {
                     FinishingOutDate = DateTimeOffset.Now,
-                    UnitTo = new DestinationViewModel
+                    UnitTo = new UnitObj
                     {
-                        _id = 1,
+                        Id = 1,
                         code = "code",
                         name = "name"
                     },
-                    Unit = new SourceViewModel
+                    Unit = new UnitObj
                     {
                         code = "code",
                         name = "name",
-                        _id = 1
+                        Id = 1
                     },
                     PackingList = "0001/FER/08/21",
                     Password = "pass",
@@ -175,17 +175,17 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocControllerFacades
                 return new SPKDocsFromFinihsingOutsViewModel
                 {
                     FinishingOutDate = DateTimeOffset.Now,
-                    UnitTo = new DestinationViewModel
+                    UnitTo = new UnitObj
                     {
-                        _id = 1,
+                        Id = 1,
                         code = "code",
                         name = "name"
                     },
-                    Unit = new SourceViewModel
+                    Unit = new UnitObj
                     {
                         code = "code",
                         name = "name",
-                        _id = 1
+                        Id = 1
                     },
                     PackingList = "0001/FER/08/21",
                     Password = "pass",
@@ -272,17 +272,17 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocControllerFacades
                 return new SPKDocsFromFinihsingOutsViewModel
                 {
                     FinishingOutDate = DateTimeOffset.Now,
-                    UnitTo = new DestinationViewModel
+                    UnitTo = new UnitObj
                     {
-                        _id = 1,
+                        Id = 1,
                         code = "code",
                         name = "name"
                     },
-                    Unit = new SourceViewModel
+                    Unit = new UnitObj
                     {
                         code = "code",
                         name = "name",
-                        _id = 1
+                        Id = 1
                     },
                     PackingList = "0001/FER/08/21",
                     Password = "pass",
@@ -369,17 +369,17 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocControllerFacades
                 return new SPKDocsFromFinihsingOutsViewModel
                 {
                     FinishingOutDate = DateTimeOffset.Now,
-                    UnitTo = new DestinationViewModel
+                    UnitTo = new UnitObj
                     {
-                        _id = 1,
+                        Id = 1,
                         code = "code",
                         name = "name"
                     },
-                    Unit = new SourceViewModel
+                    Unit = new UnitObj
                     {
                         code = "code",
                         name = "name",
-                        _id = 1
+                        Id = 1
                     },
                     PackingList = "0001/FER/08/21",
                     Password = "pass",

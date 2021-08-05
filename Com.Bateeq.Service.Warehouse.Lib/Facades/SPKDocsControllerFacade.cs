@@ -134,7 +134,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                         SendQuantity = item.Quantity,
                                     });
 
-                                    var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo._id).FirstOrDefault();
+                                    var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
                                     var itemId = item2.Single()._id;
                                     if (itemInInventory == null)
                                     {
@@ -164,7 +164,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                         SendQuantity = item.Quantity,
                                     });
 
-                                    var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo._id).FirstOrDefault();
+                                    var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
                                     var itemId = itemx.Single()._id;
                                     if (itemInInventory == null)
                                     {
@@ -253,7 +253,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                     SendQuantity = item.Quantity,
                                 });
 
-                                var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo._id).FirstOrDefault();
+                                var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
                                 var itemId = item2.Single()._id;
                                 if (itemInInventory == null)
                                 {
@@ -283,7 +283,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                     SendQuantity = item.Quantity,
                                 });
 
-                                var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo._id).FirstOrDefault();
+                                var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
                                 var itemId = itemx.Single()._id;
                                 if (itemInInventory == null)
                                 {
@@ -306,7 +306,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                     {
                         Code = GenerateCode("EFR-PK/PBJ"),
                         Date = viewModel.FinishingOutDate,
-                        DestinationId = (long)viewModel.UnitTo._id,
+                        DestinationId = (long)viewModel.UnitTo.Id,
                         DestinationCode = viewModel.UnitTo.code,
                         DestinationName = viewModel.UnitTo.name,
                         IsDistributed = true,
@@ -314,7 +314,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         PackingList = packingListCode,
                         Password = "1",
                         Reference = packingListCode,
-                        SourceId = (long)viewModel.Unit._id,
+                        SourceId = (long)viewModel.Unit.Id,
                         SourceCode = viewModel.Unit.code,
                         SourceName = viewModel.Unit.name,
                         Weight = 0,
@@ -415,7 +415,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                 ItemInternationalRetail = 0,
                 ItemInternationalSale = 0,
                 ItemInternationalWholeSale = 0,
-                StorageId = viewModel.UnitTo._id,
+                StorageId = viewModel.UnitTo.Id,
                 StorageCode = viewModel.UnitTo.code,
                 StorageName = viewModel.UnitTo.name,
                 StorageIsCentral = false,

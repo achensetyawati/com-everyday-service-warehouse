@@ -81,14 +81,14 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocFacades
             SPKDocsFromFinihsingOutsViewModel dto = new SPKDocsFromFinihsingOutsViewModel
             {
                 FinishingOutDate = dateTimeOffset,
-                UnitTo = new DestinationViewModel()
+                UnitTo = new UnitObj()
                 {
-                    _id = 1,
+                    Id = 1,
                     code = "1",
                     name = "name"
                 },
-                Unit = new SourceViewModel(){
-                    _id = 1,
+                Unit = new UnitObj(){
+                    Id = 1,
                     code = "1",
                     name = "name"
                 },
