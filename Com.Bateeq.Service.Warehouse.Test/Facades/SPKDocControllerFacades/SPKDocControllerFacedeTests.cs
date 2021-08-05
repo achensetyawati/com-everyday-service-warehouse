@@ -7,22 +7,19 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Com.Bateeq.Service.Warehouse.Lib;
 using Com.Bateeq.Service.Warehouse.Lib.Facades;
-using Com.Bateeq.Service.Warehouse.Lib.Helpers;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Models.InventoryModel;
 using Com.Bateeq.Service.Warehouse.Lib.Services;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.NewIntegrationViewModel;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.SpkDocsViewModel;
-using Com.Bateeq.Service.Warehouse.Test.DataUtils.InventoryDataUtils;
-using Com.Bateeq.Service.Warehouse.Test.DataUtils.SPKDocDataUtils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using Xunit;
 
-namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocFacades
+namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocControllerFacades
 {
-    public class SPKDocFacedeTests
+    public class SPKDocControllerFacedeTests
     {
         private const string ENTITY = "MMInventory";
 
@@ -72,16 +69,6 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocFacades
             WarehouseDbContext dbContext = new WarehouseDbContext(optionsBuilder.Options);
 
             return dbContext;
-        }
-        
-        private InventoryDataUtil dataUtil(InventoryFacade facade, string testName, WarehouseDbContext dbContext)
-        {
-            var pkbbjfacade = new InventoryFacade(ServiceProvider, _dbContext(testName));
-            //var sPKDocDataUtil = new SPKDocDataUtil(pkbbjfacade);
-            //var transferFacade = new TransferFacade(ServiceProvider, _dbContext(testName));
-            //var transferDataUtil = new TransferDataUtil(transferFacade, sPKDocDataUtil);
-
-            return new InventoryDataUtil(facade, dbContext);
         }
 
         private SPKDocsFromFinihsingOutsViewModel ViewModel
@@ -435,7 +422,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocFacades
                                     },
                                     Size = new SizeObj()
                                     {
-                                        Id = 1,
+                                        Id = 12345,
                                         Size = "S"
                                     },
                                     Uom = new Uom()
@@ -455,7 +442,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocFacades
                                     },
                                     Size = new SizeObj()
                                     {
-                                        Id = 2,
+                                        Id = 23456,
                                         Size = "M"
                                     },
                                     Uom = new Uom()
@@ -472,30 +459,54 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocFacades
             }
         }
         
+        private Inventory inventoryModel
+        {
+            get
+            {
+                return new Inventory
+                {
+                    ItemArticleRealizationOrder = "123",
+                    ItemCode = "112345",
+                    ItemDomesticCOGS = 50000,
+                    ItemDomesticSale = 500000,
+                    ItemId = 1,
+                    ItemName = "name",
+                    ItemSize = "S",
+                    ItemUom = "PCS",
+                    Quantity = 10,
+                    ItemDomesticRetail = 0,
+                    ItemDomesticWholeSale = 0,
+                    ItemInternationalCOGS = 0,
+                    ItemInternationalRetail = 0,
+                    ItemInternationalSale = 0,
+                    ItemInternationalWholeSale = 0,
+                    StorageId = 2,
+                    StorageCode = "code",
+                    StorageName = "name",
+                    StorageIsCentral = false,
+                };
+            }
+        }
+        
         [Fact]
         public async Task Should_Success_Create()
         {
             DbSet<Inventory> dbSetInventory = _dbContext(GetCurrentMethod()).Set<Inventory>();
-            SPKDocsFacade facade = new SPKDocsFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+            SPKDocsControllerFacade facade = new SPKDocsControllerFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
             
-            //dbSetInventory.Add(model);
-            //var Created = await _dbContext(GetCurrentMethod()).SaveChangesAsync();
-            //InventoryFacade facade = new InventoryFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-            //var model = await dataUtil(facade, GetCurrentMethod()).GetTestData();
             var Response = await facade.Create(this.ViewModel, "username", "Bearer");
             Assert.NotEqual(0, Response);
         }
-        
+
         [Fact]
         public async Task Should_Success_Create_Item_Exist()
         {
             DbSet<Inventory> dbSetInventory = _dbContext(GetCurrentMethod()).Set<Inventory>();
-            SPKDocsFacade facade = new SPKDocsFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+            SPKDocsControllerFacade facade = new SPKDocsControllerFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+
+            dbSetInventory.Add(this.inventoryModel);
+            var Created = await _dbContext(GetCurrentMethod()).SaveChangesAsync();
             
-            //dbSetInventory.Add(model);
-            //var Created = await _dbContext(GetCurrentMethod()).SaveChangesAsync();
-            //InventoryFacade facade = new InventoryFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-            //var model = await dataUtil(facade, GetCurrentMethod()).GetTestData();
             var Response = await facade.Create(this.ViewModelItemExist, "username", "Bearer");
             Assert.NotEqual(0, Response);
         }
@@ -505,8 +516,8 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocFacades
         {
             string itemUri = "items/finished-goods/Code";
             DbSet<Inventory> dbSetInventory = _dbContext(GetCurrentMethod()).Set<Inventory>();
-            SPKDocsFacade facade = new SPKDocsFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-            
+            SPKDocsControllerFacade facade = new SPKDocsControllerFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+
             var mockHttpClient = new Mock<IHttpClientService>();
             mockHttpClient.Setup(x => x.GetAsync(It.IsAny<string>()))
                 .ReturnsAsync(new HttpResponseMessage()
@@ -523,8 +534,8 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocFacades
         {
             string itemUri = "items/finished-goods/Code";
             DbSet<Inventory> dbSetInventory = _dbContext(GetCurrentMethod()).Set<Inventory>();
-            SPKDocsFacade facade = new SPKDocsFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-            
+            SPKDocsControllerFacade facade = new SPKDocsControllerFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+
             var mockHttpClient = new Mock<IHttpClientService>();
             mockHttpClient.Setup(x => x.GetAsync(It.IsAny<string>()))
                 .ReturnsAsync(new HttpResponseMessage()
