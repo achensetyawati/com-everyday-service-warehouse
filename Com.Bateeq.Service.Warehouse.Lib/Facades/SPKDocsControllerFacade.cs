@@ -43,7 +43,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                 try
                 {
                     List<SPKDocsItem> sPKDocsItems = new List<SPKDocsItem>();
-                    int itemIdx = 1;
+                    
                     foreach (var item in viewModel.Items)
                     {
 
@@ -60,11 +60,18 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         var isDifferentSize = item.IsDifferentSize;
                         if (isDifferentSize == true)
                         {
-                            int idx = 1;
+                            
                             foreach (var detail in item.Details)
                             {
-                                var sizeId = detail.Size.Id;
-                                var barcode = GenerateBarcode(idx, sizeId);
+                                var sizeId = detail.Size.Id.ToString("00");
+                                var productId = detail.ParentProduct.Id.ToString("00");
+                                var counterId = viewModel.counters._id.ToString("00");
+                                var subCounterId = viewModel.subCounters._id.ToString("00");
+                                var asal = "11";
+                                var motif = "99";
+
+                                var barcode = asal + counterId + subCounterId + productId + sizeId + motif;
+                                Console.WriteLine("barcodefad " + barcode);
                                 var itemx = GetItem(barcode);
 
                                 if (itemx == null || itemx.Count() == 0) //barcode belum terdaftar, insert ke tabel items (BMS) terlebih dahulu
@@ -125,7 +132,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                         ItemCode = barcode,
                                         ItemDomesticCOGS = item.BasicPrice,
                                         ItemDomesticSale = item.BasicPrice + item.ComodityPrice,
-                                        ItemId = item2.Single()._id,
+                                        ItemId = item2.FirstOrDefault()._id,
                                         ItemName = viewModel.Comodity.name,
                                         ItemSize = item.Size.Size,
                                         ItemUom = item.Uom.Unit,
@@ -134,18 +141,18 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                         SendQuantity = item.Quantity,
                                     });
 
-                                    var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
-                                    var itemId = item2.Single()._id;
-                                    if (itemInInventory == null)
-                                    {
-                                        var inserted = await InsertToInventory(viewModel, item, barcode, itemId, username);
-                                    }
-                                    else
-                                    {
-                                        itemInInventory.Quantity = itemInInventory.Quantity + item.Quantity;
-                                        EntityExtension.FlagForUpdate(itemInInventory, username, USER_AGENT);
-                                        dbContext.Update(itemInInventory);
-                                    }
+                                    //var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
+                                    //var itemId = item2.FirstOrDefault()._id;
+                                    //if (itemInInventory == null)
+                                    //{
+                                    //    var inserted = await InsertToInventory(viewModel, item, barcode, itemId, username);
+                                    //}
+                                    //else
+                                    //{
+                                    //    itemInInventory.Quantity = itemInInventory.Quantity + item.Quantity;
+                                    //    EntityExtension.FlagForUpdate(itemInInventory, username, USER_AGENT);
+                                    //    dbContext.Update(itemInInventory);
+                                    //}
                                 }
                                 else // barcode sudah terdaftar
                                 {
@@ -155,7 +162,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                         ItemCode = barcode,
                                         ItemDomesticCOGS = item.BasicPrice,
                                         ItemDomesticSale = item.BasicPrice + item.ComodityPrice,
-                                        ItemId = itemx.Single()._id,
+                                        ItemId = itemx.FirstOrDefault()._id,
                                         ItemName = viewModel.Comodity.name,
                                         ItemSize = item.Size.Size,
                                         ItemUom = item.Uom.Unit,
@@ -164,26 +171,33 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                         SendQuantity = item.Quantity,
                                     });
 
-                                    var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
-                                    var itemId = itemx.Single()._id;
-                                    if (itemInInventory == null)
-                                    {
-                                        var inserted = await InsertToInventory(viewModel, item, barcode, itemId, username);
-                                    }
-                                    else
-                                    {
-                                        itemInInventory.Quantity = itemInInventory.Quantity + item.Quantity;
-                                        EntityExtension.FlagForUpdate(itemInInventory, username, USER_AGENT);
-                                        dbContext.Update(itemInInventory);
-                                    }
+                                    //var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
+                                    //var itemId = itemx.FirstOrDefault()._id;
+                                    //if (itemInInventory == null)
+                                    //{
+                                    //    var inserted = await InsertToInventory(viewModel, item, barcode, itemId, username);
+                                    //}
+                                    //else
+                                    //{
+                                    //    itemInInventory.Quantity = itemInInventory.Quantity + item.Quantity;
+                                    //    EntityExtension.FlagForUpdate(itemInInventory, username, USER_AGENT);
+                                    //    dbContext.Update(itemInInventory);
+                                    //}
                                 }
-                                idx++;
                             }
                         }
                         else
                         {
-                            var sizeId = item.Size.Id;
-                            var barcode = GenerateBarcode(itemIdx, sizeId);
+
+                            var sizeId = item.Size.Id.ToString("00");
+                            var productId = item.Product.Id.ToString("00");
+                            var counterId = viewModel.counters._id.ToString("00");
+                            var subCounterId = viewModel.subCounters._id.ToString("00");
+                            var asal = "11";
+                            var motif = "99";
+
+                            var barcode = asal + counterId + subCounterId + productId + sizeId + motif;
+                            Console.WriteLine("barcodefad " + barcode);
                             var itemx = GetItem(barcode);
 
                             if (itemx == null || itemx.Count() == 0) //barcode belum terdaftar, insert ke tabel items (BMS) terlebih dahulu
@@ -244,7 +258,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                     ItemCode = barcode,
                                     ItemDomesticCOGS = item.BasicPrice,
                                     ItemDomesticSale = item.BasicPrice + item.ComodityPrice,
-                                    ItemId = item2.Single()._id,
+                                    ItemId = item2.FirstOrDefault()._id,
                                     ItemName = viewModel.Comodity.name,
                                     ItemSize = item.Size.Size,
                                     ItemUom = item.Uom.Unit,
@@ -253,18 +267,18 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                     SendQuantity = item.Quantity,
                                 });
 
-                                var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
-                                var itemId = item2.Single()._id;
-                                if (itemInInventory == null)
-                                {
-                                    var inserted = await InsertToInventory(viewModel, item, barcode, itemId, username);
-                                }
-                                else
-                                {
-                                    itemInInventory.Quantity = itemInInventory.Quantity + item.Quantity;
-                                    EntityExtension.FlagForUpdate(itemInInventory, username, USER_AGENT);
-                                    dbContext.Update(itemInInventory);
-                                }
+                                //var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
+                                //var itemId = item2.FirstOrDefault()._id;
+                                //if (itemInInventory == null)
+                                //{
+                                //    var inserted = await InsertToInventory(viewModel, item, barcode, itemId, username);
+                                //}
+                                //else
+                                //{
+                                //    itemInInventory.Quantity = itemInInventory.Quantity + item.Quantity;
+                                //    EntityExtension.FlagForUpdate(itemInInventory, username, USER_AGENT);
+                                //    dbContext.Update(itemInInventory);
+                                //}
                             }
                             else // barcode sudah terdaftar
                             {
@@ -274,7 +288,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                     ItemCode = barcode,
                                     ItemDomesticCOGS = item.BasicPrice,
                                     ItemDomesticSale = item.BasicPrice + item.ComodityPrice,
-                                    ItemId = itemx.Single()._id,
+                                    ItemId = itemx.FirstOrDefault()._id,
                                     ItemName = viewModel.Comodity.name,
                                     ItemSize = item.Size.Size,
                                     ItemUom = item.Uom.Unit,
@@ -283,20 +297,19 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                     SendQuantity = item.Quantity,
                                 });
 
-                                var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
-                                var itemId = itemx.Single()._id;
-                                if (itemInInventory == null)
-                                {
-                                    var inserted = await InsertToInventory(viewModel, item, barcode, itemId, username);
-                                }
-                                else
-                                {
-                                    itemInInventory.Quantity = itemInInventory.Quantity + item.Quantity;
-                                    EntityExtension.FlagForUpdate(itemInInventory, username, USER_AGENT);
-                                    dbContext.Update(itemInInventory);
-                                }
+                                //var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
+                                //var itemId = itemx.FirstOrDefault()._id;
+                                //if (itemInInventory == null)
+                                //{
+                                //    var inserted = await InsertToInventory(viewModel, item, barcode, itemId, username);
+                                //}
+                                //else
+                                //{
+                                //    itemInInventory.Quantity = itemInInventory.Quantity + item.Quantity;
+                                //    EntityExtension.FlagForUpdate(itemInInventory, username, USER_AGENT);
+                                //    dbContext.Update(itemInInventory);
+                                //}
                             }
-                            itemIdx++;
                         }
                     }
 
@@ -388,43 +401,43 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             }
         }
 
-        public string GenerateBarcode(int idx, int sizeId)
-        {
-            string code = "" + idx + sizeId;
-            return code;
-        }
+        //public string GenerateBarcode(int asal, int sizeId, int productId, int counterId, int subCounterId, int motif)
+        //{
+        //    string code = "" + idx + sizeId;
+        //    return code;
+        //}
 
-        public async Task<int> InsertToInventory(SPKDocsFromFinihsingOutsViewModel viewModel, SPKDocItemsFromFinihsingOutsViewModel item, string barcode, long itemId, string username)
-        {
-            var Inserted = 0;
+        //public async Task<int> InsertToInventory(SPKDocsFromFinihsingOutsViewModel viewModel, SPKDocItemsFromFinihsingOutsViewModel item, string barcode, long itemId, string username)
+        //{
+        //    var Inserted = 0;
 
-            Inventory inventory = new Inventory()
-            {
-                ItemArticleRealizationOrder = viewModel.RONo,
-                ItemCode = barcode,
-                ItemDomesticCOGS = item.BasicPrice,
-                ItemDomesticSale = item.BasicPrice + item.ComodityPrice,
-                ItemId = itemId,
-                ItemName = viewModel.Comodity.name,
-                ItemSize = item.Size.Size,
-                ItemUom = item.Uom.Unit,
-                Quantity = item.Quantity,
-                ItemDomesticRetail = 0,
-                ItemDomesticWholeSale = 0,
-                ItemInternationalCOGS = 0,
-                ItemInternationalRetail = 0,
-                ItemInternationalSale = 0,
-                ItemInternationalWholeSale = 0,
-                StorageId = viewModel.UnitTo.Id,
-                StorageCode = viewModel.UnitTo.code,
-                StorageName = viewModel.UnitTo.name,
-                StorageIsCentral = false,
-            };
+        //    Inventory inventory = new Inventory()
+        //    {
+        //        ItemArticleRealizationOrder = viewModel.RONo,
+        //        ItemCode = barcode,
+        //        ItemDomesticCOGS = item.BasicPrice,
+        //        ItemDomesticSale = item.BasicPrice + item.ComodityPrice,
+        //        ItemId = itemId,
+        //        ItemName = viewModel.Comodity.name,
+        //        ItemSize = item.Size.Size,
+        //        ItemUom = item.Uom.Unit,
+        //        Quantity = item.Quantity,
+        //        ItemDomesticRetail = 0,
+        //        ItemDomesticWholeSale = 0,
+        //        ItemInternationalCOGS = 0,
+        //        ItemInternationalRetail = 0,
+        //        ItemInternationalSale = 0,
+        //        ItemInternationalWholeSale = 0,
+        //        StorageId = viewModel.UnitTo.Id,
+        //        StorageCode = viewModel.UnitTo.code,
+        //        StorageName = viewModel.UnitTo.name,
+        //        StorageIsCentral = false,
+        //    };
 
-            EntityExtension.FlagForCreate(inventory, username, USER_AGENT);
-            dbContext.Add(inventory);
-            return Inserted;
-        }
+        //    EntityExtension.FlagForCreate(inventory, username, USER_AGENT);
+        //    dbContext.Add(inventory);
+        //    return Inserted;
+        //}
 
         public string GeneratePackingList() // nomor urut/EFR-FN/bulan/tahun
         {
