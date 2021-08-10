@@ -29,6 +29,9 @@ namespace Com.Bateeq.Service.Warehouse.Lib.ViewModels.SpkDocsViewModel
         public List<SPKDocItemsFromFinihsingOutsViewModel> Items { get; set; }
         public string ImagePath { get; set; }
         public string ImgFile { get; set; }
+        public int StorageId { get; set; }
+        public string StorageName { get; set; }
+        public string StorageCode { get; set; }
     }
 
     public class Comodity
