@@ -136,9 +136,9 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                         ItemName = viewModel.Comodity.name,
                                         ItemSize = item.Size.Size,
                                         ItemUom = item.Uom.Unit,
-                                        Quantity = item.Quantity,
+                                        Quantity = detail.Quantity,
                                         Remark = "",
-                                        SendQuantity = item.Quantity,
+                                        SendQuantity = detail.Quantity,
                                     });
 
                                     //var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
@@ -166,9 +166,9 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                         ItemName = viewModel.Comodity.name,
                                         ItemSize = item.Size.Size,
                                         ItemUom = item.Uom.Unit,
-                                        Quantity = item.Quantity,
+                                        Quantity = detail.Quantity,
                                         Remark = "",
-                                        SendQuantity = item.Quantity,
+                                        SendQuantity = detail.Quantity,
                                     });
 
                                     //var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
