@@ -52,5 +52,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.ViewModels.NewIntegrationViewModel
         public string ImageFile { get; set; }
         public string Username { get; set; }
         public string Token { get; set; }
+        public double TotalQty { get; set; }
     }
 }

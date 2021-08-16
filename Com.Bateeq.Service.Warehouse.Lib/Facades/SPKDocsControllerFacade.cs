@@ -46,17 +46,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                     
                     foreach (var item in viewModel.Items)
                     {
-
-                        // ambil product code, ambil first or default dari garment invoice detail yang product code dan no ro nya sama
-                        // lalu ambil invoiceItemid,
-                        // lalu ambil invoiceId, lalu ambil suplier
-
-                        //string itemsUri = "items/finished-goods";
-                        //var httpClient = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
-                        //var response = await httpClient.PostAsync($"{APIEndpoint.Core}{itemsUri}", new StringContent(JsonConvert.SerializeObject(item).ToString(), Encoding.UTF8, General.JsonMediaType));
-
-                        //response.EnsureSuccessStatusCode();
-
                         var isDifferentSize = item.IsDifferentSize;
                         if (isDifferentSize == true)
                         {
@@ -64,13 +53,13 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                             foreach (var detail in item.Details)
                             {
                                 var sizeId = detail.Size.Id.ToString("00");
-                                var productId = detail.ParentProduct.Id.ToString("00");
                                 var counterId = viewModel.counters._id.ToString("00");
                                 var subCounterId = viewModel.subCounters._id.ToString("00");
-                                var asal = "11";
-                                var motif = "99";
+                                var asal = viewModel.SourceId.ToString("0");
+                                var roCreatedUtc = viewModel.RoCreatedUtc;
+                                var materialId = viewModel.materials._id.ToString("00");
 
-                                var barcode = asal + counterId + subCounterId + productId + sizeId + motif;
+                                var barcode = asal + counterId + subCounterId + materialId + sizeId + roCreatedUtc;
                                 Console.WriteLine("barcodefad " + barcode);
                                 var itemx = GetItem(barcode);
 
@@ -115,7 +104,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                         ImageFile = "",
                                         _id = 0,
                                         Username = username,
-                                        Token = token
+                                        Token = token,
+                                        TotalQty = detail.Quantity
                                     };
 
                                     string itemsUri = "items/finished-goods/item";
@@ -138,65 +128,54 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                         ItemUom = item.Uom.Unit,
                                         Quantity = detail.Quantity,
                                         Remark = "",
-                                        SendQuantity = detail.Quantity,
+                                        SendQuantity = 0,
                                     });
-
-                                    //var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
-                                    //var itemId = item2.FirstOrDefault()._id;
-                                    //if (itemInInventory == null)
-                                    //{
-                                    //    var inserted = await InsertToInventory(viewModel, item, barcode, itemId, username);
-                                    //}
-                                    //else
-                                    //{
-                                    //    itemInInventory.Quantity = itemInInventory.Quantity + item.Quantity;
-                                    //    EntityExtension.FlagForUpdate(itemInInventory, username, USER_AGENT);
-                                    //    dbContext.Update(itemInInventory);
-                                    //}
                                 }
                                 else // barcode sudah terdaftar
                                 {
+                                    var existItemId = itemx.FirstOrDefault()._id;
+                                    ItemCoreViewModelUsername itemCore = new ItemCoreViewModelUsername
+                                    {
+                                        _id = existItemId,
+                                        Username = username,
+                                        Token = token,
+                                        TotalQty = detail.Quantity
+                                    };
+
                                     sPKDocsItems.Add(new SPKDocsItem
                                     {
                                         ItemArticleRealizationOrder = viewModel.RONo,
                                         ItemCode = barcode,
                                         ItemDomesticCOGS = item.BasicPrice,
                                         ItemDomesticSale = item.BasicPrice + item.ComodityPrice,
-                                        ItemId = itemx.FirstOrDefault()._id,
+                                        ItemId = existItemId,
                                         ItemName = viewModel.Comodity.name,
                                         ItemSize = detail.Size.Size,
                                         ItemUom = item.Uom.Unit,
                                         Quantity = detail.Quantity,
                                         Remark = "",
-                                        SendQuantity = detail.Quantity,
+                                        SendQuantity = 0,
                                     });
 
-                                    //var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
-                                    //var itemId = itemx.FirstOrDefault()._id;
-                                    //if (itemInInventory == null)
-                                    //{
-                                    //    var inserted = await InsertToInventory(viewModel, item, barcode, itemId, username);
-                                    //}
-                                    //else
-                                    //{
-                                    //    itemInInventory.Quantity = itemInInventory.Quantity + item.Quantity;
-                                    //    EntityExtension.FlagForUpdate(itemInInventory, username, USER_AGENT);
-                                    //    dbContext.Update(itemInInventory);
-                                    //}
+                                    //update TotalQty di tabel Items
+                                    string itemPutUri = $"items/finished-goods/update-qty-by-id/{existItemId}";
+                                    IHttpClientService httpClient = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
+                                    var response = await httpClient.PutAsync($"{APIEndpoint.Core}{itemPutUri}", new StringContent(JsonConvert.SerializeObject(itemCore).ToString(), Encoding.UTF8, General.JsonMediaType));
+
+                                    response.EnsureSuccessStatusCode();
                                 }
                             }
                         }
                         else
                         {
-
                             var sizeId = item.Size.Id.ToString("00");
-                            var productId = item.Product.Id.ToString("00");
                             var counterId = viewModel.counters._id.ToString("00");
                             var subCounterId = viewModel.subCounters._id.ToString("00");
-                            var asal = "11";
-                            var motif = "99";
+                            var asal = viewModel.SourceId.ToString("0");
+                            var roCreatedUtc = viewModel.RoCreatedUtc;
+                            var materialId = viewModel.materials._id.ToString("00");
 
-                            var barcode = asal + counterId + subCounterId + productId + sizeId + motif;
+                            var barcode = asal + counterId + subCounterId + materialId + sizeId + roCreatedUtc;
                             Console.WriteLine("barcodefad " + barcode);
                             var itemx = GetItem(barcode);
 
@@ -241,7 +220,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                     ImageFile = "",
                                     _id = 0,
                                     Username = username,
-                                    Token = token
+                                    Token = token,
+                                    TotalQty = item.Quantity
                                 };
 
                                 string itemsUri = "items/finished-goods/item";
@@ -264,51 +244,41 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                     ItemUom = item.Uom.Unit,
                                     Quantity = item.Quantity,
                                     Remark = "",
-                                    SendQuantity = item.Quantity,
+                                    SendQuantity = 0,
                                 });
-
-                                //var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
-                                //var itemId = item2.FirstOrDefault()._id;
-                                //if (itemInInventory == null)
-                                //{
-                                //    var inserted = await InsertToInventory(viewModel, item, barcode, itemId, username);
-                                //}
-                                //else
-                                //{
-                                //    itemInInventory.Quantity = itemInInventory.Quantity + item.Quantity;
-                                //    EntityExtension.FlagForUpdate(itemInInventory, username, USER_AGENT);
-                                //    dbContext.Update(itemInInventory);
-                                //}
                             }
                             else // barcode sudah terdaftar
                             {
+                                var existItemId = itemx.FirstOrDefault()._id;
+                                ItemCoreViewModelUsername itemCore = new ItemCoreViewModelUsername
+                                {
+                                    _id = existItemId,
+                                    Username = username,
+                                    Token = token,
+                                    TotalQty = item.Quantity
+                                };
+
                                 sPKDocsItems.Add(new SPKDocsItem
                                 {
                                     ItemArticleRealizationOrder = viewModel.RONo,
                                     ItemCode = barcode,
                                     ItemDomesticCOGS = item.BasicPrice,
                                     ItemDomesticSale = item.BasicPrice + item.ComodityPrice,
-                                    ItemId = itemx.FirstOrDefault()._id,
+                                    ItemId = existItemId,
                                     ItemName = viewModel.Comodity.name,
                                     ItemSize = item.Size.Size,
                                     ItemUom = item.Uom.Unit,
                                     Quantity = item.Quantity,
                                     Remark = "",
-                                    SendQuantity = item.Quantity,
+                                    SendQuantity = 0,
                                 });
 
-                                //var itemInInventory = dbContext.Inventories.Where(entity => entity.ItemCode == barcode && entity.StorageId == viewModel.UnitTo.Id).FirstOrDefault();
-                                //var itemId = itemx.FirstOrDefault()._id;
-                                //if (itemInInventory == null)
-                                //{
-                                //    var inserted = await InsertToInventory(viewModel, item, barcode, itemId, username);
-                                //}
-                                //else
-                                //{
-                                //    itemInInventory.Quantity = itemInInventory.Quantity + item.Quantity;
-                                //    EntityExtension.FlagForUpdate(itemInInventory, username, USER_AGENT);
-                                //    dbContext.Update(itemInInventory);
-                                //}
+                                //update TotalQty di tabel Items
+                                string itemPutUri = $"items/finished-goods/update-qty-by-id/{existItemId}";
+                                IHttpClientService httpClient = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
+                                var response = await httpClient.PutAsync($"{APIEndpoint.Core}{itemPutUri}", new StringContent(JsonConvert.SerializeObject(itemCore).ToString(), Encoding.UTF8, General.JsonMediaType));
+
+                                response.EnsureSuccessStatusCode();
                             }
                         }
                     }
