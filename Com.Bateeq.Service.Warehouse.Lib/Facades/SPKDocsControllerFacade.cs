@@ -161,8 +161,10 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                     string itemPutUri = $"items/finished-goods/update-qty-by-id/{existItemId}";
                                     IHttpClientService httpClient = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
                                     var response = await httpClient.PutAsync($"{APIEndpoint.Core}{itemPutUri}", new StringContent(JsonConvert.SerializeObject(itemCore).ToString(), Encoding.UTF8, General.JsonMediaType));
-
-                                    response.EnsureSuccessStatusCode();
+                                    if (response != null)
+                                    {
+                                        response.EnsureSuccessStatusCode();
+                                    }
                                 }
                             }
                         }
@@ -277,8 +279,10 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                 string itemPutUri = $"items/finished-goods/update-qty-by-id/{existItemId}";
                                 IHttpClientService httpClient = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
                                 var response = await httpClient.PutAsync($"{APIEndpoint.Core}{itemPutUri}", new StringContent(JsonConvert.SerializeObject(itemCore).ToString(), Encoding.UTF8, General.JsonMediaType));
-
-                                response.EnsureSuccessStatusCode();
+                                if (response != null)
+                                {
+                                    response.EnsureSuccessStatusCode();
+                                }
                             }
                         }
                     }
@@ -326,7 +330,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
         private List<ItemCoreViewModel> GetItem(string itemCode)
         {
-            if (itemCode.Length < 5)
+            if (itemCode.Length < 14)
             {
                 return null;
             }

@@ -88,7 +88,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                     model.Code = code;
 
 
-                    var SPK = dbContext.SPKDocs.Where(x => x.PackingList == model.Reference).Single();
+                    var SPK = dbContext.SPKDocs.Where(x => x.PackingList == model.Reference).FirstOrDefault();
                     var expedition = dbContext.ExpeditionItems.Where(x => x.PackingList == model.Reference);
                     if (expedition.Count() != 0)
                     {

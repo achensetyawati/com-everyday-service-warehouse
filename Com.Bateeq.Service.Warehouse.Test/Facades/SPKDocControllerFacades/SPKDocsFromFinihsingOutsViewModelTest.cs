@@ -5,7 +5,7 @@ using Com.Bateeq.Service.Warehouse.Lib.ViewModels.SpkDocsViewModel;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using Xunit;
 
-namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocFacades
+namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocControllerFacades
 {
     public class SPKDocsFromFinihsingOutsViewModelTest
     {
@@ -159,7 +159,12 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocFacades
                 RONo = "123",
                 ImagePath = "/sales/",
                 ImgFile = "imgFile",
-                Items = listItem
+                Items = listItem,
+                StorageId = 1,
+                StorageName = "storage",
+                StorageCode = "code",
+                RoCreatedUtc = "2110",
+                SourceId = 1
             };
             
             Assert.Equal(dto.FinishingOutDate, dateTimeOffset);
@@ -183,6 +188,11 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocFacades
             Assert.Equal(dto.ImagePath,"/sales/");
             Assert.Equal(dto.ImgFile,"imgFile");
             Assert.NotEmpty(dto.Items);
+            Assert.Equal(dto.StorageId,1);
+            Assert.Equal(dto.StorageName,"storage");
+            Assert.Equal(dto.StorageCode,"code");
+            Assert.Equal(dto.RoCreatedUtc,"2110");
+            Assert.Equal(dto.SourceId,1);
         }
     }
 }
