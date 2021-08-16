@@ -128,7 +128,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                         ItemUom = item.Uom.Unit,
                                         Quantity = detail.Quantity,
                                         Remark = "",
-                                        SendQuantity = 0,
+                                        SendQuantity = detail.Quantity,
                                     });
                                 }
                                 else // barcode sudah terdaftar
@@ -154,7 +154,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                         ItemUom = item.Uom.Unit,
                                         Quantity = detail.Quantity,
                                         Remark = "",
-                                        SendQuantity = 0,
+                                        SendQuantity = detail.Quantity,
                                     });
 
                                     //update TotalQty di tabel Items
@@ -244,7 +244,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                     ItemUom = item.Uom.Unit,
                                     Quantity = item.Quantity,
                                     Remark = "",
-                                    SendQuantity = 0,
+                                    SendQuantity = item.Quantity,
                                 });
                             }
                             else // barcode sudah terdaftar
@@ -270,7 +270,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                     ItemUom = item.Uom.Unit,
                                     Quantity = item.Quantity,
                                     Remark = "",
-                                    SendQuantity = 0,
+                                    SendQuantity = item.Quantity,
                                 });
 
                                 //update TotalQty di tabel Items
