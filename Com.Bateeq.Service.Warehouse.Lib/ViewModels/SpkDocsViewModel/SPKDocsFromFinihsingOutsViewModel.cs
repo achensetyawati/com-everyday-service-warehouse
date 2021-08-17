@@ -32,6 +32,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.ViewModels.SpkDocsViewModel
         public int StorageId { get; set; }
         public string StorageName { get; set; }
         public string StorageCode { get; set; }
+        public string RoCreatedUtc { get; set; }
+        public int SourceId { get; set; }
     }
 
     public class Comodity

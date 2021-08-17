@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.SpkDocsViewModel;
 using Xunit;
 
-namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocFacades
+namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocControllerFacades
 {
     public class SPKDocItemsFromFinihsingOutsViewModelTest
     {

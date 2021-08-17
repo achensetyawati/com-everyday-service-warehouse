@@ -88,7 +88,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                     model.Code = code;
 
 
-                    var SPK = dbContext.SPKDocs.Where(x => x.PackingList == model.Reference).Single();
+                    var SPK = dbContext.SPKDocs.Where(x => x.PackingList == model.Reference).FirstOrDefault();
                     var expedition = dbContext.ExpeditionItems.Where(x => x.PackingList == model.Reference);
                     if (expedition.Count() != 0)
                     {
@@ -104,19 +104,33 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         var SPKItems = dbContext.SPKDocsItems.Where(x => x.ItemArticleRealizationOrder == i.ArticleRealizationOrder && x.ItemCode == i.ItemCode && i.ItemName == i.ItemName && x.SPKDocsId == Id).Single();
                         SPKItems.SendQuantity = i.Quantity;
                         var inventorymovement = new InventoryMovement();
-                        var inven = dbContext.Inventories.Where(x => x.ItemId == i.ItemId && x.StorageId == model.DestinationId).FirstOrDefault();
+                        //var inven = dbContext.Inventories.Where(x => x.ItemId == i.ItemId && x.StorageId == model.DestinationId).FirstOrDefault();
+                        //if (inven != null)
+                        //{
+                        //    inventorymovement.Before = inven.Quantity;
+                        //    inven.Quantity = inven.Quantity + i.Quantity ;//inven.Quantity + i.quantity;
+                        //    //dbSetInventory.Update(inven);
+                        //}
+                        //else
+                        //{
+
+                        int status = 0;
+                        var inven = dbContext.Inventories.OrderByDescending(x => x.CreatedUtc).Where(x => x.ItemId == i.ItemId && x.StorageId == model.DestinationId && x.ItemCode.Contains(i.ItemCode)).FirstOrDefault();
                         if (inven != null)
                         {
-                            inventorymovement.Before = inven.Quantity;
-                            inven.Quantity = inven.Quantity + i.Quantity ;//inven.Quantity + i.quantity;
-                            //dbSetInventory.Update(inven);
+                            var latestItemCode = inven.ItemCode;
+                            var latestItemCodeLength = latestItemCode.Length;
+                            var latestStatus = latestItemCode.Substring(latestItemCodeLength - 2);
+                            status = int.Parse(latestStatus);
                         }
-                        else
+
+                        for (var j = 0; j < i.Quantity; j++)
                         {
+                            status = status + 1;
                             Inventory inventory = new Inventory
                             {
                                 ItemArticleRealizationOrder = i.ArticleRealizationOrder,
-                                ItemCode = i.ItemCode,
+                                ItemCode = "" + i.ItemCode + status.ToString("00"),
                                 ItemDomesticCOGS = i.DomesticCOGS,
                                 ItemDomesticRetail = i.DomesticRetail,
                                 ItemDomesticSale = i.DomesticSale,
@@ -129,7 +143,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                 ItemName = i.ItemName,
                                 ItemSize = i.Size,
                                 ItemUom = i.Uom,
-                                Quantity = i.Quantity,
+                                Quantity = 1,
                                 StorageCode = model.DestinationCode,
                                 StorageId = model.DestinationId,
                                 StorageName = model.DestinationName,
@@ -137,34 +151,33 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                             };
                             EntityExtension.FlagForCreate(inventory, username, USER_AGENT);
                             dbSetInventory.Add(inventory);
+
+                            inventorymovement.After = inventorymovement.Before + 1;
+                            inventorymovement.Date = DateTimeOffset.UtcNow;
+                            inventorymovement.ItemCode = "" + i.ItemCode + status.ToString("00");
+                            inventorymovement.ItemDomesticCOGS = i.DomesticCOGS;
+                            inventorymovement.ItemDomesticRetail = i.DomesticRetail;
+                            inventorymovement.ItemDomesticWholeSale = i.DomesticRetail;
+                            inventorymovement.ItemDomesticSale = i.DomesticSale;
+                            inventorymovement.ItemId = i.ItemId;
+                            inventorymovement.ItemInternationalCOGS = 0;
+                            inventorymovement.ItemInternationalRetail = 0;
+                            inventorymovement.ItemInternationalSale = 0;
+                            inventorymovement.ItemInternationalWholeSale = 0;
+                            inventorymovement.ItemName = i.ItemName;
+                            inventorymovement.ItemSize = i.Size;
+                            inventorymovement.ItemUom = i.Uom;
+                            inventorymovement.Quantity = 1;
+                            inventorymovement.StorageCode = model.DestinationCode;
+                            inventorymovement.StorageId = model.DestinationId;
+                            inventorymovement.StorageName = model.DestinationName;
+                            inventorymovement.Type = "IN";
+                            inventorymovement.Reference = code;
+                            inventorymovement.Remark = model.Remark;
+                            inventorymovement.StorageIsCentral = model.DestinationName.Contains("GUDANG") ? true : false;
+                            EntityExtension.FlagForCreate(inventorymovement, username, USER_AGENT);
+                            dbSetInventoryMovement.Add(inventorymovement);
                         }
-
-                        inventorymovement.After = inventorymovement.Before + i.Quantity;
-                        inventorymovement.Date = DateTimeOffset.UtcNow;
-                        inventorymovement.ItemCode = i.ItemCode;
-                        inventorymovement.ItemDomesticCOGS = i.DomesticCOGS;
-                        inventorymovement.ItemDomesticRetail = i.DomesticRetail;
-                        inventorymovement.ItemDomesticWholeSale = i.DomesticRetail;
-                        inventorymovement.ItemDomesticSale = i.DomesticSale;
-                        inventorymovement.ItemId = i.ItemId;
-                        inventorymovement.ItemInternationalCOGS = 0;
-                        inventorymovement.ItemInternationalRetail = 0;
-                        inventorymovement.ItemInternationalSale = 0;
-                        inventorymovement.ItemInternationalWholeSale = 0;
-                        inventorymovement.ItemName = i.ItemName;
-                        inventorymovement.ItemSize = i.Size;
-                        inventorymovement.ItemUom = i.Uom;
-                        inventorymovement.Quantity = i.Quantity;
-                        inventorymovement.StorageCode = model.DestinationCode;
-                        inventorymovement.StorageId = model.DestinationId;
-                        inventorymovement.StorageName = model.DestinationName;
-                        inventorymovement.Type = "IN";
-                        inventorymovement.Reference = code;
-                        inventorymovement.Remark = model.Remark;
-                        inventorymovement.StorageIsCentral = model.DestinationName.Contains("GUDANG") ? true : false;
-                        EntityExtension.FlagForCreate(inventorymovement, username, USER_AGENT);
-                        dbSetInventoryMovement.Add(inventorymovement);
-
                     }
 
                     dbSet.Add(model);

@@ -163,6 +163,26 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocControllerFacades
                                 }
                             }
                         }
+                    },
+                    counters = new ItemArticleCounterViewModel()
+                    {
+                        _id = 1,
+                        code = "code",
+                        name = "name"
+                    },
+                    subCounters = new ItemArticleSubCounterViewModel()
+                    {
+                        _id = 1,
+                        code = "code",
+                        name = "name"
+                    },
+                    SourceId = 1,
+                    RoCreatedUtc = "2110",
+                    materials = new ItemArticleMaterialViewModel()
+                    {
+                        _id = 1,
+                        code = "code",
+                        name = "name"
                     }
                 };
             }
@@ -260,6 +280,26 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocControllerFacades
                                 }
                             }
                         }
+                    },
+                    counters = new ItemArticleCounterViewModel()
+                    {
+                        _id = 1,
+                        code = "code",
+                        name = "name"
+                    },
+                    subCounters = new ItemArticleSubCounterViewModel()
+                    {
+                        _id = 1,
+                        code = "code",
+                        name = "name"
+                    },
+                    SourceId = 1,
+                    RoCreatedUtc = "2110",
+                    materials = new ItemArticleMaterialViewModel()
+                    {
+                        _id = 1,
+                        code = "code",
+                        name = "name"
                     }
                 };
             }
@@ -357,6 +397,26 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocControllerFacades
                                 }
                             }
                         }
+                    },
+                    counters = new ItemArticleCounterViewModel()
+                    {
+                        _id = 1,
+                        code = "code",
+                        name = "name"
+                    },
+                    subCounters = new ItemArticleSubCounterViewModel()
+                    {
+                        _id = 1,
+                        code = "code",
+                        name = "name"
+                    },
+                    SourceId = 1,
+                    RoCreatedUtc = "2110",
+                    materials = new ItemArticleMaterialViewModel()
+                    {
+                        _id = 1,
+                        code = "code",
+                        name = "name"
                     }
                 };
             }
@@ -454,6 +514,26 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocControllerFacades
                                 }
                             }
                         }
+                    },
+                    counters = new ItemArticleCounterViewModel()
+                    {
+                        _id = 1,
+                        code = "code",
+                        name = "name"
+                    },
+                    subCounters = new ItemArticleSubCounterViewModel()
+                    {
+                        _id = 1,
+                        code = "code",
+                        name = "name"
+                    },
+                    SourceId = 1,
+                    RoCreatedUtc = "2110",
+                    materials = new ItemArticleMaterialViewModel()
+                    {
+                        _id = 1,
+                        code = "code",
+                        name = "name"
                     }
                 };
             }

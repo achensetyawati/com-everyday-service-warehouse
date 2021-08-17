@@ -15,6 +15,7 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Com.Bateeq.Service.Warehouse.Lib.Models.SPKDocsModel;
 using Xunit;
 
 namespace Com.Bateeq.Service.Warehouse.Test.Facades.TransferInFacades
@@ -80,8 +81,44 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.TransferInFacades
         public async Task Should_Success_Create_Data()
         {
 
+            SPKDocs spkDocs = new SPKDocs()
+            {
+                Code = "code",
+                Date = DateTimeOffset.Now,
+                DestinationCode = "destinationCode1",
+                DestinationId = 1,
+                DestinationName = "destName1",
+                Reference = "0095/EFR-FN/08/21",
+                Password = "1",
+                SourceCode = "SorceCode",
+                SourceId = 1,
+                SourceName = "SorceName",
+                Items = new List<SPKDocsItem>
+                {
+                    new SPKDocsItem()
+                    {
+                        ItemArticleRealizationOrder = "2110003",
+                        ItemDomesticCOGS = 40000,
+                        ItemDomesticRetail = 0,
+                        ItemDomesticSale = 40010,
+                        ItemDomesticWholesale = 0,
+                        ItemCode = "111",
+                        ItemId = 60482,
+                        ItemName = "BOYS VEST",
+                        Quantity = 1,
+                        Remark = "",
+                        ItemSize = "S",
+                        ItemUom = "PCS"
+                    }
+                }
+            };
+            
+            DbSet<SPKDocs> dbSPKDocs = _dbContext(GetCurrentMethod()).Set<SPKDocs>();
+            dbSPKDocs.Add(spkDocs);
+            var Created = await _dbContext(GetCurrentMethod()).SaveChangesAsync();
+            
             TransferFacade facade = new TransferFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-            var model = await dataUtil(facade, GetCurrentMethod()).GetNewData();
+            var model = await dataUtil(facade, GetCurrentMethod()).GetNewData2();
             var Response = await facade.Create(model, USERNAME);
             Assert.NotEqual(0, Response);
         }
