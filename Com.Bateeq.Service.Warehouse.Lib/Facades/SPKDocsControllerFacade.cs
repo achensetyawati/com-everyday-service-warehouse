@@ -293,9 +293,9 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                     {
                         Code = GenerateCode("EFR-PK/PBJ"),
                         Date = viewModel.FinishingOutDate,
-                        DestinationId = (long)viewModel.StorageId,
-                        DestinationCode = viewModel.StorageCode,
-                        DestinationName = viewModel.StorageName,
+                        DestinationId = (long)viewModel.UnitTo.Id,
+                        DestinationCode = viewModel.UnitTo.code,
+                        DestinationName = viewModel.UnitTo.name,
                         IsDistributed = true,
                         IsReceived = false,
                         PackingList = packingListCode,
