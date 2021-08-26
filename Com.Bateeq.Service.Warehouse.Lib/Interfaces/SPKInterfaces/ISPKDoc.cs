@@ -13,5 +13,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Interfaces.SPKInterfaces
         SPKDocs ReadById(int id);
         SPKDocs ReadByReference(string reference);
         Task<int> Create(SPKDocsFromFinihsingOutsViewModel viewModel, string username, string token);
+        List<SPKDocs> ReadByFinishingOutIdentity(string FinishingOutIdentity);
     }
 }
