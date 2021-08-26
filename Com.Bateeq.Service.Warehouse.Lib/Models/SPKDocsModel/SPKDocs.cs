@@ -38,6 +38,9 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Models.SPKDocsModel
 
         public int Weight { get; set; }
 
+        [MaxLength(255)]
+        public string FinishingOutIdentity { get; set; }
+
         public virtual ICollection<SPKDocsItem> Items { get; set; }
     }
 }
