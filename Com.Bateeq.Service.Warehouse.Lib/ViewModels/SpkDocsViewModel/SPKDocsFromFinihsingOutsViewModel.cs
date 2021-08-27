@@ -29,11 +29,15 @@ namespace Com.Bateeq.Service.Warehouse.Lib.ViewModels.SpkDocsViewModel
         public List<SPKDocItemsFromFinihsingOutsViewModel> Items { get; set; }
         public string ImagePath { get; set; }
         public string ImgFile { get; set; }
-        public int StorageId { get; set; }
-        public string StorageName { get; set; }
-        public string StorageCode { get; set; }
+        public int SourceStorageId { get; set; }
+        public string SourceStorageName { get; set; }
+        public string SourceStorageCode { get; set; }
+        public int DestinationStorageId { get; set; }
+        public string DestinationStorageName { get; set; }
+        public string DestinationStorageCode { get; set; }
         public string RoCreatedUtc { get; set; }
         public int SourceId { get; set; }
+        public string FinishingOutIdentity { get; set; }
     }
 
     public class Comodity

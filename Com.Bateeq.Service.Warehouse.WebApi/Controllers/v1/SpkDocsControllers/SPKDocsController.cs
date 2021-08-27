@@ -51,5 +51,34 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.SpkDocsControllers
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
+        [HttpGet("FinishingOutIdentity/{FinishingOutIdentity}")]
+        public IActionResult GetByFinishingIdentity([FromRoute] string FinishingOutIdentity)
+        {
+            try
+            {
+                identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
+                identityService.Token = Request.Headers["Authorization"].FirstOrDefault().Replace("Bearer ", "");
+
+                var data = iSPKDocs.ReadByFinishingOutIdentity(FinishingOutIdentity);
+
+                var info = new Dictionary<string, object>
+                    {
+                        { "count", data.Count }
+                    };
+
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.OK_STATUS_CODE, General.OK_MESSAGE)
+                    .Ok(data, info);
+                return Ok(Result);
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
     }
 }

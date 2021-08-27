@@ -213,37 +213,37 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                     foreach (var i in model.Items)
                     {
                         EntityExtension.FlagForCreate(i, username, USER_AGENT);
-                        var inven = GetItems(i.ItemCode, i.ItemName, i.ItemArticleRealizationOrder);
-                        if (inven == null)
-                        {
-                            ItemCoreViewModel item = new ItemCoreViewModel
-                            {
-                                dataDestination = new List<ItemViewModelRead> {
-                                    new ItemViewModelRead{
-                                        ArticleRealizationOrder = i.ItemArticleRealizationOrder,
-                                        code = i.ItemCode,
-                                        name = i.ItemName,
-                                        Remark = i.Remark,
-                                        Size = i.ItemSize,
-                                        Uom = i.ItemUom,
+                        //var inven = GetItems(i.ItemCode, i.ItemName, i.ItemArticleRealizationOrder);
+                        //if (inven == null)
+                        //{
+                        //    ItemCoreViewModel item = new ItemCoreViewModel
+                        //    {
+                        //        dataDestination = new List<ItemViewModelRead> {
+                        //            new ItemViewModelRead{
+                        //                ArticleRealizationOrder = i.ItemArticleRealizationOrder,
+                        //                code = i.ItemCode,
+                        //                name = i.ItemName,
+                        //                Remark = i.Remark,
+                        //                Size = i.ItemSize,
+                        //                Uom = i.ItemUom,
 
-                                    }
+                        //            }
 
-                                },
-                                DomesticCOGS = i.ItemDomesticCOGS,
-                                DomesticRetail = i.ItemDomesticRetail,
-                                DomesticSale = i.ItemDomesticSale,
-                                DomesticWholesale = i.ItemDomesticWholesale
-                            };
-                            
-                            string itemsUri = "items/finished-goods";
-                            var httpClient = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
-                            var response = await httpClient.PostAsync($"{APIEndpoint.Core}{itemsUri}", new StringContent(JsonConvert.SerializeObject(item).ToString(), Encoding.UTF8, General.JsonMediaType));
+                        //        },
+                        //        DomesticCOGS = i.ItemDomesticCOGS,
+                        //        DomesticRetail = i.ItemDomesticRetail,
+                        //        DomesticSale = i.ItemDomesticSale,
+                        //        DomesticWholesale = i.ItemDomesticWholesale
+                        //    };
 
-                            response.EnsureSuccessStatusCode();
+                        //    string itemsUri = "items/finished-goods";
+                        //    var httpClient = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
+                        //    var response = await httpClient.PostAsync($"{APIEndpoint.Core}{itemsUri}", new StringContent(JsonConvert.SerializeObject(item).ToString(), Encoding.UTF8, General.JsonMediaType));
 
-                        }
-                        
+                        //    response.EnsureSuccessStatusCode();
+
+                        //}
+
 
                     }
                     model.Code = code;

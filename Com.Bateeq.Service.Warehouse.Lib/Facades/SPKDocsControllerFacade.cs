@@ -293,18 +293,19 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                     {
                         Code = GenerateCode("EFR-PK/PBJ"),
                         Date = viewModel.FinishingOutDate,
-                        DestinationId = (long)viewModel.UnitTo.Id,
-                        DestinationCode = viewModel.UnitTo.code,
-                        DestinationName = viewModel.UnitTo.name,
-                        IsDistributed = true,
+                        DestinationId = (long)viewModel.DestinationStorageId,
+                        DestinationCode = viewModel.DestinationStorageCode,
+                        DestinationName = viewModel.DestinationStorageName,
+                        IsDistributed = false,
                         IsReceived = false,
                         PackingList = packingListCode,
                         Password = "1",
                         Reference = packingListCode,
-                        SourceId = (long)viewModel.Unit.Id,
-                        SourceCode = viewModel.Unit.code,
-                        SourceName = viewModel.Unit.name,
+                        SourceId = (long)viewModel.SourceStorageId,
+                        SourceCode = viewModel.SourceStorageCode,
+                        SourceName = viewModel.SourceStorageName,
                         Weight = 0,
+                        FinishingOutIdentity = viewModel.FinishingOutIdentity,
                         Items = sPKDocsItems
                     };
 
@@ -461,6 +462,19 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
         public SPKDocs ReadByReference(string reference)
         {
             throw new NotImplementedException();
+        }
+
+        public List<SPKDocs> ReadByFinishingOutIdentity(string FinishingOutIdentity)
+        {
+            var result = new List<SPKDocs>();
+            if(FinishingOutIdentity != null)
+            {
+                var spkDocs = dbContext.SPKDocs.Where(entity => entity.FinishingOutIdentity == FinishingOutIdentity).FirstOrDefault();
+                if(spkDocs != null)
+                    result.Add(spkDocs);
+            }
+
+            return result;
         }
     }
 }
