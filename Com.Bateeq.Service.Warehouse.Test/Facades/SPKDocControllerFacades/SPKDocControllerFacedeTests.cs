@@ -9,6 +9,7 @@ using Com.Bateeq.Service.Warehouse.Lib;
 using Com.Bateeq.Service.Warehouse.Lib.Facades;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Models.InventoryModel;
+using Com.Bateeq.Service.Warehouse.Lib.Models.SPKDocsModel;
 using Com.Bateeq.Service.Warehouse.Lib.Services;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.NewIntegrationViewModel;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.SpkDocsViewModel;
@@ -568,6 +569,32 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocControllerFacades
             }
         }
         
+        private SPKDocs spkDocsModel
+        {
+            get
+            {
+                return new SPKDocs
+                {
+                    Code = "code",
+                    Date = DateTimeOffset.Now,
+                    DestinationId = 1,
+                    DestinationCode = "code",
+                    DestinationName = "name",
+                    IsDistributed = false,
+                    IsDraft = false,
+                    IsReceived = false,
+                    PackingList = "ERF-12",
+                    Password = "1",
+                    Reference = "ERF-12",
+                    SourceId = 1,
+                    SourceCode = "1",
+                    SourceName = "source",
+                    Weight = 0,
+                    FinishingOutIdentity = "00123"
+                };
+            }
+        }
+        
         [Fact]
         public async Task Should_Success_Create()
         {
@@ -625,6 +652,19 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocControllerFacades
                 });
             var Response = await facade.Create(this.ViewModelDifferentSizeItemExist, "username", "Bearer");
             Assert.NotEqual(0, Response);
+        }
+        
+        [Fact]
+        public async Task Should_Success_ReadByFinishingOutIdentity()
+        {
+            DbSet<SPKDocs> dbSet = _dbContext(GetCurrentMethod()).Set<SPKDocs>();
+            
+            dbSet.Add(this.spkDocsModel);
+            await _dbContext(GetCurrentMethod()).SaveChangesAsync();
+            SPKDocsControllerFacade facade = new SPKDocsControllerFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+            
+            var Response =  facade.ReadByFinishingOutIdentity("00123");
+            Assert.NotEqual(null, Response);
         }
     }
 }
