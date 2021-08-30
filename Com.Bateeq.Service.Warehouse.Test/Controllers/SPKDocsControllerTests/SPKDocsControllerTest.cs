@@ -138,5 +138,31 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.SPKDocsControllerTests
             var response = await controller.Post(this.ViewModel);
             Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
         }
+        
+        [Fact]
+        public async Task Should_Success_GetByFinishingIdentity()
+        {
+            var mockFacade = new Mock<ISPKDoc>();
+            mockFacade.Setup(x => x.ReadByFinishingOutIdentity(It.IsAny<string>()))
+                .Returns(new List<SPKDocs>());
+
+            var controller = GetController(mockFacade);
+
+            var response = controller.GetByFinishingIdentity(It.IsAny<string>());
+            Assert.Equal((int)HttpStatusCode.OK, GetStatusCode(response));
+        }
+        
+        [Fact]
+        public async Task Should_Error_GetByFinishingIdentity()
+        {
+            var mockFacade = new Mock<ISPKDoc>();
+            mockFacade.Setup(x => x.ReadByFinishingOutIdentity(It.IsAny<string>()))
+                .Throws(new Exception("error"));
+
+            var controller = GetController(mockFacade);
+
+            var response = controller.GetByFinishingIdentity(It.IsAny<string>());
+            Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
+        }
     }
 }

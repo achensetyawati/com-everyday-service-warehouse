@@ -160,11 +160,14 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocControllerFacades
                 ImagePath = "/sales/",
                 ImgFile = "imgFile",
                 Items = listItem,
-                StorageId = 1,
-                StorageName = "storage",
-                StorageCode = "code",
+                SourceStorageId = 1,
+                SourceStorageName = "storage",
+                SourceStorageCode = "code",
                 RoCreatedUtc = "2110",
-                SourceId = 1
+                SourceId = 1,
+                DestinationStorageName = "destination",
+                DestinationStorageCode = "code",
+                DestinationStorageId = 1
             };
             
             Assert.Equal(dto.FinishingOutDate, dateTimeOffset);
@@ -188,11 +191,14 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.SPKDocControllerFacades
             Assert.Equal(dto.ImagePath,"/sales/");
             Assert.Equal(dto.ImgFile,"imgFile");
             Assert.NotEmpty(dto.Items);
-            Assert.Equal(dto.StorageId,1);
-            Assert.Equal(dto.StorageName,"storage");
-            Assert.Equal(dto.StorageCode,"code");
+            Assert.Equal(dto.SourceStorageId,1);
+            Assert.Equal(dto.SourceStorageName,"storage");
+            Assert.Equal(dto.SourceStorageCode,"code");
             Assert.Equal(dto.RoCreatedUtc,"2110");
             Assert.Equal(dto.SourceId,1);
+            Assert.Equal(dto.DestinationStorageId,1);
+            Assert.Equal(dto.DestinationStorageName,"destination");
+            Assert.Equal(dto.DestinationStorageCode,"code");
         }
     }
 }

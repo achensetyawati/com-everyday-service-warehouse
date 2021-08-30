@@ -38,7 +38,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
         public Tuple<List<TransferInDoc>, int, Dictionary<string, string>> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            IQueryable<TransferInDoc> Query = this.dbSet.Include(m => m.Items);
+            IQueryable<TransferInDoc> Query = this.dbSet.Include(m => m.Items).Where(m => m.Reference.Contains("EFR-FN"));
 
             List<string> searchAttributes = new List<string>()
             {
@@ -115,7 +115,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         //{
 
                         int status = 0;
-                        var inven = dbContext.Inventories.OrderByDescending(x => x.CreatedUtc).Where(x => x.ItemId == i.ItemId && x.StorageId == model.DestinationId && x.ItemCode.Contains(i.ItemCode)).FirstOrDefault();
+                        var inven = dbContext.Inventories.OrderByDescending(x => x.CreatedUtc).Where(x => x.ItemId == i.ItemId && x.ItemCode.Contains(i.ItemCode)).FirstOrDefault();
                         if (inven != null)
                         {
                             var latestItemCode = inven.ItemCode;
