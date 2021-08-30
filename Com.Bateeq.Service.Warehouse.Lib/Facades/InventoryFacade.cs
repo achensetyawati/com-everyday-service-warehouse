@@ -1200,30 +1200,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             return Excel.CreateExcel(new List<KeyValuePair<DataTable, string>>() { new KeyValuePair<DataTable, string>(result, "Age") }, true);
         }
 
-        public Tuple<List<Inventory>, int, Dictionary<string, string>> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
-        {
-            IQueryable<Inventory> Query = dbContext.Inventories.Where(m => m.IsDeleted == false);
-
-            List<string> searchAttributes = new List<string>()
-            {
-                "ItemCode", "ItemName"
-            };
-
-            Query = QueryHelper<Inventory>.ConfigureSearch(Query, searchAttributes, Keyword);
-
-            Dictionary<string, string> FilterDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Filter);
-            Query = QueryHelper<Inventory>.ConfigureFilter(Query, FilterDictionary);
-
-            Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
-            Query = QueryHelper<Inventory>.ConfigureOrder(Query, OrderDictionary);
-
-            Pageable<Inventory> pageable = new Pageable<Inventory>(Query, Page - 1, Size);
-            List<Inventory> Data = pageable.Data.ToList();
-            int TotalData = pageable.TotalCount;
-
-            return Tuple.Create(Data, TotalData, OrderDictionary);
-        }
-
         #endregion
     }
 }

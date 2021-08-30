@@ -48,6 +48,7 @@ using Com.Bateeq.Service.Warehouse.Lib.Interfaces.PkbjInterfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces.AdjustmentInterfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces.SOInterfaces;
+using Com.Bateeq.Service.Warehouse.Lib.Interfaces.InventoryLoaderInterfaces;
 //using Com.DanLiris.Service.Purchasing.Lib.Facades.PRMasterValidationReportFacade;
 //using Com.DanLiris.Service.Purchasing.Lib.Facades.GarmentExternalPurchaseOrderFacades.Reports;
 //using Com.DanLiris.Service.Purchasing.Lib.Facades.GarmentSupplierBalanceDebtFacades;
@@ -102,8 +103,8 @@ namespace Com.Bateeq.Service.Warehouse.WebApi
                 .AddTransient<IAdjustmentDoc, AdjustmentFacade>()
                 .AddTransient<ISODoc, SOFacade>()
                 .AddTransient<SPKDocsFacade>()
-                .AddTransient<ISPKDoc, SPKDocsControllerFacade>();
-
+                .AddTransient<ISPKDoc, SPKDocsControllerFacade>()
+                .AddTransient<IInventoryLoader, InventoryLoaderFacade>();
         }
 
         private void AddTransient<T>()
