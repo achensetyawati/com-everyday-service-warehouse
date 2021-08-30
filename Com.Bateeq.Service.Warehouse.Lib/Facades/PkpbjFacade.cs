@@ -150,7 +150,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
         public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadExpedition(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            IQueryable<SPKDocs> Query = this.dbSet.Include(x=>x.Items);
+            IQueryable<SPKDocs> Query = this.dbSet.Include(x=>x.Items).Where(x => x.IsDistributed == false);
 
             List<string> searchAttributes = new List<string>()
             {

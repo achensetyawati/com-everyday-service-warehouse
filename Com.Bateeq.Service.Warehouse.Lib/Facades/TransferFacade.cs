@@ -115,7 +115,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         //{
 
                         int status = 0;
-                        var inven = dbContext.Inventories.OrderByDescending(x => x.CreatedUtc).Where(x => x.ItemId == i.ItemId && x.StorageId == model.DestinationId && x.ItemCode.Contains(i.ItemCode)).FirstOrDefault();
+                        var inven = dbContext.Inventories.OrderByDescending(x => x.CreatedUtc).Where(x => x.ItemId == i.ItemId && x.ItemCode.Contains(i.ItemCode)).FirstOrDefault();
                         if (inven != null)
                         {
                             var latestItemCode = inven.ItemCode;
