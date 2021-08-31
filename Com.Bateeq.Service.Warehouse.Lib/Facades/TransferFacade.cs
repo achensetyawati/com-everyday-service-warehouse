@@ -97,22 +97,14 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                     SPK.IsReceived = true;
                     var Id = SPK.Id;
                     EntityExtension.FlagForCreate(model, username, USER_AGENT);
+
+                    var newItems = new List<TransferInDocItem>();
+
                     foreach (var i in model.Items)
                     {
-                        i.Id = 0;
-                        EntityExtension.FlagForCreate(i, username, USER_AGENT);
                         var SPKItems = dbContext.SPKDocsItems.Where(x => x.ItemArticleRealizationOrder == i.ArticleRealizationOrder && x.ItemCode == i.ItemCode && i.ItemName == i.ItemName && x.SPKDocsId == Id).Single();
                         SPKItems.SendQuantity = i.Quantity;
                         var inventorymovement = new InventoryMovement();
-                        //var inven = dbContext.Inventories.Where(x => x.ItemId == i.ItemId && x.StorageId == model.DestinationId).FirstOrDefault();
-                        //if (inven != null)
-                        //{
-                        //    inventorymovement.Before = inven.Quantity;
-                        //    inven.Quantity = inven.Quantity + i.Quantity ;//inven.Quantity + i.quantity;
-                        //    //dbSetInventory.Update(inven);
-                        //}
-                        //else
-                        //{
 
                         int status = 0;
                         var inven = dbContext.Inventories.OrderByDescending(x => x.CreatedUtc).Where(x => x.ItemId == i.ItemId && x.ItemCode.Contains(i.ItemCode)).FirstOrDefault();
@@ -123,14 +115,42 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                             var latestStatus = latestItemCode.Substring(latestItemCodeLength - 2);
                             status = int.Parse(latestStatus);
                         }
-
-                        for (var j = 0; j < i.Quantity; j++)
+                        var countLoop = i.Quantity;
+                        var itemcode = i.ItemCode;
+                        for (var j = 0; j < countLoop; j++)
                         {
                             status = status + 1;
+
+                            i.Id = 0;
+                            i.Quantity = 1;
+                            i.ItemCode = "" + itemcode + status.ToString("00");
+
+                            TransferInDocItem transferInDocItem = new TransferInDocItem
+                            {
+                                ArticleRealizationOrder = i.ArticleRealizationOrder,
+                                DomesticCOGS = i.DomesticCOGS,
+                                DomesticRetail = i.DomesticRetail,
+                                DomesticSale = i.DomesticSale,
+                                DomesticWholeSale = i.DomesticWholeSale,
+                                ItemCode = "" + itemcode + status.ToString("00"),
+                                ItemId = i.ItemId,
+                                ItemName = i.ItemName,
+                                Quantity = 1,
+                                Remark = i.Remark,
+                                Size = i.Size,
+                                TransferDocsId = i.TransferDocsId,
+                                TransferInDocs = i.TransferInDocs,
+                                Uom = i.Uom,
+                                Id = 0
+                            };
+
+                            EntityExtension.FlagForCreate(transferInDocItem, username, USER_AGENT);
+                            newItems.Add(transferInDocItem);
+
                             Inventory inventory = new Inventory
                             {
                                 ItemArticleRealizationOrder = i.ArticleRealizationOrder,
-                                ItemCode = "" + i.ItemCode + status.ToString("00"),
+                                ItemCode = "" + itemcode + status.ToString("00"),
                                 ItemDomesticCOGS = i.DomesticCOGS,
                                 ItemDomesticRetail = i.DomesticRetail,
                                 ItemDomesticSale = i.DomesticSale,
@@ -154,7 +174,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
                             inventorymovement.After = inventorymovement.Before + 1;
                             inventorymovement.Date = DateTimeOffset.UtcNow;
-                            inventorymovement.ItemCode = "" + i.ItemCode + status.ToString("00");
+                            inventorymovement.ItemCode = "" + itemcode + status.ToString("00");
                             inventorymovement.ItemDomesticCOGS = i.DomesticCOGS;
                             inventorymovement.ItemDomesticRetail = i.DomesticRetail;
                             inventorymovement.ItemDomesticWholeSale = i.DomesticRetail;
@@ -180,6 +200,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         }
                     }
 
+                    model.Items = newItems;
                     dbSet.Add(model);
                     Created = await dbContext.SaveChangesAsync();
                     transaction.Commit();
