@@ -90,8 +90,4 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.SpkDocsControllers
         }
         #endregion
     }
-
-
-
-
 }

@@ -39,7 +39,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 
         public Tuple<List<TransferInDoc>, int, Dictionary<string, string>> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            IQueryable<TransferInDoc> Query = this.dbSet.Include(m => m.Items).Where(x=>x.DestinationCode != "GDG.05");
+            IQueryable<TransferInDoc> Query = this.dbSet.Include(m => m.Items).Where(x=>x.SourceCode.Contains("GDG."));
 
             List<string> searchAttributes = new List<string>()
             {
@@ -63,7 +63,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 
         public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadPending(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            IQueryable<SPKDocs> Query = this.dbSetSpk.Include(m => m.Items).Where(i=>i.IsDistributed == true && i.IsReceived == false);
+            IQueryable<SPKDocs> Query = this.dbSetSpk.Include(m => m.Items).Where(i=>i.IsDistributed == true && i.IsReceived == false && i.SourceCode.Contains("GDG."));
 
             List<string> searchAttributes = new List<string>()
             {
@@ -150,68 +150,14 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                         EntityExtension.FlagForCreate(i, username, USER_AGENT);
                         var SPKItems = dbContext.SPKDocsItems.Where(x => x.ItemArticleRealizationOrder == i.ArticleRealizationOrder && x.ItemCode == i.ItemCode && i.ItemName == i.ItemName && x.SPKDocsId == Id).Single();
                         SPKItems.SendQuantity = i.Quantity;
-                        var inventorymovement = new InventoryMovement();
-                        var inven = dbContext.Inventories.Where(x => x.ItemId == i.ItemId && x.StorageId == model.DestinationId).FirstOrDefault();
+
+                        var inven = dbContext.Inventories.Where(x => x.ItemCode == i.ItemCode).FirstOrDefault();
                         if (inven != null)
                         {
-                            inventorymovement.Before = inven.Quantity;
-                            inven.Quantity = inven.Quantity + i.Quantity;//inven.Quantity + i.quantity;
-                                                                         //dbSetInventory.Update(inven);
+                            inven.StorageCode = model.DestinationCode;
+                            inven.StorageId = model.DestinationId;
+                            inven.StorageName = model.DestinationName;
                         }
-                        else
-                        {
-                            Inventory inventory = new Inventory
-                            {
-                                ItemArticleRealizationOrder = i.ArticleRealizationOrder,
-                                ItemCode = i.ItemCode,
-                                ItemDomesticCOGS = i.DomesticCOGS,
-                                ItemDomesticRetail = i.DomesticRetail,
-                                ItemDomesticSale = i.DomesticSale,
-                                ItemDomesticWholeSale = i.DomesticWholeSale,
-                                ItemId = i.ItemId,
-                                ItemInternationalCOGS = 0,
-                                ItemInternationalRetail = 0,
-                                ItemInternationalSale = 0,
-                                ItemInternationalWholeSale = 0,
-                                ItemName = i.ItemName,
-                                ItemSize = i.Size,
-                                ItemUom = i.Uom,
-                                Quantity = i.Quantity,
-                                StorageCode = model.DestinationCode,
-                                StorageId = model.DestinationId,
-                                StorageName = model.DestinationName,
-                                StorageIsCentral = model.DestinationName.Contains("GUDANG") ? true : false,
-                            };
-                            EntityExtension.FlagForCreate(inventory, username, USER_AGENT);
-                            dbSetInventory.Add(inventory);
-                        }
-
-                        inventorymovement.After = inventorymovement.Before + i.Quantity;
-                        inventorymovement.Date = DateTimeOffset.UtcNow;
-                        inventorymovement.ItemCode = i.ItemCode;
-                        inventorymovement.ItemDomesticCOGS = i.DomesticCOGS;
-                        inventorymovement.ItemDomesticRetail = i.DomesticRetail;
-                        inventorymovement.ItemDomesticWholeSale = i.DomesticRetail;
-                        inventorymovement.ItemDomesticSale = i.DomesticSale;
-                        inventorymovement.ItemId = i.ItemId;
-                        inventorymovement.ItemInternationalCOGS = 0;
-                        inventorymovement.ItemInternationalRetail = 0;
-                        inventorymovement.ItemInternationalSale = 0;
-                        inventorymovement.ItemInternationalWholeSale = 0;
-                        inventorymovement.ItemName = i.ItemName;
-                        inventorymovement.ItemSize = i.Size;
-                        inventorymovement.ItemUom = i.Uom;
-                        inventorymovement.Quantity = i.Quantity;
-                        inventorymovement.StorageCode = model.DestinationCode;
-                        inventorymovement.StorageId = model.DestinationId;
-                        inventorymovement.StorageName = model.DestinationName;
-                        inventorymovement.Type = "IN";
-                        inventorymovement.Reference = code;
-                        inventorymovement.Remark = model.Remark;
-                        inventorymovement.StorageIsCentral = model.DestinationName.Contains("GUDANG") ? true : false;
-                        EntityExtension.FlagForCreate(inventorymovement, username, USER_AGENT);
-                        dbSetInventoryMovement.Add(inventorymovement);
-
                     }
 
                     dbSet.Add(model);

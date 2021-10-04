@@ -46,7 +46,9 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
         public Tuple<List<SPKDocs>, int, Dictionary<string, string>> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
+
             //IQueryable<SPKDocs> Query = this.dbSet.Include(x=>x.Items).Where(x => !x.PackingList.Contains("EFR-FN"));
+            
             IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items);
 
             List<string> searchAttributes = new List<string>()
@@ -68,6 +70,59 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
             return Tuple.Create(Data, TotalData, OrderDictionary);
         }
+
+
+        public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadPackingList(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
+        {
+            IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items).Where(x => !x.PackingList.Contains("EFR-FN"));
+            //IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items).Where(i => i.DestinationCode.Contains("GDG"));
+            //IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items);
+
+            List<string> searchAttributes = new List<string>()
+            {
+                "PackingList", "SourceName", "DestinationName"
+            };
+
+            Query = QueryHelper<SPKDocs>.ConfigureSearch(Query, searchAttributes, Keyword);
+
+            Dictionary<string, string> FilterDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Filter);
+            Query = QueryHelper<SPKDocs>.ConfigureFilter(Query, FilterDictionary);
+
+            Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
+            Query = QueryHelper<SPKDocs>.ConfigureOrder(Query, OrderDictionary);
+
+            Pageable<SPKDocs> pageable = new Pageable<SPKDocs>(Query, Page - 1, Size);
+            List<SPKDocs> Data = pageable.Data.ToList<SPKDocs>();
+            int TotalData = pageable.TotalCount;
+
+            return Tuple.Create(Data, TotalData, OrderDictionary);
+        }
+
+        public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadPackingRTT(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
+        {
+            //IQueryable<SPKDocs> Query = this.dbSet.Include(x=>x.Items).Where(x => !x.PackingList.Contains("EFR-FN"));
+            IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items).Where(x => x.Reference.Contains("EFR-KB/RTT"));
+
+            List<string> searchAttributes = new List<string>()
+            {
+                "PackingList", "SourceName", "DestinationName"
+            };
+
+            Query = QueryHelper<SPKDocs>.ConfigureSearch(Query, searchAttributes, Keyword);
+
+            Dictionary<string, string> FilterDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Filter);
+            Query = QueryHelper<SPKDocs>.ConfigureFilter(Query, FilterDictionary);
+
+            Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
+            Query = QueryHelper<SPKDocs>.ConfigureOrder(Query, OrderDictionary);
+
+            Pageable<SPKDocs> pageable = new Pageable<SPKDocs>(Query, Page - 1, Size);
+            List<SPKDocs> Data = pageable.Data.ToList<SPKDocs>();
+            int TotalData = pageable.TotalCount;
+
+            return Tuple.Create(Data, TotalData, OrderDictionary);
+        }
+
 
         public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadForUpload(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
@@ -95,7 +150,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
         public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadExpedition(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            IQueryable<SPKDocs> Query = this.dbSet.Include(x=>x.Items);
+            IQueryable<SPKDocs> Query = this.dbSet.Include(x=>x.Items).Where(x => x.IsDistributed == false);
 
             List<string> searchAttributes = new List<string>()
             {
@@ -158,37 +213,37 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                     foreach (var i in model.Items)
                     {
                         EntityExtension.FlagForCreate(i, username, USER_AGENT);
-                        var inven = GetItems(i.ItemCode, i.ItemName, i.ItemArticleRealizationOrder);
-                        if (inven == null)
-                        {
-                            ItemCoreViewModel item = new ItemCoreViewModel
-                            {
-                                dataDestination = new List<ItemViewModelRead> {
-                                    new ItemViewModelRead{
-                                        ArticleRealizationOrder = i.ItemArticleRealizationOrder,
-                                        code = i.ItemCode,
-                                        name = i.ItemName,
-                                        Remark = i.Remark,
-                                        Size = i.ItemSize,
-                                        Uom = i.ItemUom,
+                        //var inven = GetItems(i.ItemCode, i.ItemName, i.ItemArticleRealizationOrder);
+                        //if (inven == null)
+                        //{
+                        //    ItemCoreViewModel item = new ItemCoreViewModel
+                        //    {
+                        //        dataDestination = new List<ItemViewModelRead> {
+                        //            new ItemViewModelRead{
+                        //                ArticleRealizationOrder = i.ItemArticleRealizationOrder,
+                        //                code = i.ItemCode,
+                        //                name = i.ItemName,
+                        //                Remark = i.Remark,
+                        //                Size = i.ItemSize,
+                        //                Uom = i.ItemUom,
 
-                                    }
+                        //            }
 
-                                },
-                                DomesticCOGS = i.ItemDomesticCOGS,
-                                DomesticRetail = i.ItemDomesticRetail,
-                                DomesticSale = i.ItemDomesticSale,
-                                DomesticWholesale = i.ItemDomesticWholesale
-                            };
-                            
-                            string itemsUri = "items/finished-goods";
-                            var httpClient = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
-                            var response = await httpClient.PostAsync($"{APIEndpoint.Core}{itemsUri}", new StringContent(JsonConvert.SerializeObject(item).ToString(), Encoding.UTF8, General.JsonMediaType));
+                        //        },
+                        //        DomesticCOGS = i.ItemDomesticCOGS,
+                        //        DomesticRetail = i.ItemDomesticRetail,
+                        //        DomesticSale = i.ItemDomesticSale,
+                        //        DomesticWholesale = i.ItemDomesticWholesale
+                        //    };
 
-                            response.EnsureSuccessStatusCode();
+                        //    string itemsUri = "items/finished-goods";
+                        //    var httpClient = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
+                        //    var response = await httpClient.PostAsync($"{APIEndpoint.Core}{itemsUri}", new StringContent(JsonConvert.SerializeObject(item).ToString(), Encoding.UTF8, General.JsonMediaType));
 
-                        }
-                        
+                        //    response.EnsureSuccessStatusCode();
+
+                        //}
+
 
                     }
                     model.Code = code;

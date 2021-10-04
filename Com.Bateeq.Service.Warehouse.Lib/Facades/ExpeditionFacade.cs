@@ -243,37 +243,36 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         foreach (var d in i.Details)
                         {
                             d.Id = 0;
-                            var inven = dbContext.Inventories.Where(x => x.ItemArticleRealizationOrder == d.ArticleRealizationOrder && x.ItemCode == d.ItemCode && x.ItemName == d.ItemName && x.StorageId == i.SourceId).Single();
-                            //inven.Quantity = inven.Quantity - d.SendQuantity;
+                            //var inven = dbContext.Inventories.Where(x => x.ItemArticleRealizationOrder == d.ArticleRealizationOrder && x.ItemCode == d.ItemCode && x.ItemName == d.ItemName && x.StorageId == i.SourceId).Single();
                             
-                            InventoryMovement movement = new InventoryMovement { 
-                                After = inven.Quantity - d.SendQuantity,
-                                Before = inven.Quantity,
-                                Date = DateTimeOffset.Now,
-                                ItemArticleRealizationOrder = d.ArticleRealizationOrder,
-                                ItemCode = d.ItemCode,
-                                ItemDomesticCOGS = d.DomesticCOGS,
-                                ItemDomesticRetail = d.DomesticRetail,
-                                ItemDomesticSale = d.DomesticSale,
-                                ItemDomesticWholeSale = d.DomesticWholesale,
-                                ItemInternationalCOGS = 0,
-                                ItemInternationalRetail = 0,
-                                ItemInternationalSale = 0,
-                                ItemInternationalWholeSale = 0,
-                                ItemId = d.ItemId,
-                                ItemName = d.ItemName,
-                                ItemSize = d.Size,
-                                Quantity = d.Quantity,
-                                Reference = CodeTransferOut,
-                                Remark = d.Remark,
-                                StorageCode = i.SourceCode,
-                                StorageIsCentral = i.SourceName.Contains("GUDANG") ? true : false,
-                                StorageId = i.SourceId,
-                                StorageName = i.DestinationName,
-                                Type = "OUT"
-                            };
+                            //InventoryMovement movement = new InventoryMovement { 
+                            //    After = inven.Quantity - d.SendQuantity,
+                            //    Before = inven.Quantity,
+                            //    Date = DateTimeOffset.Now,
+                            //    ItemArticleRealizationOrder = d.ArticleRealizationOrder,
+                            //    ItemCode = d.ItemCode,
+                            //    ItemDomesticCOGS = d.DomesticCOGS,
+                            //    ItemDomesticRetail = d.DomesticRetail,
+                            //    ItemDomesticSale = d.DomesticSale,
+                            //    ItemDomesticWholeSale = d.DomesticWholesale,
+                            //    ItemInternationalCOGS = 0,
+                            //    ItemInternationalRetail = 0,
+                            //    ItemInternationalSale = 0,
+                            //    ItemInternationalWholeSale = 0,
+                            //    ItemId = d.ItemId,
+                            //    ItemName = d.ItemName,
+                            //    ItemSize = d.Size,
+                            //    Quantity = d.Quantity,
+                            //    Reference = CodeTransferOut,
+                            //    Remark = d.Remark,
+                            //    StorageCode = i.SourceCode,
+                            //    StorageIsCentral = i.SourceName.Contains("GUDANG") ? true : false,
+                            //    StorageId = i.SourceId,
+                            //    StorageName = i.DestinationName,
+                            //    Type = "OUT"
+                            //};
 
-                            inven.Quantity = inven.Quantity - d.SendQuantity;
+                            //inven.Quantity = inven.Quantity - d.SendQuantity;
                             TransferOutDocItem transferItem = new TransferOutDocItem
                             {
                                 ArticleRealizationOrder = d.ArticleRealizationOrder,
@@ -310,8 +309,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
                             //});
                             EntityExtension.FlagForCreate(d, username, USER_AGENT);
-                            EntityExtension.FlagForCreate(movement, username, USER_AGENT);
-                            this.dbSetInventoryMovement.Add(movement);
+                            //EntityExtension.FlagForCreate(movement, username, USER_AGENT);
+                            //this.dbSetInventoryMovement.Add(movement);
                         }
                         transferOutDoc.Items = transferOutDocItems;
                         EntityExtension.FlagForCreate(i, username, USER_AGENT);

@@ -15,6 +15,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Helpers
 		public static string Sales { get; set; }
         public static string Auth { get; set; }
         public static string GarmentProduction { get; set; }
+        public static string POS { get; set; }
     }
 
     public static class AuthCredential

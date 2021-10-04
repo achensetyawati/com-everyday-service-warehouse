@@ -408,5 +408,18 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
                 .FirstOrDefault();
             return model;
         }
+
+        public List<AdjustmentDocs> ReadByStorage(int id)
+        {
+            var modelList = dbSetAdjustment.Where(m => m.StorageId == id)
+                .Include(m => m.Items)
+                .ToList();
+
+            return modelList;
+        }
+
+        #region readByStorage
+
+        #endregion
     }
 }

@@ -1,9 +1,11 @@
 ﻿using Com.Bateeq.Service.Warehouse.Lib.Helpers;
+using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces.TransferInterfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Models.Expeditions;
 using Com.Bateeq.Service.Warehouse.Lib.Models.InventoryModel;
 using Com.Bateeq.Service.Warehouse.Lib.Models.SPKDocsModel;
 using Com.Bateeq.Service.Warehouse.Lib.Models.TransferModel;
+using Com.Bateeq.Service.Warehouse.Lib.ViewModels.NewIntegrationViewModel;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.TransferViewModels;
 using Com.Moonlay.Models;
 using Com.Moonlay.NetCore.Lib;
@@ -16,6 +18,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -426,7 +429,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                     foreach (var i in model2.Items)
                     {
                         var inventorymovement = new InventoryMovement();
-                        var inven = dbContext.Inventories.Where(x => x.ItemId == i.ItemId && x.StorageId == model2.SourceId).FirstOrDefault();
+                        var inven = dbContext.Inventories.Where(x => x.ItemCode == i.ItemCode && x.StorageId == model2.SourceId).FirstOrDefault();
                         if (inven != null)
                         {
                             inventorymovement.Before = inven.Quantity;
@@ -459,7 +462,24 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         dbSetInventoryMovement.Add(inventorymovement);
 
                         EntityExtension.FlagForCreate(i, username, USER_AGENT);
+
+                        //update TotalQty di tabel Items
+                        var existItemId = (int)i.ItemId;
+                        ItemCoreViewModelUsername itemCore = new ItemCoreViewModelUsername
+                        {
+                            _id = existItemId,
+                            Username = username,
+                            Token = "Bearer ",
+                            TotalQty = i.Quantity
+                        };
+
+                        string itemPutUri = $"items/finished-goods/reduce-qty-by-id/{i.ItemId}";
+                        IHttpClientService httpClient = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
+                        var response = await httpClient.PutAsync($"{APIEndpoint.Core}{itemPutUri}", new StringContent(JsonConvert.SerializeObject(itemCore).ToString(), Encoding.UTF8, General.JsonMediaType));
+
+                        response.EnsureSuccessStatusCode();
                     }
+
                     dbSet.Add(model2);
                     Created = await dbContext.SaveChangesAsync();
                     transaction.Commit();

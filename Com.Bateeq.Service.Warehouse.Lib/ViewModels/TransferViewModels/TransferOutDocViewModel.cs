@@ -63,7 +63,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.ViewModels.TransferViewModels
                     //}
 
                     WarehouseDbContext warehouseDbContext = (WarehouseDbContext)validationContext.GetService(typeof(WarehouseDbContext));
-                    var qtyinven = warehouseDbContext.Inventories.Where(x => x.ItemId == item.item._id && x.StorageId == source._id).Select(x => x.Quantity).FirstOrDefault();
+                    var qtyinven = warehouseDbContext.Inventories.Where(x => x.ItemCode == item.item.code && x.StorageId == source._id).Select(x => x.Quantity).FirstOrDefault();
                     if (item.quantity > qtyinven) {
                         itemErrorCount++;
                         itemError += "quantity: 'Qty can't more than inven quantity', ";

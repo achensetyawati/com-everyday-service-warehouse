@@ -64,6 +64,43 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.TransferDataUtils
             await facade.Create(data, "Unit Test");
             return data;
         }
+        
+        public async Task<TransferInDoc> GetNewData2()
+        {
+            //var datas = await Task.Run(() => sPKDocDataUtils.GetTestData());
+            //List<SPKDocsItem> Item = new List<SPKDocsItem>(datas.Items);
+            return new TransferInDoc
+            {
+                Code = "code",
+                Date = DateTimeOffset.Now,
+                DestinationCode = "destinationCode1",
+                DestinationId = 1,
+                DestinationName = "destName1",
+                Reference = "0095/EFR-FN/08/21",
+                Remark = "remark",
+                SourceCode = "SorceCode",
+                SourceId = 1,
+                SourceName = "SorceName",
+                Items = new List<TransferInDocItem>
+                {
+                    new TransferInDocItem
+                    {
+                        ArticleRealizationOrder = "2110003",
+                        DomesticCOGS = 40000,
+                        DomesticRetail = 0,
+                        DomesticSale = 40010,
+                        DomesticWholeSale = 0,
+                        ItemCode = "111",
+                        ItemId =60482,
+                        ItemName = "BOYS VEST",
+                        Quantity = 1,
+                        Remark = "",
+                        Size = "S",
+                        Uom = "PCS"
+                    }
+                }
+            };
+        }
 
     }
 }
