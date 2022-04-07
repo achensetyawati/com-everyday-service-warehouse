@@ -117,13 +117,13 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         }
                         var countLoop = i.Quantity;
                         var itemcode = i.ItemCode;
-                        for (var j = 0; j < countLoop; j++)
-                        {
-                            status = status + 1;
+                        //for (var j = 0; j < countLoop; j++)
+                        //{
+                        //    status = status + 1;
 
-                            i.Id = 0;
-                            i.Quantity = 1;
-                            i.ItemCode = "" + itemcode + status.ToString("00");
+                        //    i.Id = 0;
+                        //    i.Quantity = 1;
+                        //    i.ItemCode = "" + itemcode + status.ToString("00");
 
                             TransferInDocItem transferInDocItem = new TransferInDocItem
                             {
@@ -132,10 +132,10 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                 DomesticRetail = i.DomesticRetail,
                                 DomesticSale = i.DomesticSale,
                                 DomesticWholeSale = i.DomesticWholeSale,
-                                ItemCode = "" + itemcode + status.ToString("00"),
+                                ItemCode = itemcode,
                                 ItemId = i.ItemId,
                                 ItemName = i.ItemName,
-                                Quantity = 1,
+                                Quantity = i.Quantity,
                                 Remark = i.Remark,
                                 Size = i.Size,
                                 TransferDocsId = i.TransferDocsId,
@@ -150,7 +150,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                             Inventory inventory = new Inventory
                             {
                                 ItemArticleRealizationOrder = i.ArticleRealizationOrder,
-                                ItemCode = "" + itemcode + status.ToString("00"),
+                                ItemCode =itemcode,
                                 ItemDomesticCOGS = i.DomesticCOGS,
                                 ItemDomesticRetail = i.DomesticRetail,
                                 ItemDomesticSale = i.DomesticSale,
@@ -163,7 +163,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                 ItemName = i.ItemName,
                                 ItemSize = i.Size,
                                 ItemUom = i.Uom,
-                                Quantity = 1,
+                                Quantity = i.Quantity,
                                 StorageCode = model.DestinationCode,
                                 StorageId = model.DestinationId,
                                 StorageName = model.DestinationName,
@@ -174,7 +174,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
                             inventorymovement.After = inventorymovement.Before + 1;
                             inventorymovement.Date = DateTimeOffset.UtcNow;
-                            inventorymovement.ItemCode = "" + itemcode + status.ToString("00");
+                            inventorymovement.ItemCode =itemcode ;
                             inventorymovement.ItemDomesticCOGS = i.DomesticCOGS;
                             inventorymovement.ItemDomesticRetail = i.DomesticRetail;
                             inventorymovement.ItemDomesticWholeSale = i.DomesticRetail;
@@ -187,7 +187,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                             inventorymovement.ItemName = i.ItemName;
                             inventorymovement.ItemSize = i.Size;
                             inventorymovement.ItemUom = i.Uom;
-                            inventorymovement.Quantity = 1;
+                            inventorymovement.Quantity = i.Quantity;
                             inventorymovement.StorageCode = model.DestinationCode;
                             inventorymovement.StorageId = model.DestinationId;
                             inventorymovement.StorageName = model.DestinationName;
@@ -198,7 +198,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                             EntityExtension.FlagForCreate(inventorymovement, username, USER_AGENT);
                             dbSetInventoryMovement.Add(inventorymovement);
                         }
-                    }
+                    
 
                     model.Items = newItems;
                     dbSet.Add(model);
