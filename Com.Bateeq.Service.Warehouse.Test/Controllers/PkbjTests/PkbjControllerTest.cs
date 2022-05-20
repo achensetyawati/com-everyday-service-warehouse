@@ -133,6 +133,20 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.PkbjTests
             }
         }
 
+        private Mock<IServiceProvider> GetServiceProvider()
+        {
+            var serviceProvider = new Mock<IServiceProvider>();
+            serviceProvider
+                .Setup(x => x.GetService(typeof(IdentityService)))
+                .Returns(new IdentityService() { Token = "Token", Username = "Test" });
+
+            serviceProvider
+                .Setup(x => x.GetService(typeof(IHttpClientService)))
+                .Returns(new HttpClientTestService());
+
+            return serviceProvider;
+        }
+
         private ServiceValidationExeption GetServiceValidationExeption()
         {
             Mock<IServiceProvider> serviceProvider = new Mock<IServiceProvider>();
@@ -179,18 +193,45 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.PkbjTests
 
             return controller;
         }
-        private Mock<IServiceProvider> GetServiceProvider()
+
+        [Fact]
+        public void Should_Success_Get_PackingList_By_User()
         {
-            var serviceProvider = new Mock<IServiceProvider>();
-            serviceProvider
-                .Setup(x => x.GetService(typeof(IdentityService)))
-                .Returns(new IdentityService() { Token = "Token", Username = "Test" });
+            var validateMock = new Mock<IValidateService>();
+            validateMock.Setup(s => s.Validate(It.IsAny<SPKDocsViewModel>())).Verifiable();
 
-            serviceProvider
-                .Setup(x => x.GetService(typeof(IHttpClientService)))
-                .Returns(new HttpClientTestService());
+            var mockFacade = new Mock<IPkpbjFacade>();
 
-            return serviceProvider;
+            mockFacade.Setup(x => x.ReadPackingList(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
+                .Returns(Tuple.Create(new List<SPKDocs>(), 0, new Dictionary<string, string>()));
+
+            var mockMapper = new Mock<IMapper>();
+            mockMapper.Setup(x => x.Map<List<SPKDocsViewModel>>(It.IsAny<List<SPKDocs>>()))
+                .Returns(new List<SPKDocsViewModel> { SpkViewModel });
+
+            PkpbjByUserController controller = GetController(mockFacade, validateMock, mockMapper);
+            var response = controller.GetPackingList();
+            Assert.Equal((int)HttpStatusCode.OK, GetStatusCode(response));
+        }
+
+        [Fact]
+        public void Should_Error_Get_PackingList_By_User()
+        {
+            var validateMock = new Mock<IValidateService>();
+            validateMock.Setup(s => s.Validate(It.IsAny<SPKDocsViewModel>())).Verifiable();
+
+            var mockFacade = new Mock<IPkpbjFacade>();
+
+            mockFacade.Setup(x => x.ReadPackingList(It.IsAny<int>(), It.IsAny<int>(), "}", null, It.IsAny<string>()))
+                .Returns(Tuple.Create(new List<SPKDocs>(), 0, new Dictionary<string, string>()));
+
+            var mockMapper = new Mock<IMapper>();
+            mockMapper.Setup(x => x.Map<List<SPKDocsViewModel>>(It.IsAny<List<SPKDocs>>()))
+                .Returns(new List<SPKDocsViewModel> { SpkViewModel });
+
+            PkpbjByUserController controller = GetController(mockFacade, validateMock, mockMapper);
+            var response = controller.GetPackingList();
+            Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
         }
 
         [Fact]
@@ -201,18 +242,18 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.PkbjTests
 
             var mockFacade = new Mock<IPkpbjFacade>();
 
-
-            mockFacade.Setup(x => x.Read(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
+            mockFacade.Setup(x => x.Read(It.IsAny<int>(), It.IsAny<int>(), "{", null, It.IsAny<string>()))
                 .Returns(Tuple.Create(new List<SPKDocs>(), 0, new Dictionary<string, string>()));
 
             var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(x => x.Map<List<SPKDocsViewModel>>(It.IsAny<List<SPKDocs>>()))
                 .Returns(new List<SPKDocsViewModel> { SpkViewModel });
 
-            PkpbjByUserController controller = new PkpbjByUserController(mockMapper.Object, mockFacade.Object, GetServiceProvider().Object);
+            PkpbjByUserController controller = GetController(mockFacade, validateMock, mockMapper);
             var response = controller.Get();
             Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
         }
+
         [Fact]
         public void  Should_Success_Get_All_Data_By_User()
         {
@@ -220,7 +261,6 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.PkbjTests
             validateMock.Setup(s => s.Validate(It.IsAny<SPKDocsViewModel>())).Verifiable();
 
             var mockFacade = new Mock<IPkpbjFacade>();
-
 
             mockFacade.Setup(x => x.Read(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
                 .Returns(Tuple.Create(new List<SPKDocs>(), 0, new Dictionary<string, string>()));
@@ -233,6 +273,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.PkbjTests
             var response = controller.Get();
             Assert.Equal((int)HttpStatusCode.OK, GetStatusCode(response));
         }
+
         [Fact]
         public void Should_Error_Get_Expedition_Data_By_User()
         {
@@ -253,6 +294,89 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.PkbjTests
             var response = controller.Get();
             Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
         }
+
+        [Fact]
+        public void Should_Success_Get_PDF_PackingList()
+        {
+            var validateMock = new Mock<IValidateService>();
+            validateMock.Setup(s => s.Validate(It.IsAny<SPKDocsViewModel>())).Verifiable();
+
+            var mockFacade = new Mock<IPkpbjFacade>();
+
+            mockFacade.Setup(x => x.ReadById(It.IsAny<int>()))
+                .Returns(new SPKDocs());
+
+            var mockMapper = new Mock<IMapper>();
+            mockMapper.Setup(x => x.Map<SPKDocsViewModel>(It.IsAny<SPKDocs>()))
+                .Returns(SpkViewModel);
+
+            var user = new Mock<ClaimsPrincipal>();
+            var claims = new Claim[]
+            {
+                new Claim("username", "unittestusername")
+            };
+            user.Setup(u => u.Claims).Returns(claims);
+
+
+            PkpbjByUserController controller = GetController(mockFacade, validateMock, mockMapper);
+
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext()
+                {
+                    User = user.Object
+                }
+            };
+
+            controller.ControllerContext.HttpContext.Request.Headers["Accept"] = "application/pdf";
+            controller.ControllerContext.HttpContext.Request.Headers["x-timezone-offset"] = "0";
+
+            var response = controller.GetPackingListPDF(It.IsAny<int>());
+
+            Assert.NotNull(response.GetType().GetProperty("FileStream"));
+        }
+
+        [Fact]
+        public void Should_Error_Get_PDF_PackingList()
+        {
+            var validateMock = new Mock<IValidateService>();
+            validateMock.Setup(s => s.Validate(It.IsAny<SPKDocsViewModel>())).Verifiable();
+
+            var mockFacade = new Mock<IPkpbjFacade>();
+
+            mockFacade.Setup(x => x.ReadById(It.IsAny<int>()))
+                .Returns(new SPKDocs());
+
+            var mockMapper = new Mock<IMapper>();
+            //mockMapper.Setup(x => x.Map<SPKDocsViewModel>(It.IsAny<SPKDocs>()))
+            //    .Returns(SpkViewModel);
+
+            var user = new Mock<ClaimsPrincipal>();
+            var claims = new Claim[]
+            {
+                new Claim("username", "unittestusername")
+            };
+            user.Setup(u => u.Claims).Returns(claims);
+
+
+            PkpbjByUserController controller = GetController(mockFacade, validateMock, mockMapper);
+
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext()
+                {
+                    User = user.Object
+                }
+            };
+
+            controller.ControllerContext.HttpContext.Request.Headers["Accept"] = "application/pdf";
+            controller.ControllerContext.HttpContext.Request.Headers["x-timezone-offset"] = "0";
+
+            var response = controller.GetPackingListPDF(It.IsAny<int>());
+
+            Assert.Null(response.GetType().GetProperty("FileStream"));
+        }
+
         [Fact]
         public void Should_Success_Get_Expedition_Data_By_User()
         {
@@ -273,6 +397,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.PkbjTests
             var response = controller.Get();
             Assert.Equal((int)HttpStatusCode.OK, GetStatusCode(response));
         }
+
         [Fact]
         public async Task Should_Success_Create_Data()
         {
@@ -292,6 +417,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.PkbjTests
             var response = await controller.Post(this.ViewModel);
             Assert.Equal((int)HttpStatusCode.Created, GetStatusCode(response));
         }
+
         [Fact]
         public async Task Should_Validate_Create_Data()
         {
@@ -307,6 +433,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.PkbjTests
             var response = await controller.Post(this.ViewModel);
             Assert.Equal((int)HttpStatusCode.BadRequest, GetStatusCode(response));
         }
+
         [Fact]
         public async Task Should_Error_Create_Data()
         {
@@ -326,9 +453,13 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.PkbjTests
             var response = await controller.Post(this.ViewModel);
             Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
         }
+
         [Fact]
         public void Should_Success_Get_Data_By_Id()
         {
+            var validateMock = new Mock<IValidateService>();
+            validateMock.Setup(s => s.Validate(It.IsAny<SPKDocsViewModel>())).Verifiable();
+
             var mockFacade = new Mock<IPkpbjFacade>();
 
             mockFacade.Setup(x => x.ReadById(It.IsAny<int>()))
@@ -338,7 +469,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.PkbjTests
             mockMapper.Setup(x => x.Map<SPKDocsViewModel>(It.IsAny<SPKDocs>()))
                 .Returns(SpkViewModel);
 
-            PkpbjByUserController controller = new PkpbjByUserController(mockMapper.Object, mockFacade.Object, GetServiceProvider().Object);
+            PkpbjByUserController controller = GetController(mockFacade, validateMock, mockMapper);
             var response = controller.Get(It.IsAny<int>());
             Assert.Equal((int)HttpStatusCode.OK, GetStatusCode(response));
         }
@@ -357,6 +488,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.PkbjTests
             var response = controller.Get(It.IsAny<int>());
             Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
         }
+
         [Fact]
         public void Should_Success_Get_Data_By_reference()
         {
@@ -388,6 +520,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.PkbjTests
             var response = controller.Getbyreference(It.IsAny<string>());
             Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
         }
+
         [Fact]
         public void Should_Success_Get_Data_By_reference_TO()
         {
