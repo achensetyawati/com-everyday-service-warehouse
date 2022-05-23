@@ -71,7 +71,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             return Tuple.Create(Data, TotalData, OrderDictionary);
         }
 
-
         public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadPackingList(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
             IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items).Where(x => !x.PackingList.Contains("EFR-FN"));
@@ -123,7 +122,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             return Tuple.Create(Data, TotalData, OrderDictionary);
         }
 
-
         public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadForUpload(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
             IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items).Where(x => x.PackingList.Contains("EFR-FN"));
@@ -171,6 +169,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
             return Tuple.Create(Data, TotalData, OrderDictionary);
         }
+
         public SPKDocs ReadById(int id)
         {
             var a = this.dbSet.Where(p => p.Id == id)
@@ -178,6 +177,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                 .FirstOrDefault();
             return a;
         }
+
         public SPKDocs ReadByReference(string reference)
         {
             var model = dbSet.Where(m => m.Reference == reference && m.DestinationCode != "GDG.05")
@@ -185,6 +185,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                  .FirstOrDefault();
             return model;
         }
+
         public string GenerateCode(string ModuleId)
         {
             var uid = ObjectId.GenerateNewId().ToString();
@@ -195,6 +196,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             string code = String.Format("{0}/{1}/{2}", hashids.Encode(diff), ModuleId, DateTime.Now.ToString("MM/yyyy"));
             return code;
         }
+
         public async Task<int> Create(SPKDocs model, string username, int clientTimeZoneOffset = 7)
         {
             int Created = 0;

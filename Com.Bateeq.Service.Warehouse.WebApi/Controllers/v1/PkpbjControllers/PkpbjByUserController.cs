@@ -105,7 +105,6 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.PkpbjControllers
             }
         }
 
-
         [HttpGet("packingList")]
         public IActionResult GetPackingList(int page = 1, int size = 25, string order = "{}", string keyword = null, string filter = "{}")
         {
@@ -232,7 +231,6 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.PkpbjControllers
             }
         }
 
-
         [HttpGet("expedition")]
         public IActionResult GetExpedition(int page = 1, int size = 25, string order = "{}", string keyword = null, string filter = "{}")
         {
@@ -340,6 +338,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.PkpbjControllers
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]PkbjByUserViewModel ViewModel)
         {
@@ -377,6 +376,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.PkpbjControllers
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
         [HttpGet("pdf/{id}")]
         public IActionResult GetPackingListPDF(int id)
         {
@@ -436,6 +436,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.PkpbjControllers
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
         [HttpGet("byreference")]
         public IActionResult Getbyreference(string reference)
         {
@@ -462,6 +463,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.PkpbjControllers
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
         [HttpGet("transfer-stock/byreference")]
         public IActionResult Getbyreferencetransfer(string reference)
         {
