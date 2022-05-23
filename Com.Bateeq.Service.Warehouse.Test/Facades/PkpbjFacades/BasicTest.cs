@@ -2,9 +2,11 @@
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Services;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.PkbjByUserViewModel;
+using Com.Bateeq.Service.Warehouse.Lib.ViewModels.SpkDocsViewModel;
 using Com.Bateeq.Service.Warehouse.Test.DataUtils.SPKDocDataUtils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Primitives;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -103,6 +105,16 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.PkpbjFacades
             return new SPKDocDataUtil(facade);
         }
 
+        private SPKDocDataUtilRTT dataUtilRTT(Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade facade, string testName)
+        {
+            var pkbbjfacade = new Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade(ServiceProvider, _dbContext(testName));
+            //var sPKDocDataUtil = new SPKDocDataUtil(pkbbjfacade);
+            //var transferFacade = new TransferFacade(ServiceProvider, _dbContext(testName));
+            //var transferDataUtil = new TransferDataUtil(transferFacade, sPKDocDataUtil);
+
+            return new SPKDocDataUtilRTT(facade);
+        }
+
         [Fact]
         public async Task Should_Success_Create_Data()
         {
@@ -142,6 +154,15 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.PkpbjFacades
         }
 
         [Fact]
+        public async Task Should_Success_Get_All_Data_PackingListRTT()
+        {
+            Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade facade = new Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+            var model = await dataUtilRTT(facade, GetCurrentMethod()).GetTestData();
+            var Response = facade.ReadPackingRTT();
+            Assert.NotEmpty(Response.Item1);
+        }
+
+        [Fact]
         public async Task Should_Success_Get_All_Data_Expedition()
         {
             Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade facade = new Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
@@ -173,7 +194,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.PkpbjFacades
         {
             PkbjByUserViewModel ViewModel = new PkbjByUserViewModel
             {
-                
+
                 destination = new Lib.ViewModels.NewIntegrationViewModel.DestinationViewModel
                 {
                     _id = 1,
@@ -202,7 +223,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.PkpbjFacades
                     code = "test",
                     name = "test"
                 },
-                
+
                 reference = "test",
                 items = new List<PkbjByUserItemViewModel> {
                     new PkbjByUserItemViewModel
@@ -216,6 +237,8 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.PkpbjFacades
 
             };
             Assert.True(destViewModel.Validate(null).Count() > 0);
+
+            #region commend
             //PkbjByUserViewModel refViewModel = new PkbjByUserViewModel
             //{
             //    source = new Lib.ViewModels.NewIntegrationViewModel.SourceViewModel
@@ -242,6 +265,8 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.PkpbjFacades
 
             //};
             //Assert.True(refViewModel.Validate(null).Count() > 0);
+            #endregion
+
             PkbjByUserViewModel itemViewModel = new PkbjByUserViewModel
             {
                 source = new Lib.ViewModels.NewIntegrationViewModel.SourceViewModel
@@ -260,6 +285,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.PkpbjFacades
 
             };
             Assert.True(itemViewModel.Validate(null).Count() > 0);
+
             PkbjByUserViewModel itemsViewModel = new PkbjByUserViewModel
             {
                 source = new Lib.ViewModels.NewIntegrationViewModel.SourceViewModel
@@ -275,13 +301,29 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.PkpbjFacades
                     name = "test"
                 },
                 reference = "test",
-                items = new List<PkbjByUserItemViewModel> {
-                    
+                items = new List<PkbjByUserItemViewModel>
+                {
+
                 }
 
             };
             Assert.True(itemsViewModel.Validate(null).Count() > 0);
         }
+
+        //[Fact]
+        //public async Task Should_Success_Upload()
+        //{
+        //    Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade facade = new Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade(GetServiceProvidernulldataget().Object, _dbContext(GetCurrentMethod()));
+        //    var dataUtil = this.dataUtil(facade, serviceProvider, dbContext);
+        //    var data = await dataUtil.GetNewData();
+        //    var firstData = data.First();
+        //    var excel = dataUtil.GetExcel(data, null, firstData.UnitCode, firstData.StorageCode, firstData.StorageName);
+
+        //    var Response = await facade.Upload(excel);
+        //    Assert.NotEqual(0, Response.Id);
+        //}
+
+
 
     }
 }
