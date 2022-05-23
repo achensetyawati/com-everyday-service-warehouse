@@ -177,6 +177,26 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
         }
 
         [Fact]
+        public void Should_Success_Get_All_Data()
+        {
+            var validateMock = new Mock<IValidateService>();
+            validateMock.Setup(s => s.Validate(It.IsAny<ExpeditionViewModel>())).Verifiable();
+
+            var mockFacade = new Mock<ExpeditionFacade>();
+
+
+            mockFacade.Setup(x => x.Read(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>() ))
+                .Returns(Tuple.Create(new List<Expedition>(), 0, new Dictionary<string, string>()));
+
+            var mockMapper = new Mock<IMapper>();
+            mockMapper.Setup(x => x.Map<List<ExpeditionViewModel>>(It.IsAny<List<Expedition>>()))
+                .Returns(new List<ExpeditionViewModel> { expviewModel });
+
+            ExpeditionController controller = GetController(mockFacade, validateMock, mockMapper);
+            var response = controller.Get();
+            Assert.Equal((int)HttpStatusCode.OK, GetStatusCode(response));
+        }
+        [Fact]
         public void Should_Error_Get_All_Data()
         {
             var validateMock = new Mock<IValidateService>();
@@ -195,26 +215,6 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
             ExpeditionController controller = new ExpeditionController(mockMapper.Object, mockFacade.Object, GetServiceProvider().Object);
             var response = controller.Get();
             Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
-        }
-        [Fact]
-        public void Should_Success_Get_All_Data()
-        {
-            var validateMock = new Mock<IValidateService>();
-            validateMock.Setup(s => s.Validate(It.IsAny<ExpeditionViewModel>())).Verifiable();
-
-            var mockFacade = new Mock<ExpeditionFacade>();
-
-
-            mockFacade.Setup(x => x.Read(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
-                .Returns(Tuple.Create(new List<Expedition>(), 0, new Dictionary<string, string>()));
-
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(x => x.Map<List<ExpeditionViewModel>>(It.IsAny<List<Expedition>>()))
-                .Returns(new List<ExpeditionViewModel> { expviewModel });
-
-            ExpeditionController controller = GetController(mockFacade, validateMock, mockMapper);
-            var response = controller.Get();
-            Assert.Equal((int)HttpStatusCode.OK, GetStatusCode(response));
         }
         [Fact]
         public async Task Should_Success_Create_Data()
@@ -285,7 +285,6 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
             var response = controller.Get(It.IsAny<int>());
             Assert.Equal((int)HttpStatusCode.OK, GetStatusCode(response));
         }
-
         [Fact]
         public void Should_Error_Get_Data_By_Id()
         {
