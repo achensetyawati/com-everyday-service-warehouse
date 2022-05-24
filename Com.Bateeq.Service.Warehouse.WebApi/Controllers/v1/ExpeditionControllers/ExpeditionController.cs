@@ -34,7 +34,6 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.ExpeditionControlle
             this.mapper = mapper;
             this.facade = facade;
             identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));
-
         }
 
         [HttpGet]

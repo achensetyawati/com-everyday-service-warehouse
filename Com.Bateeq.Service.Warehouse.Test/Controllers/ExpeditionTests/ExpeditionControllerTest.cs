@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Com.Bateeq.Service.Warehouse.Lib;
 using Com.Bateeq.Service.Warehouse.Lib.Facades;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Models.Expeditions;
@@ -10,11 +11,17 @@ using Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.ExpeditionControllers;
 using Com.Moonlay.NetCore.Lib.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
+using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -61,6 +68,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
             {
                 return new ExpeditionViewModel
                 {
+                    Id = 1,
                     code = "code",
                     expeditionService = new Lib.ViewModels.NewIntegrationViewModel.ExpeditionServiceViewModel
                     {
@@ -108,6 +116,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
             {
                 return new Expedition
                 {
+                    Id = 1,
                     Code = "Code",
                     ExpeditionServiceCode = "ExpserviceCode"
 
@@ -115,6 +124,33 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
 
             }
         }
+
+        private Expedition ModelTest
+        {
+            get
+            {
+                return new Expedition
+                {
+                    Id = 1,
+                    Code = "code",
+                    Items = new List<ExpeditionItem>
+                    {
+                        new ExpeditionItem
+                        {
+                            Details = new List<ExpeditionDetail> {
+                                new ExpeditionDetail
+                                {
+                                    ItemCode = "code"
+                                }
+                            }
+                        }
+
+                    }
+                };
+            }
+        }
+        //private IServiceProvider service;
+        //private WarehouseDbContext dbContext;
 
         private ServiceValidationExeption GetServiceValidationExeption()
         {
@@ -124,12 +160,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
             return new ServiceValidationExeption(validationContext, validationResults);
         }
 
-        protected int GetStatusCode(IActionResult response)
-        {
-            return (int)response.GetType().GetProperty("StatusCode").GetValue(response, null);
-        }
-
-        private ExpeditionController GetController(Mock<ExpeditionFacade> facadeM, Mock<IValidateService> validateM, Mock<IMapper> mapper)
+        private ExpeditionController GetController(ExpeditionFacade facadeM, Mock<IMapper> mapper)
         {
             var user = new Mock<ClaimsPrincipal>();
             var claims = new Claim[]
@@ -139,14 +170,8 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
             user.Setup(u => u.Claims).Returns(claims);
 
             var servicePMock = GetServiceProvider();
-            if (validateM != null)
-            {
-                servicePMock
-                    .Setup(x => x.GetService(typeof(IValidateService)))
-                    .Returns(validateM.Object);
-            }
 
-            ExpeditionController controller = new ExpeditionController(mapper.Object, facadeM.Object, servicePMock.Object)
+            ExpeditionController controller = new ExpeditionController(mapper.Object, facadeM, servicePMock.Object)
             {
                 ControllerContext = new ControllerContext()
                 {
@@ -162,12 +187,60 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
 
             return controller;
         }
+
+        private WarehouseDbContext _dbContext(string testName)
+        {
+            var serviceProvider = new ServiceCollection()
+              .AddEntityFrameworkInMemoryDatabase()
+              .BuildServiceProvider();
+
+            DbContextOptionsBuilder<WarehouseDbContext> optionsBuilder = new DbContextOptionsBuilder<WarehouseDbContext>();
+            optionsBuilder
+                .UseInMemoryDatabase(testName)
+                .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+                .UseInternalServiceProvider(serviceProvider);
+
+            WarehouseDbContext dbContext = new WarehouseDbContext(optionsBuilder.Options);
+
+            return dbContext;
+        }
+
+        protected string GetCurrentAsyncMethod([CallerMemberName] string methodName = "")
+        {
+            var method = new StackTrace()
+                .GetFrames()
+                .Select(frame => frame.GetMethod())
+                .FirstOrDefault(item => item.Name == methodName);
+
+            return method.Name;
+
+        }
+
+        public Expedition GetTestData(WarehouseDbContext dbContext)
+        {
+            //Expedition data = new Expedition();
+            dbContext.Expeditions.Add(ModelTest);
+            dbContext.SaveChanges();
+
+            return ModelTest;
+        }
+
+        protected int GetStatusCode(IActionResult response)
+        {
+            return (int)response.GetType().GetProperty("StatusCode").GetValue(response, null);
+        }
+
         private Mock<IServiceProvider> GetServiceProvider()
         {
             var serviceProvider = new Mock<IServiceProvider>();
             serviceProvider
                 .Setup(x => x.GetService(typeof(IdentityService)))
                 .Returns(new IdentityService() { Token = "Token", Username = "Test" });
+
+            var validateService = new Mock<IValidateService>();
+            serviceProvider
+              .Setup(s => s.GetService(typeof(IValidateService)))
+              .Returns(validateService.Object);
 
             serviceProvider
                 .Setup(x => x.GetService(typeof(IHttpClientService)))
@@ -179,128 +252,172 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
         [Fact]
         public void Should_Success_Get_All_Data()
         {
-            var validateMock = new Mock<IValidateService>();
-            validateMock.Setup(s => s.Validate(It.IsAny<ExpeditionViewModel>())).Verifiable();
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProvider();
 
-            var mockFacade = new Mock<ExpeditionFacade>();
+            ExpeditionFacade facade = new ExpeditionFacade(serviceProvider.Object, dbContext);
 
-
-            mockFacade.Setup(x => x.Read(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>() ))
-                .Returns(Tuple.Create(new List<Expedition>(), 0, new Dictionary<string, string>()));
+            serviceProvider.Setup(s => s.GetService(typeof(ExpeditionFacade))).Returns(facade);
+            serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
 
             var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(x => x.Map<List<ExpeditionViewModel>>(It.IsAny<List<Expedition>>()))
                 .Returns(new List<ExpeditionViewModel> { expviewModel });
 
-            ExpeditionController controller = GetController(mockFacade, validateMock, mockMapper);
-            var response = controller.Get();
+            IActionResult response = GetController(facade, mockMapper).Get();
+
             Assert.Equal((int)HttpStatusCode.OK, GetStatusCode(response));
         }
+
         [Fact]
         public void Should_Error_Get_All_Data()
         {
-            var validateMock = new Mock<IValidateService>();
-            validateMock.Setup(s => s.Validate(It.IsAny<ExpeditionViewModel>())).Verifiable();
 
-            var mockFacade = new Mock<ExpeditionFacade>();
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProvider();
 
+            ExpeditionFacade facade = new ExpeditionFacade(serviceProvider.Object, dbContext);
 
-            mockFacade.Setup(x => x.Read(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
-                .Returns(Tuple.Create(new List<Expedition>(), 0, new Dictionary<string, string>()));
+            serviceProvider.Setup(s => s.GetService(typeof(ExpeditionFacade))).Returns(facade);
 
             var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(x => x.Map<List<ExpeditionViewModel>>(It.IsAny<List<Expedition>>()))
-                .Returns(new List<ExpeditionViewModel> { expviewModel });
+            mockMapper.Setup(x => x.Map<List<ExpeditionViewModel>>(It.IsAny<List<Expedition>>()));
 
-            ExpeditionController controller = new ExpeditionController(mockMapper.Object, mockFacade.Object, GetServiceProvider().Object);
-            var response = controller.Get();
+            IActionResult response = GetController(facade, mockMapper).Get();
+
             Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
         }
-        [Fact]
-        public async Task Should_Success_Create_Data()
-        {
-            var validateMock = new Mock<IValidateService>();
-            validateMock.Setup(s => s.Validate(It.IsAny<ExpeditionViewModel>())).Verifiable();
 
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(x => x.Map<Expedition>(It.IsAny<ExpeditionViewModel>()))
-                .Returns(Model);
-
-            var mockFacade = new Mock<ExpeditionFacade>();
-            mockFacade.Setup(x => x.Create(It.IsAny<Expedition>(), "unittestusername", 7))
-               .ReturnsAsync(1);
-
-            var controller = GetController(mockFacade, validateMock, mockMapper);
-
-            var response = await controller.Post(this.expviewModel);
-            Assert.Equal((int)HttpStatusCode.Created, GetStatusCode(response));
-        }
-        [Fact]
-        public async Task Should_Validate_Create_Data()
-        {
-            var validateMock = new Mock<IValidateService>();
-            validateMock.Setup(s => s.Validate(It.IsAny<ExpeditionViewModel>())).Throws(GetServiceValidationExeption());
-
-            var mockMapper = new Mock<IMapper>();
-
-            var mockFacade = new Mock<ExpeditionFacade>();
-
-            var controller = GetController(mockFacade, validateMock, mockMapper);
-
-            var response = await controller.Post(this.expviewModel);
-            Assert.Equal((int)HttpStatusCode.BadRequest, GetStatusCode(response));
-        }
-        [Fact]
-        public async Task Should_Error_Create_Data()
-        {
-            var validateMock = new Mock<IValidateService>();
-            validateMock.Setup(s => s.Validate(It.IsAny<ExpeditionViewModel>())).Verifiable();
-
-            var mockMapper = new Mock<IMapper>();
-            mockMapper.Setup(x => x.Map<Expedition>(It.IsAny<ExpeditionViewModel>()))
-                .Returns(Model);
-
-            var mockFacade = new Mock<ExpeditionFacade>();
-            mockFacade.Setup(x => x.Create(It.IsAny<Expedition>(), "unittestusername", 7))
-               .ReturnsAsync(1);
-
-            var controller = new ExpeditionController(mockMapper.Object, mockFacade.Object, GetServiceProvider().Object);
-
-            var response = await controller.Post(this.expviewModel);
-            Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
-        }
         [Fact]
         public void Should_Success_Get_Data_By_Id()
         {
-            var mockFacade = new Mock<ExpeditionFacade>();
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProvider();
 
-            mockFacade.Setup(x => x.ReadById(It.IsAny<int>()))
-                .Returns(new Expedition());
+            ExpeditionFacade facade = new ExpeditionFacade(serviceProvider.Object, dbContext);
+
+            serviceProvider.Setup(s => s.GetService(typeof(ExpeditionFacade))).Returns(facade);
+            serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
 
             var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(x => x.Map<ExpeditionViewModel>(It.IsAny<Expedition>()))
                 .Returns(expviewModel);
 
-            ExpeditionController controller = new ExpeditionController(mockMapper.Object, mockFacade.Object, GetServiceProvider().Object);
-            var response = controller.Get(It.IsAny<int>());
+            Expedition testData = GetTestData(dbContext);
+
+            //IActionResult response = GetController(facade, mockMapper).Get((int)testData.Id);
+            IActionResult response = GetController(facade, mockMapper).Get(1);
+
             Assert.Equal((int)HttpStatusCode.OK, GetStatusCode(response));
         }
+
         [Fact]
         public void Should_Error_Get_Data_By_Id()
         {
-            var mockFacade = new Mock<ExpeditionFacade>();
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProvider();
 
-            mockFacade.Setup(x => x.ReadById(It.IsAny<int>()))
-                .Returns(new Expedition());
+            ExpeditionFacade facade = new ExpeditionFacade(serviceProvider.Object, dbContext);
+
+            serviceProvider.Setup(s => s.GetService(typeof(ExpeditionFacade))).Returns(facade);
+            serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
 
             var mockMapper = new Mock<IMapper>();
+            mockMapper.Setup(x => x.Map<List<ExpeditionViewModel>>(It.IsAny<List<Expedition>>()))
+                .Returns(new List<ExpeditionViewModel> { expviewModel });
 
-            ExpeditionController controller = new ExpeditionController(mockMapper.Object, mockFacade.Object, GetServiceProvider().Object);
-            var response = controller.Get(It.IsAny<int>());
+            Expedition testData = GetTestData(dbContext);
+
+            IActionResult response = GetController(facade, mockMapper).Get(It.IsAny<int>());
+
             Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
         }
 
+        [Fact]
+        public void Should_Success_Get_PDF()
+        {
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+
+            ExpeditionFacade facade = new ExpeditionFacade(serviceProvider.Object, dbContext);
+
+            serviceProvider.Setup(s => s.GetService(typeof(ExpeditionFacade))).Returns(facade);
+            serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+
+            var mockMapper = new Mock<IMapper>();
+            mockMapper.Setup(x => x.Map<ExpeditionViewModel>(It.IsAny<Expedition>()))
+                .Returns(expviewModel);
+
+            Expedition testData = GetTestData(dbContext);
+
+            ExpeditionController controller = GetController(facade, mockMapper);
+            controller.ControllerContext.HttpContext.Request.Headers["Accept"] = "application/pdf";
+
+            //IActionResult response = GetController(facade, mockMapper).Get((int)testData.Id);
+            IActionResult response = controller.GetExpeditionPDF(1);
+
+            Assert.NotNull(response.GetType().GetProperty("FileStream"));
+        }
+
+        //[Fact]
+        //public async Task Should_Success_Create_Data()
+        //{
+        //    var validateMock = new Mock<IValidateService>();
+        //    validateMock.Setup(s => s.Validate(It.IsAny<ExpeditionViewModel>())).Verifiable();
+
+        //    var mockMapper = new Mock<IMapper>();
+        //    mockMapper.Setup(x => x.Map<Expedition>(It.IsAny<ExpeditionViewModel>()))
+        //        .Returns(Model);
+
+        //    var mockFacade = new Mock<ExpeditionFacade>();
+        //    mockFacade.Setup(x => x.Create(It.IsAny<Expedition>(), "unittestusername", 7))
+        //       .ReturnsAsync(1);
+
+        //    var controller = GetController(mockFacade, validateMock, mockMapper);
+
+        //    var response = await controller.Post(this.expviewModel);
+        //    Assert.Equal((int)HttpStatusCode.Created, GetStatusCode(response));
+        //}
+
+        //public async Task Should_Error_Create_Data()
+        //{
+        //    var validateMock = new Mock<IValidateService>();
+        //    validateMock.Setup(s => s.Validate(It.IsAny<ExpeditionViewModel>())).Verifiable();
+
+        //    var mockMapper = new Mock<IMapper>();
+        //    mockMapper.Setup(x => x.Map<Expedition>(It.IsAny<ExpeditionViewModel>()))
+        //        .Returns(Model);
+
+        //    var mockFacade = new Mock<ExpeditionFacade>();
+        //    mockFacade.Setup(x => x.Create(It.IsAny<Expedition>(), "unittestusername", 7))
+        //       .ReturnsAsync(1);
+
+        //    var controller = new ExpeditionController(mockMapper.Object, mockFacade.Object, GetServiceProvider().Object);
+
+        //    var response = await controller.Post(this.expviewModel);
+        //    Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
+        //}
+
+        //[Fact]
+        //public async Task Should_Validate_Create_Data()
+        //{
+        //    var validateMock = new Mock<IValidateService>();
+        //    validateMock.Setup(s => s.Validate(It.IsAny<ExpeditionViewModel>())).Throws(GetServiceValidationExeption());
+
+        //    var mockMapper = new Mock<IMapper>();
+
+        //    var mockFacade = new Mock<ExpeditionFacade>();
+
+        //    var controller = GetController(mockFacade, validateMock, mockMapper);
+
+        //    var response = await controller.Post(this.expviewModel);
+        //    Assert.Equal((int)HttpStatusCode.BadRequest, GetStatusCode(response));
+        //}
+
+        //[Fact]
+
+
     }
 
-    
+
 }
