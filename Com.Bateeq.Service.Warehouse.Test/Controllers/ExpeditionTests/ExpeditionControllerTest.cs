@@ -3,6 +3,7 @@ using Com.Bateeq.Service.Warehouse.Lib;
 using Com.Bateeq.Service.Warehouse.Lib.Facades;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Models.Expeditions;
+using Com.Bateeq.Service.Warehouse.Lib.Models.SPKDocsModel;
 using Com.Bateeq.Service.Warehouse.Lib.Services;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.ExpeditionViewModel;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.TransferViewModels;
@@ -85,8 +86,15 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
                         {
                             spkDocsViewModel = new Lib.ViewModels.SpkDocsViewModel.SPKDocsViewModel
                             {
+                                packingList = "packinglist",
                                 code = "code",
                                 destination = new Lib.ViewModels.NewIntegrationViewModel.DestinationViewModel
+                                {
+                                    code = "code",
+                                    name = "name",
+                                    _id = 1
+                                },
+                                source = new Lib.ViewModels.NewIntegrationViewModel.SourceViewModel
                                 {
                                     code = "code",
                                     name = "name",
@@ -98,9 +106,11 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
                                 {
                                     item = new Lib.ViewModels.NewIntegrationViewModel.ItemViewModel
                                     {
+                                        articleRealizationOrder = "art1",
                                         code = "code",
                                         name = "name"
-                                    }
+                                    },
+                                    sendQuantity = 10
                                 }
                             },
                             weight = 2
@@ -124,7 +134,6 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
 
             }
         }
-
         private Expedition ModelTest
         {
             get
@@ -137,6 +146,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
                     {
                         new ExpeditionItem
                         {
+                            PackingList = "packinglist",
                             Details = new List<ExpeditionDetail> {
                                 new ExpeditionDetail
                                 {
@@ -149,14 +159,153 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
                 };
             }
         }
-        //private IServiceProvider service;
-        //private WarehouseDbContext dbContext;
-
-        private ServiceValidationExeption GetServiceValidationExeption()
+        private SPKDocs ModelTestSpk
         {
-            Mock<IServiceProvider> serviceProvider = new Mock<IServiceProvider>();
+            get
+            {
+                return new SPKDocs
+                {
+                    Id = 1,
+                    Code = "code",
+                    PackingList = "packinglist",
+                    Items = new List<SPKDocsItem>
+                    {
+
+                    }
+                };
+            }
+        }
+        private SPKDocs ModelTestSpkError
+        {
+            get
+            {
+                return new SPKDocs
+                {
+                    Id = 1,
+                    Code = "code",
+                    PackingList = "packinglist1",
+                    Items = new List<SPKDocsItem>
+                    {
+
+                    }
+                };
+            }
+        }
+        private ExpeditionViewModel expviewModelValidated1
+        {
+            get
+            {
+                return new ExpeditionViewModel
+                {
+                    Id = 1,
+                    code = "code",
+                    expeditionService = null,
+                    remark = "remark",
+                    //source = new Lib.ViewModels.NewIntegrationViewModel.SourceViewModel
+                    //{
+                    //    code = "codesource"
+                    //},
+                    items = new List<ExpeditionItemViewModel>
+                    {
+                        new ExpeditionItemViewModel
+                        {
+                            spkDocsViewModel = new Lib.ViewModels.SpkDocsViewModel.SPKDocsViewModel
+                            {
+                                packingList = "packinglist",
+                                code = "code",
+                                destination = new Lib.ViewModels.NewIntegrationViewModel.DestinationViewModel
+                                {
+                                    code = "code",
+                                    name = "name",
+                                    _id = 1
+                                },
+                                source = new Lib.ViewModels.NewIntegrationViewModel.SourceViewModel
+                                {
+                                    code = "code",
+                                    name = "name",
+                                    _id = 1
+                                }
+                            },
+                            details = new List<ExpeditionDetailViewModel> {
+                                new ExpeditionDetailViewModel
+                                {
+                                    item = new Lib.ViewModels.NewIntegrationViewModel.ItemViewModel
+                                    {
+                                        articleRealizationOrder = "art1",
+                                        code = "code",
+                                        name = "name"
+                                    },
+                                    sendQuantity = 10
+                                }
+                            },
+                            weight = 0
+                        }
+
+                    }
+                };
+            }
+        }
+        private ExpeditionViewModel expviewModelValidated2
+        {
+            get
+            {
+                return new ExpeditionViewModel
+                {
+                    Id = 1,
+                    code = "code",
+                    expeditionService = null,
+                    remark = "remark",
+                    //source = new Lib.ViewModels.NewIntegrationViewModel.SourceViewModel
+                    //{
+                    //    code = "codesource"
+                    //},
+                    items = new List<ExpeditionItemViewModel>
+                    {
+                        new ExpeditionItemViewModel
+                        {
+                            spkDocsViewModel = new Lib.ViewModels.SpkDocsViewModel.SPKDocsViewModel
+                            {
+                                packingList = "packinglist",
+                                code = "code",
+                                destination = new Lib.ViewModels.NewIntegrationViewModel.DestinationViewModel
+                                {
+                                    code = "code",
+                                    name = "name",
+                                    _id = 1
+                                },
+                                source = new Lib.ViewModels.NewIntegrationViewModel.SourceViewModel
+                                {
+                                    code = "code",
+                                    name = "name",
+                                    _id = 1
+                                }
+                            },
+                            details = new List<ExpeditionDetailViewModel> {
+                                new ExpeditionDetailViewModel
+                                {
+                                    item = new Lib.ViewModels.NewIntegrationViewModel.ItemViewModel
+                                    {
+                                        articleRealizationOrder = "art1",
+                                        code = "code",
+                                        name = "name"
+                                    },
+                                    sendQuantity = 0,
+                                    remark = ""
+                                }
+                            },
+                            weight = 0
+                        }
+
+                    }
+                };
+            }
+        }
+
+        private ServiceValidationExeption GetServiceValidationExeption(ExpeditionViewModel exp, Mock<IServiceProvider> serviceProvider)
+        {
             List<ValidationResult> validationResults = new List<ValidationResult>();
-            System.ComponentModel.DataAnnotations.ValidationContext validationContext = new System.ComponentModel.DataAnnotations.ValidationContext(expviewModel, serviceProvider.Object, null);
+            System.ComponentModel.DataAnnotations.ValidationContext validationContext = new System.ComponentModel.DataAnnotations.ValidationContext(exp, serviceProvider.Object, null);
+
             return new ServiceValidationExeption(validationContext, validationResults);
         }
 
@@ -216,6 +365,22 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
 
         }
 
+        public SPKDocs GetTestDataSpk(WarehouseDbContext dbContext)
+        {
+            dbContext.SPKDocs.Add(ModelTestSpk);
+            dbContext.SaveChanges();
+
+            return ModelTestSpk;
+        }
+
+        public SPKDocs GetTestDataSpkError(WarehouseDbContext dbContext)
+        {
+            dbContext.SPKDocs.Add(ModelTestSpkError);
+            dbContext.SaveChanges();
+
+            return ModelTestSpk;
+        }
+
         public Expedition GetTestData(WarehouseDbContext dbContext)
         {
             //Expedition data = new Expedition();
@@ -238,6 +403,8 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
                 .Returns(new IdentityService() { Token = "Token", Username = "Test" });
 
             var validateService = new Mock<IValidateService>();
+            //validateService.Setup(s => s.Validate(It.IsAny<ExpeditionViewModel>())).Verifiable();
+
             serviceProvider
               .Setup(s => s.GetService(typeof(IValidateService)))
               .Returns(validateService.Object);
@@ -245,6 +412,10 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
             serviceProvider
                 .Setup(x => x.GetService(typeof(IHttpClientService)))
                 .Returns(new HttpClientTestService());
+
+            serviceProvider
+                .Setup(x => x.GetService(typeof(WarehouseDbContext)))
+                .Returns(_dbContext(GetCurrentAsyncMethod()));
 
             return serviceProvider;
         }
@@ -359,63 +530,123 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
             Assert.NotNull(response.GetType().GetProperty("FileStream"));
         }
 
+        [Fact]
+        public void Should_Error_Get_PDF()
+        {
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+
+            ExpeditionFacade facade = new ExpeditionFacade(serviceProvider.Object, dbContext);
+
+            serviceProvider.Setup(s => s.GetService(typeof(ExpeditionFacade))).Returns(facade);
+
+            var mockMapper = new Mock<IMapper>();
+            mockMapper.Setup(x => x.Map<ExpeditionViewModel>(It.IsAny<Expedition>()));
+
+            Expedition testData = GetTestData(dbContext);
+
+            ExpeditionController controller = GetController(facade, mockMapper);
+            controller.ControllerContext.HttpContext.Request.Headers["Accept"] = "application/pdf";
+
+            //IActionResult response = GetController(facade, mockMapper).Get((int)testData.Id);
+            IActionResult response = controller.GetExpeditionPDF(1);
+
+            Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
+        }
+
+        [Fact]
+        public async Task Should_Success_Create_Data()
+        {
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+
+            var validateService = new Mock<IValidateService>();
+            var mockMapper = new Mock<IMapper>();
+            validateService.Setup(s => s.Validate(It.IsAny<ExpeditionViewModel>())).Verifiable();
+
+            ExpeditionFacade facade = new ExpeditionFacade(serviceProvider.Object, dbContext);
+
+            serviceProvider.Setup(s => s.GetService(typeof(ExpeditionFacade))).Returns(facade);
+            serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+            serviceProvider.Setup(s => s.GetService(typeof(IValidateService))).Returns(validateService.Object);
+            mockMapper.Setup(x => x.Map<Expedition>(It.IsAny<ExpeditionViewModel>())).Returns(ModelTest);
+
+            SPKDocs testDataSpk = GetTestDataSpk(dbContext);
+
+            IActionResult response = await GetController(facade, mockMapper).Post(expviewModel);
+
+            Assert.Equal((int)HttpStatusCode.Created, GetStatusCode(response));
+        }
+
+        [Fact]
+        public async Task Should_Error_Create_Data()
+        {
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+
+            ExpeditionFacade facade = new ExpeditionFacade(serviceProvider.Object, dbContext);
+
+            serviceProvider.Setup(s => s.GetService(typeof(ExpeditionFacade))).Returns(facade);
+            serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+
+            var mockMapper = new Mock<IMapper>();
+            mockMapper.Setup(x => x.Map<Expedition>(It.IsAny<ExpeditionViewModel>()))
+                .Returns(ModelTest);
+
+            SPKDocs testDataSpk = GetTestDataSpkError(dbContext);
+
+            IActionResult response = await GetController(facade, mockMapper).Post(expviewModel);
+
+            Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
+        }
+
         //[Fact]
-        //public async Task Should_Success_Create_Data()
+        //public async Task Should_Validate_Create_Data()
         //{
-        //    var validateMock = new Mock<IValidateService>();
-        //    validateMock.Setup(s => s.Validate(It.IsAny<ExpeditionViewModel>())).Verifiable();
+        //    WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+        //    Mock<IServiceProvider> serviceProvider = GetServiceProvider();
 
+        //    ExpeditionFacade facade = new ExpeditionFacade(serviceProvider.Object, dbContext);
+
+        //    var validateService = new Mock<IValidateService>();
         //    var mockMapper = new Mock<IMapper>();
-        //    mockMapper.Setup(x => x.Map<Expedition>(It.IsAny<ExpeditionViewModel>()))
-        //        .Returns(Model);
 
-        //    var mockFacade = new Mock<ExpeditionFacade>();
-        //    mockFacade.Setup(x => x.Create(It.IsAny<Expedition>(), "unittestusername", 7))
-        //       .ReturnsAsync(1);
+        //    var Exception = new ValidationException();
 
-        //    var controller = GetController(mockFacade, validateMock, mockMapper);
+        //    var validationContext = new System.ComponentModel.DataAnnotations.ValidationContext(expviewModelValidated1, serviceProvider.Object, null);
+        //    validateService.Setup(s => s.Validate(validationContext)).Throws(Exception);
 
-        //    var response = await controller.Post(this.expviewModel);
-        //    Assert.Equal((int)HttpStatusCode.Created, GetStatusCode(response));
-        //}
+        //    serviceProvider.Setup(s => s.GetService(typeof(ExpeditionFacade))).Returns(facade);
+        //    serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+        //    serviceProvider.Setup(s => s.GetService(typeof(IValidateService))).Returns(validateService.Object);
 
-        //public async Task Should_Error_Create_Data()
-        //{
-        //    var validateMock = new Mock<IValidateService>();
-        //    validateMock.Setup(s => s.Validate(It.IsAny<ExpeditionViewModel>())).Verifiable();
+        //    IActionResult response1 = await GetController(facade, mockMapper).Post(expviewModelValidated1);
+        //    Assert.Equal((int)HttpStatusCode.BadRequest, GetStatusCode(response1));
 
-        //    var mockMapper = new Mock<IMapper>();
-        //    mockMapper.Setup(x => x.Map<Expedition>(It.IsAny<ExpeditionViewModel>()))
-        //        .Returns(Model);
-
-        //    var mockFacade = new Mock<ExpeditionFacade>();
-        //    mockFacade.Setup(x => x.Create(It.IsAny<Expedition>(), "unittestusername", 7))
-        //       .ReturnsAsync(1);
-
-        //    var controller = new ExpeditionController(mockMapper.Object, mockFacade.Object, GetServiceProvider().Object);
-
-        //    var response = await controller.Post(this.expviewModel);
-        //    Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
         //}
 
         //[Fact]
         //public async Task Should_Validate_Create_Data()
         //{
+        //    WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+        //    Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+
+        //    ExpeditionFacade facade = new ExpeditionFacade(serviceProvider.Object, dbContext);
+
         //    var validateMock = new Mock<IValidateService>();
-        //    validateMock.Setup(s => s.Validate(It.IsAny<ExpeditionViewModel>())).Throws(GetServiceValidationExeption());
+        //    validateMock.Setup(s => s.Validate(It.IsAny<ExpeditionViewModel>())).Throws(GetServiceValidationExeption(expviewModelValidated1));
+
+        //    serviceProvider.Setup(s => s.GetService(typeof(ExpeditionFacade))).Returns(facade);
+        //    serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
 
         //    var mockMapper = new Mock<IMapper>();
 
-        //    var mockFacade = new Mock<ExpeditionFacade>();
+        //    IActionResult response1 = await GetController(facade, mockMapper).Post(expviewModelValidated1);
+        //    Assert.Equal((int)HttpStatusCode.BadRequest, GetStatusCode(response1));
 
-        //    var controller = GetController(mockFacade, validateMock, mockMapper);
-
-        //    var response = await controller.Post(this.expviewModel);
-        //    Assert.Equal((int)HttpStatusCode.BadRequest, GetStatusCode(response));
+        //    IActionResult response2 = await GetController(facade, mockMapper).Post(expviewModelValidated2);
+        //    Assert.Equal((int)HttpStatusCode.BadRequest, GetStatusCode(response2));
         //}
-
-        //[Fact]
-
 
     }
 
