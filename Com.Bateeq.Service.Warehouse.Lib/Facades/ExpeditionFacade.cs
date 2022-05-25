@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 
 namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 {
-    public class ExpeditionFacade
+    public class ExpeditionFacade 
     {
         private string USER_AGENT = "Facade";
 
@@ -209,6 +209,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             string code = String.Format("{0}/{1}/{2}", hashids.Encode(diff), ModuleId, DateTime.Now.ToString("MM/yyyy"));
             return code;
         }
+
         public async Task<int> Create(Expedition model, string username, int clientTimeZoneOffset = 7)
         {
             int Created = 0;

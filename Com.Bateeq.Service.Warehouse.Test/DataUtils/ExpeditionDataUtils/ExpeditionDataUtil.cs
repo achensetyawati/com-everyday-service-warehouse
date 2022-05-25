@@ -20,6 +20,8 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.ExpeditionDataUtils
         {
             this.facade = facade;
             this.inventoryDataUtils = inventoryDataUtils;
+            this.sPKDocDataUtils = sPKDocDataUtils;
+            this.facade = facade;
         }
 
         public async Task<Expedition> GetNewData()
