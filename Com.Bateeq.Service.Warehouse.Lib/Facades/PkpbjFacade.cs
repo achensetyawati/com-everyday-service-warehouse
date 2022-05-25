@@ -215,7 +215,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                     foreach (var i in model.Items)
                     {
                         EntityExtension.FlagForCreate(i, username, USER_AGENT);
-                        #region comment
                         //var inven = GetItems(i.ItemCode, i.ItemName, i.ItemArticleRealizationOrder);
                         //if (inven == null)
                         //{
@@ -246,7 +245,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         //    response.EnsureSuccessStatusCode();
 
                         //}
-                        #endregion
+
+
                     }
                     model.Code = code;
                     model.Date = new DateTimeOffset(model.CreatedUtc);
@@ -362,7 +362,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                 //{
                 //    ErrorMessage = string.Concat(ErrorMessage, "Mata Uang tidak boleh kosong, ");
                 //}
-
                 decimal domesticSale = 0;
                 if (string.IsNullOrWhiteSpace(productVM.domesticSale))
                 {
@@ -384,6 +383,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         ErrorMessage = string.Concat(ErrorMessage, "Harga maksimal memiliki 2 digit dibelakang koma, ");
                     }
                 }
+
 
                 if (string.IsNullOrWhiteSpace(productVM.uom))
                 {

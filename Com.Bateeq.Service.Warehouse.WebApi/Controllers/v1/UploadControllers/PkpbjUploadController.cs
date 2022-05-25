@@ -33,12 +33,12 @@ namespace Com.MM.Service.Core.WebApi.Controllers.v1.UploadControllers
         private readonly IdentityService identityService;
         private readonly string ContentType = "application/vnd.openxmlformats";
         private readonly string FileName = string.Concat("Error Log - ", typeof(SPKDocs).Name, " ", DateTime.Now.ToString("dd MMM yyyy"), ".csv");
-        public PkpbjUploadController(IMapper mapper, IPkpbjFacade facade, IdentityService identityService) //: base(facade, ApiVersion)
+        public PkpbjUploadController(IMapper mapper, IPkpbjFacade facade, IServiceProvider serviceProvider) //: base(facade, ApiVersion)
         {
             this.mapper = mapper;
             this.facade = facade;
-            this.identityService = identityService;
-        }
+			this.identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));
+		}
 
         //private Action<COAModel> Transfrom => (coaModel) =>
         //{
