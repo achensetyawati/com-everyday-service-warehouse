@@ -293,7 +293,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
         public List<string> CsvHeader { get; } = new List<string>()
         {
-            "PackingList", "Password", "Barcode", "Name", "Size", "Price", "UOM", "QTY", "RO", "HPP"
+            "PackList", "Password", "Barcode", "Name", "Size", "Price", "UOM", "QTY", "RO", "HPP"
         };
 
         public sealed class PkbjMap : CsvHelper.Configuration.ClassMap<SPKDocsCsvViewModel>

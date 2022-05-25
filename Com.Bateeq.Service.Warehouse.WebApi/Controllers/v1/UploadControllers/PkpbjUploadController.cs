@@ -65,7 +65,7 @@ namespace Com.MM.Service.Core.WebApi.Controllers.v1.UploadControllers
                     //VerifyUser();
                     var UploadedFile = Request.Form.Files[0];
                     StreamReader Reader = new StreamReader(UploadedFile.OpenReadStream());
-                    List<string> FileHeader = new List<string>(Reader.ReadLine().Split(","));
+                    List<string> FileHeader = new List<string>(Reader.ReadLine().Replace("\"",string.Empty).Split(","));
                     var ValidHeader = facade.CsvHeader.SequenceEqual(FileHeader, StringComparer.OrdinalIgnoreCase);
 
                     if (ValidHeader)
@@ -83,7 +83,7 @@ namespace Com.MM.Service.Core.WebApi.Controllers.v1.UploadControllers
 
                         SPKDocsViewModel Data1 = await facade.MapToViewModel(Data, source, sourcec, sourcen, destination, destinationc, destinationn, date);
 
-                        Tuple<bool, List<object>> Validated = facade.UploadValidate(ref Data, Request.Form.ToList());
+                         Tuple<bool, List<object>> Validated = facade.UploadValidate(ref Data, Request.Form.ToList());
 
                         Reader.Close();
 
