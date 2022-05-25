@@ -16,6 +16,7 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Xunit;
+using static Com.Bateeq.Service.Warehouse.Test.DataUtils.SPKDocDataUtils.SPKDocDataUtil;
 
 namespace Com.Bateeq.Service.Warehouse.Test.Facades.PkpbjFacades
 {

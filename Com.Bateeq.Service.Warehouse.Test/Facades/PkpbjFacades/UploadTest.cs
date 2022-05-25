@@ -18,6 +18,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+using static Com.Bateeq.Service.Warehouse.Test.DataUtils.SPKDocDataUtils.SPKDocDataUtil;
 
 namespace Com.Bateeq.Service.Warehouse.Test.Facades.PkpbjFacades
 {
@@ -69,17 +70,18 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.PkpbjFacades
 
         private Mock<IServiceProvider> GetServiceProvidernulldataget()
         {
-            HttpResponseMessage message = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
-            message.Content = new StringContent("{\"apiVersion\":\"1.0\",\"statusCode\":200,\"message\":\"Ok\",\"data\":[{ }}");
+            HttpResponseMessage message = new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError);
+            //message.Content = new StringContent("{\"apiVersion\":\"1.0\",\"statusCode\":200,\"message\":\"Ok\",\"data\":[{ }}");
             HttpResponseMessage messagePost = new HttpResponseMessage();
             var HttpClientService = new Mock<IHttpClientService>();
             HttpClientService
                 .Setup(x => x.GetAsync(It.IsAny<string>()))
                 .ReturnsAsync(message);
-            //HttpClientService
-            //    .Setup(x => x.PostAsync(It.IsAny<string>(), It.IsAny<HttpContent>()))
-            //    .ReturnsAsync(messagePost);
-            var serviceProvider = new Mock<IServiceProvider>();
+			HttpClientService
+				 .Setup(x => x.PostAsync(It.Is<string>(s => s.Contains("items/finished-goods")), It.IsAny<HttpContent>()))
+				 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(new ItemDataUtil().GetResultFormatterOkString()) });
+
+			var serviceProvider = new Mock<IServiceProvider>();
             serviceProvider
                 .Setup(x => x.GetService(typeof(IdentityService)))
                 .Returns(new IdentityService() { Token = "Token", Username = "Test" });
@@ -137,11 +139,17 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.PkpbjFacades
         {
             Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade facade = new Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
             var viewModel = dataUtilCSV(facade, GetCurrentMethod()).GetNewData();
+			var viewModel2 = dataUtilCSV(facade, GetCurrentMethod()).GetNewData2();
+			var viewModel3 = dataUtilCSV(facade, GetCurrentMethod()).GetNewData3();
+			var viewModel4 = dataUtilCSV(facade, GetCurrentMethod()).GetNewData4();
 
-            List<SPKDocsCsvViewModel> data = new List<SPKDocsCsvViewModel>();
+			List<SPKDocsCsvViewModel> data = new List<SPKDocsCsvViewModel>();
             data.Add(viewModel);
+			data.Add(viewModel2);
+			data.Add(viewModel3);
+			data.Add(viewModel4);
 
-            List<KeyValuePair<string, StringValues>> Body = new List<KeyValuePair<string, StringValues>>();
+			List<KeyValuePair<string, StringValues>> Body = new List<KeyValuePair<string, StringValues>>();
 
             var Response = facade.UploadValidate(ref data, Body);
 
@@ -149,7 +157,24 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.PkpbjFacades
 
         }
 
-        [Fact]
+		[Fact]
+		public void Should_Success_Validate_UploadDataNoErrorMessage()
+		{
+			Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade facade = new Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+			var viewModel = dataUtilCSV(facade, GetCurrentMethod()).GetNewDataValid();
+			 
+			List<SPKDocsCsvViewModel> data = new List<SPKDocsCsvViewModel>();
+			data.Add(viewModel);
+		 
+			List<KeyValuePair<string, StringValues>> Body = new List<KeyValuePair<string, StringValues>>();
+
+			var Response = facade.UploadValidate(ref data, Body);
+
+			Assert.True(Response.Item2.Count() == 0);
+
+		}
+
+		[Fact]
         public async Task Should_Success_Map_ViewModel()
         {
             Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade facade = new Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
@@ -173,7 +198,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.PkpbjFacades
 
             Assert.NotNull(Response);
         }
-
+		 
         //[Fact]
         //public async Task Should_Success_Map_ViewModel2()
         //{
