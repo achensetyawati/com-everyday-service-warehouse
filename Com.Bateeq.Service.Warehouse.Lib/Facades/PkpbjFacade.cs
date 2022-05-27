@@ -124,7 +124,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
         public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadForUpload(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items).Where(x => x.PackingList.Contains("EFR-FN"));
+            IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items).Where(x => x.PackingList.Contains("EVR-FN"));
 
             List<string> searchAttributes = new List<string>()
             {
