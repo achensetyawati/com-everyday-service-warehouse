@@ -138,6 +138,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.Stores.TransferIn
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]TransferInDocViewModel ViewModel)
         {
@@ -153,7 +154,6 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.Stores.TransferIn
 
                 await facade.Create(model, identityService.Username);
 
-                // await facade.Crea
 
                 Dictionary<string, object> Result =
                     new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
