@@ -158,7 +158,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.PDFTemplates
                 });
 
                 totalPriceTotal += item.sendquantity * item.item.domesticSale;
-                total += item.quantity;
+                total += item.sendquantity;
 
             }
 
