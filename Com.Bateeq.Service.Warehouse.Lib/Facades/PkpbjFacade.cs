@@ -47,7 +47,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
         public Tuple<List<SPKDocs>, int, Dictionary<string, string>> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
 
-            //IQueryable<SPKDocs> Query = this.dbSet.Include(x=>x.Items).Where(x => !x.PackingList.Contains("EFR-FN"));
+            //IQueryable<SPKDocs> Query = this.dbSet.Include(x=>x.Items).Where(x => !x.PackingList.Contains("EVR-FN"));
             
             IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items);
 
@@ -73,7 +73,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
         public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadPackingList(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items).Where(x => !x.PackingList.Contains("EFR-FN"));
+            IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items).Where(x => !x.PackingList.Contains("EVR-FN"));
             //IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items).Where(i => i.DestinationCode.Contains("GDG"));
             //IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items);
 
@@ -99,8 +99,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
         public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadPackingRTT(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            //IQueryable<SPKDocs> Query = this.dbSet.Include(x=>x.Items).Where(x => !x.PackingList.Contains("EFR-FN"));
-            IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items).Where(x => x.Reference.Contains("EFR-KB/RTT"));
+            //IQueryable<SPKDocs> Query = this.dbSet.Include(x=>x.Items).Where(x => !x.PackingList.Contains("EVR-FN"));
+            IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items).Where(x => x.Reference.Contains("EVR-KB/RTT"));
 
             List<string> searchAttributes = new List<string>()
             {
@@ -207,8 +207,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                 {
                     EntityExtension.FlagForCreate(model, username, USER_AGENT);
 
-                    string packingList = GenerateCode("EFR-KB/PLB");
-                    string code = GenerateCode("EFR-PK/PBJ");
+                    string packingList = GenerateCode("EVR-KB/PLB");
+                    string code = GenerateCode("EVR-PK/PBJ");
                     string password = String.Join("",GenerateCode(DateTime.Now.ToString("dd")).Split("/"));
                     //(generateCode(("0" + date.getDate()).slice(-2))).split('/').join('')
 
@@ -587,7 +587,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
             SPKDocsViewModel sPKDocsViews = new SPKDocsViewModel
             {
-                code = GenerateCode("EFR-PK/PBJ"),
+                code = GenerateCode("EVR-PK/PBJ"),
                 date = date,
                 packingList = csv.FirstOrDefault().PackingList,
                 password = csv.FirstOrDefault().Password,
