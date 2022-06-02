@@ -592,7 +592,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                 packingList = csv.FirstOrDefault().PackingList,
                 password = csv.FirstOrDefault().Password,
                 reference = csv.FirstOrDefault().PackingList,
-                isDistributed = true,
+                isDistributed = false,
                 isReceived = false,
                 Weight = 0,
                 source = new SourceViewModel
