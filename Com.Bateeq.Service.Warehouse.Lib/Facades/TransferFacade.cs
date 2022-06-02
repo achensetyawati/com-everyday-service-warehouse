@@ -84,7 +84,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             {
                 try
                 {
-                    string code = GenerateCode("EFR-TB/BBP");
+                    string code = GenerateCode("EVR-TB/BBP");
                     model.Code = code;
 
 
@@ -125,32 +125,41 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         //    i.Quantity = 1;
                         //    i.ItemCode = "" + itemcode + status.ToString("00");
 
-                            TransferInDocItem transferInDocItem = new TransferInDocItem
-                            {
-                                ArticleRealizationOrder = i.ArticleRealizationOrder,
-                                DomesticCOGS = i.DomesticCOGS,
-                                DomesticRetail = i.DomesticRetail,
-                                DomesticSale = i.DomesticSale,
-                                DomesticWholeSale = i.DomesticWholeSale,
-                                ItemCode = itemcode,
-                                ItemId = i.ItemId,
-                                ItemName = i.ItemName,
-                                Quantity = i.Quantity,
-                                Remark = i.Remark,
-                                Size = i.Size,
-                                TransferDocsId = i.TransferDocsId,
-                                TransferInDocs = i.TransferInDocs,
-                                Uom = i.Uom,
-                                Id = 0
-                            };
+                        TransferInDocItem transferInDocItem = new TransferInDocItem
+                        {
+                            ArticleRealizationOrder = i.ArticleRealizationOrder,
+                            DomesticCOGS = i.DomesticCOGS,
+                            DomesticRetail = i.DomesticRetail,
+                            DomesticSale = i.DomesticSale,
+                            DomesticWholeSale = i.DomesticWholeSale,
+                            ItemCode = itemcode,
+                            ItemId = i.ItemId,
+                            ItemName = i.ItemName,
+                            Quantity = i.Quantity,
+                            Remark = i.Remark,
+                            Size = i.Size,
+                            TransferDocsId = i.TransferDocsId,
+                            TransferInDocs = i.TransferInDocs,
+                            Uom = i.Uom,
+                            Id = 0
+                        };
 
-                            EntityExtension.FlagForCreate(transferInDocItem, username, USER_AGENT);
-                            newItems.Add(transferInDocItem);
+                        EntityExtension.FlagForCreate(transferInDocItem, username, USER_AGENT);
+                        newItems.Add(transferInDocItem);
 
+                        var invenExist = dbSetInventory.Where(a => a.ItemCode == itemcode && a.StorageId == model.DestinationId).FirstOrDefault();
+                        if (invenExist !=null)
+                        {
+                            invenExist.Quantity += i.Quantity;
+                            EntityExtension.FlagForUpdate(invenExist, username, USER_AGENT);
+                            dbSetInventory.Add(invenExist);
+                        }
+                        else
+                        {
                             Inventory inventory = new Inventory
                             {
                                 ItemArticleRealizationOrder = i.ArticleRealizationOrder,
-                                ItemCode =itemcode,
+                                ItemCode = itemcode,
                                 ItemDomesticCOGS = i.DomesticCOGS,
                                 ItemDomesticRetail = i.DomesticRetail,
                                 ItemDomesticSale = i.DomesticSale,
@@ -171,6 +180,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                             };
                             EntityExtension.FlagForCreate(inventory, username, USER_AGENT);
                             dbSetInventory.Add(inventory);
+                        }
+                            
 
                             inventorymovement.After = inventorymovement.Before + 1;
                             inventorymovement.Date = DateTimeOffset.UtcNow;
