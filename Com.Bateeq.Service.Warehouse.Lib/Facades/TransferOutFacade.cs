@@ -51,7 +51,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
             List<string> searchAttributes = new List<string>()
             {
-                "Code"
+                "Code","SourceName","DestinationName"
             };
 
             Query = QueryHelper<TransferOutDoc>.ConfigureSearch(Query, searchAttributes, Keyword);
@@ -108,20 +108,27 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                                             
                                                         };
 
-            //List<string> searchAttributes = new List<string>()
-            //{
-            //    "Code"
-            //};
+			IQueryable<TransferOutDoc> QueryDoc = this.dbSet.Include(m => m.Items);
 
-            //Query = QueryHelper<TransferOutDoc>.ConfigureSearch(Query, searchAttributes, Keyword);
+			List<string> searchAttributes = new List<string>()
+			{
+				"Code","SourceName","DestinationName"
+			};
 
-            //Dictionary<string, string> FilterDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Filter);
-            //Query = QueryHelper<TransferOutDoc>.ConfigureFilter(Query, FilterDictionary);
+			QueryDoc = QueryHelper<TransferOutDoc>.ConfigureSearch(QueryDoc, searchAttributes, Keyword);
+			List<long> listID = new List<long>();
+			foreach (var item in QueryDoc)
+			{
+				listID.Add(item.Id);
+			}
 
-            Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
-            //Query = QueryHelper<TransferOutDoc>.ConfigureOrder(Query, OrderDictionary);
+			Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
+			//Query = QueryHelper<TransferOutDoc>.ConfigureOrder(Query, OrderDictionary);
 
-            Pageable<TransferOutReadViewModel> pageable = new Pageable<TransferOutReadViewModel>(Query, Page - 1, Size);
+			Query = Query.Where(x => listID.Any(y => y == x._id));
+			Pageable<TransferOutReadViewModel> pageable = new Pageable<TransferOutReadViewModel>(Query, Page - 1, Size);
+
+			
             List<TransferOutReadViewModel> Data = pageable.Data.ToList();
             int TotalData = pageable.TotalCount;
 

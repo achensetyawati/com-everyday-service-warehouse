@@ -49,12 +49,12 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                                                          //join d in dbContext.SPKDocsItems on c.Id equals d.SPKDocsId
                                                          join f in dbContext.ExpeditionItems on a.Code equals f.Reference
                                                          join g in dbContext.Expeditions on f.ExpeditionId equals g.Id
-                                                         where a.Code.Contains("EFR-KB/RTP")
+                                                         where a.Code.Contains("EVR-KB/RTP")
                                                          select new TransferOutReadViewModel
                                                          {
                                                              _id = (int)a.Id,
                                                              code = a.Code,
-                                                             date = a.CreatedUtc,
+                                                             date = a.Date ,
                                                              destination = new ViewModels.NewIntegrationViewModel.DestinationViewModel
                                                              {
                                                                  code = a.DestinationCode,
@@ -80,11 +80,24 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                                                              createdby = a.CreatedBy
 
                                                          };
+			IQueryable<TransferOutDoc> QueryDoc = this.dbSet.Include(m => m.Items);
 
+			List<string> searchAttributes = new List<string>()
+			{
+				"Code","SourceName","DestinationName"
+			};
 
-            Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
+			QueryDoc = QueryHelper<TransferOutDoc>.ConfigureSearch(QueryDoc, searchAttributes, Keyword);
+			List<long> listID = new List<long>();
+			foreach(var item in QueryDoc)
+			{
+				listID.Add(item.Id);
+			}
+
+			Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
             //Query = QueryHelper<TransferOutDoc>.ConfigureOrder(Query, OrderDictionary);
 
+			Query = Query.Where(x => listID.Any(y => y == x._id));
             Pageable<TransferOutReadViewModel> pageable = new Pageable<TransferOutReadViewModel>(Query, Page - 1, Size);
             List<TransferOutReadViewModel> Data = pageable.Data.ToList();
             int TotalData = pageable.TotalCount;
@@ -110,7 +123,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
             {
                 try
                 {
-                    string codeOut = GenerateCode("EFR-KB/RTP");
+                    string codeOut = GenerateCode("EVR-KB/RTP");
                     model2.Code = codeOut;
                     model2.Date = DateTimeOffset.Now;
                     List<ExpeditionItem> expeditionItems = new List<ExpeditionItem>();
@@ -143,7 +156,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 
                     SPKDocs sPKDocs = new SPKDocs
                     {
-                        Code = GenerateCode("EFR-PK/PBJ"),
+                        Code = GenerateCode("EVR-PK/PBJ"),
                         Date = DateTimeOffset.Now,
                         IsDistributed = true,
                         IsDraft = false,
@@ -151,7 +164,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                         DestinationCode = model2.DestinationCode,
                         DestinationId = model2.DestinationId,
                         DestinationName = model2.DestinationName,
-                        PackingList = GenerateCode("EFR-KB/PLR"),
+                        PackingList = GenerateCode("EVR-KB/PLR"),
                         Password = String.Join("", GenerateCode(DateTime.Now.ToString("dd")).Split("/")),
                         Reference = codeOut,
                         SourceCode = model2.SourceCode,
@@ -247,7 +260,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 
                     Expedition expedition = new Expedition
                     {
-                        Code = GenerateCode("EFR-KB/EXP"),
+                        Code = GenerateCode("EVR-KB/EXP"),
                         Date = DateTimeOffset.Now,
                         ExpeditionServiceCode = model.expeditionService.code,
                         ExpeditionServiceId = (int)model.expeditionService._id,
