@@ -138,14 +138,14 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
             {
                 try
                 {
-                    string code = GenerateCode("EFR-TB/BBT");
+                    string code = GenerateCode("EVR-TB/BBT");
                     model.Code = code;
                     var SPK = dbContext.SPKDocs.Where(x => x.PackingList == model.Reference).Single();
                     var Id = SPK.Id;
-                    var ExpeditionCode = (from a in dbContext.Expeditions
-                                          join b in dbContext.ExpeditionItems on a.Id equals b.ExpeditionId
-                                          where b.SPKDocsId == SPK.Id
-                                          select a.Code).Single();
+                    //var ExpeditionCode = (from a in dbContext.Expeditions
+                    //                      join b in dbContext.ExpeditionItems on a.Id equals b.ExpeditionId
+                    //                      where b.SPKDocsId == SPK.Id
+                    //                      select a.Code).Single();
 
                     SPK.IsReceived = true;
 
