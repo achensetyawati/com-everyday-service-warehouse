@@ -101,6 +101,12 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.TransferOutDataUtils
             {
                 code = transferOutDoc.Code,
                 date = transferOutDoc.Date,
+                expeditionService = new Lib.ViewModels.NewIntegrationViewModel.ExpeditionServiceViewModel
+                {
+                    code = "expCode",
+                    name = "expName",
+                    _id = 0
+                },
                 destination = new Lib.ViewModels.NewIntegrationViewModel.DestinationViewModel
                 {
                     code = transferOutDoc.DestinationCode,

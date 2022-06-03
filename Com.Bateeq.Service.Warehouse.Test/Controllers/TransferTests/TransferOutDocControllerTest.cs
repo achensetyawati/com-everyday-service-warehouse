@@ -2,8 +2,11 @@
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces.PkbjInterfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces.TransferInterfaces;
+using Com.Bateeq.Service.Warehouse.Lib.Models.SPKDocsModel;
 using Com.Bateeq.Service.Warehouse.Lib.Models.TransferModel;
 using Com.Bateeq.Service.Warehouse.Lib.Services;
+using Com.Bateeq.Service.Warehouse.Lib.ViewModels.PkbjByUserViewModel;
+using Com.Bateeq.Service.Warehouse.Lib.ViewModels.SpkDocsViewModel;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.TransferViewModels;
 using Com.Bateeq.Service.Warehouse.Test.Helpers;
 using Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.Transfer;
@@ -33,6 +36,16 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.TransferTests
                 {
                     code = "code",
                     reference = "reference",
+                    destination = new Lib.ViewModels.NewIntegrationViewModel.DestinationViewModel
+                    {
+                        code = "code",
+                        name = "name"
+                    },
+                    source = new Lib.ViewModels.NewIntegrationViewModel.SourceViewModel
+                    {
+                        code = "code",
+                        name = "name"
+                    },
                     expeditionService = new Lib.ViewModels.NewIntegrationViewModel.ExpeditionServiceViewModel
                     {
                         code = "code",
@@ -46,8 +59,11 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.TransferTests
                             articleRealizationOrder = "ro",
                             item = new Lib.ViewModels.NewIntegrationViewModel.ItemViewModel
                             {
-                                code = "code"
-                            }
+                                code = "code",
+                                name = "name",
+                                domesticSale = 0
+                            },
+                            quantity = 0
                         }
                     }
                 };
@@ -71,6 +87,43 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.TransferTests
                 };
             }
         }
+
+        private PkbjByUserViewModel viewModel1
+        {
+            get
+            {
+                return new PkbjByUserViewModel
+                {
+                    code = "code",
+                    destination = new Lib.ViewModels.NewIntegrationViewModel.DestinationViewModel
+                    {
+                        code = "code",
+                        name = "name"
+                    },
+                    source = new Lib.ViewModels.NewIntegrationViewModel.SourceViewModel
+                    {
+                        code = "code",
+                        name = "name"
+                    },
+                    reference = "code",
+                    items = new List<PkbjByUserItemViewModel>
+                    {
+                        new PkbjByUserItemViewModel
+                        {
+                            item = new Lib.ViewModels.NewIntegrationViewModel.ItemViewModel
+                            {
+                                articleRealizationOrder = "RO",
+                                code = "itemcode",
+                                domesticSale = 0
+                            },
+                            quantity = 0
+                            
+                        }
+                    }
+                };
+            }
+        }
+        
         private ServiceValidationExeption GetServiceValidationExeption()
         {
             Mock<IServiceProvider> serviceProvider = new Mock<IServiceProvider>();
@@ -117,6 +170,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.TransferTests
 
             return controller;
         }
+
         private Mock<IServiceProvider> GetServiceProvider()
         {
             var serviceProvider = new Mock<IServiceProvider>();
@@ -130,6 +184,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.TransferTests
 
             return serviceProvider;
         }
+
         [Fact]
         public void Should_Error_Get_All_Data_By_User()
         {
@@ -152,6 +207,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.TransferTests
             var response = controller.Get();
             Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
         }
+
         [Fact]
         public void Should_Success_Get_All_Data_By_User()
         {
@@ -197,6 +253,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.TransferTests
             var response = controller.GetRetur();
             Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
         }
+
         [Fact]
         public void Should_Success_Get_All_Data_Retur_By_User()
         {
@@ -207,9 +264,8 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.TransferTests
 
             var mockFacadePkbj = new Mock<IPkpbjFacade>();
 
-
-            mockFacade.Setup(x => x.Read(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
-                .Returns(Tuple.Create(new List<TransferOutDoc>(), 0, new Dictionary<string, string>()));
+            mockFacade.Setup(x => x.ReadForRetur(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
+                .Returns(Tuple.Create(new List<TransferOutReadViewModel>(), 0, new Dictionary<string, string>()));
 
             var mockMapper = new Mock<IMapper>();
             mockMapper.Setup(x => x.Map<List<TransferOutDocViewModel>>(It.IsAny<List<TransferOutDoc>>()))
@@ -219,6 +275,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.TransferTests
             var response = controller.GetRetur();
             Assert.Equal((int)HttpStatusCode.OK, GetStatusCode(response));
         }
+
         [Fact]
         public async Task Should_Success_Create_Data()
         {
@@ -241,6 +298,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.TransferTests
             var response = await controller.Post(this.viewModel);
             Assert.Equal((int)HttpStatusCode.Created, GetStatusCode(response));
         }
+
         [Fact]
         public async Task Should_Validate_Create_Data()
         {
@@ -258,6 +316,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.TransferTests
             var response = await controller.Post(this.viewModel);
             Assert.Equal((int)HttpStatusCode.BadRequest, GetStatusCode(response));
         }
+
         [Fact]
         public async Task Should_Error_Create_Data()
         {
@@ -280,6 +339,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.TransferTests
             var response = await controller.Post(this.viewModel);
             Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
         }
+
         [Fact]
         public void Should_Success_Get_Data_By_Id()
         {
@@ -315,6 +375,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.TransferTests
             var response = controller.Get(It.IsAny<int>());
             Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
         }
+
         [Fact]
         public void Should_Sucess_Get_Excel()
         {
@@ -343,6 +404,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.TransferTests
             var response = controller.GetXls(It.IsAny<int>());
             Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", response.GetType().GetProperty("ContentType").GetValue(response, null));
         }
+
         [Fact]
         public void Should_Error_Get_Excel()
         {
@@ -353,6 +415,91 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.TransferTests
             TransferOutDocController controller = new TransferOutDocController(GetServiceProvider().Object, mockMapper.Object, mockFacade.Object, mockFacadePkbj.Object);
             var response = controller.GetXls(It.IsAny<int>());
             Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
+        }
+
+        [Fact]
+        public void Should_Success_Get_ExpeditionPDF()
+        {
+            var mockFacade = new Mock<ITransferOutDoc>();
+
+            var mockFacadePkbj = new Mock<IPkpbjFacade>();
+
+            mockFacade.Setup(x => x.ReadById(It.IsAny<int>()))
+                .Returns(new TransferOutDoc());
+
+            mockFacadePkbj.Setup(x => x.ReadByReference(It.IsAny<string>()))
+                .Returns(new SPKDocs());
+
+            var mockMapper = new Mock<IMapper>();
+            mockMapper.Setup(x => x.Map<TransferOutDocViewModel>(It.IsAny<TransferOutDoc>()))
+                .Returns(viewModel);
+            mockMapper.Setup(x => x.Map<PkbjByUserViewModel>(It.IsAny<SPKDocs>()))
+                .Returns(viewModel1);
+
+            var user = new Mock<ClaimsPrincipal>();
+            var claims = new Claim[]
+{
+                new Claim("username", "unittestusername")
+};
+            user.Setup(u => u.Claims).Returns(claims);
+
+            TransferOutDocController controller = new TransferOutDocController(GetServiceProvider().Object, mockMapper.Object, mockFacade.Object, mockFacadePkbj.Object);
+
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext()
+                {
+                    User = user.Object
+                }
+            };
+
+            controller.ControllerContext.HttpContext.Request.Headers["Accept"] = "application/pdf";
+            controller.ControllerContext.HttpContext.Request.Headers["x-timezone-offset"] = "0";
+
+            var response = controller.GetExpeditionPDF(It.IsAny<int>());
+
+            Assert.NotNull(response.GetType().GetProperty("FileStream"));
+
+        }
+
+        [Fact]
+        public void Should_Error_Get_ExpeditionPDF()
+        {
+            var mockFacade = new Mock<ITransferOutDoc>();
+
+            var mockFacadePkbj = new Mock<IPkpbjFacade>();
+
+            mockFacade.Setup(x => x.ReadById(It.IsAny<int>()))
+                .Returns(new TransferOutDoc());
+
+            mockFacadePkbj.Setup(x => x.ReadByReference(It.IsAny<string>()))
+                .Returns(new SPKDocs());
+
+            var mockMapper = new Mock<IMapper>();
+
+            var user = new Mock<ClaimsPrincipal>();
+            var claims = new Claim[]
+{
+                new Claim("username", "unittestusername")
+};
+            user.Setup(u => u.Claims).Returns(claims);
+
+            TransferOutDocController controller = new TransferOutDocController(GetServiceProvider().Object, mockMapper.Object, mockFacade.Object, mockFacadePkbj.Object);
+
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext()
+                {
+                    User = user.Object
+                }
+            };
+
+            controller.ControllerContext.HttpContext.Request.Headers["Accept"] = "application/pdf";
+            controller.ControllerContext.HttpContext.Request.Headers["x-timezone-offset"] = "0";
+
+            var response = controller.GetExpeditionPDF(It.IsAny<int>());
+
+            Assert.Null(response.GetType().GetProperty("FileStream"));
         }
     }
 }
