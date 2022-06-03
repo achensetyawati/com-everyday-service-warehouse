@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Com.Bateeq.Service.Warehouse.Lib.Facades.Stores;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
+using Com.Bateeq.Service.Warehouse.Lib.Interfaces.Stores.TransferStocksInterfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Models.TransferModel;
 using Com.Bateeq.Service.Warehouse.Lib.Services;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.TransferViewModels;
@@ -23,11 +24,11 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.Stores.TransferStoc
     {
         private string ApiVersion = "1.0.0";
         private readonly IMapper mapper;
-        private readonly TransferStockFacade facade;
+        private readonly ITransferStock  facade;
         private readonly IdentityService identityService;
         public readonly IServiceProvider serviceProvider;
 
-        public TransferStockController(IServiceProvider serviceProvider, IMapper mapper, TransferStockFacade facade)
+        public TransferStockController(IServiceProvider serviceProvider, IMapper mapper, ITransferStock facade)
         {
             this.serviceProvider = serviceProvider;
             this.mapper = mapper;
