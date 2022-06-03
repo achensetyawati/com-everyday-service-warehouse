@@ -310,12 +310,12 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
                             //});
                             EntityExtension.FlagForCreate(d, username, USER_AGENT);
-                            //EntityExtension.FlagForCreate(movement, username, USER_AGENT);
-                            //this.dbSetInventoryMovement.Add(movement);
+                            EntityExtension.FlagForCreate(movement, username, USER_AGENT);
+                            this.dbSetInventoryMovement.Add(movement);
                         }
                         EntityExtension.FlagForCreate(transferOutDoc, username, USER_AGENT);
                         this.dbSetTransfer.Add(transferOutDoc);
-                        await dbContext.SaveChangesAsync();
+
                         transferOutDoc.Items = transferOutDocItems;
                         foreach (var trfOut in transferOutDocItems)
                         {
