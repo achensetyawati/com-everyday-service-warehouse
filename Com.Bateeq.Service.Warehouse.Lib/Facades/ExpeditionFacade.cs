@@ -219,7 +219,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                 try
                 {
                     int totalweight = 0;
-                    string code = GenerateCode("EFR-KB/EXP");
+                    string code = GenerateCode("EVR-KB/EXP");
                     
                     model.Code = code;
                     model.Date = DateTimeOffset.Now;
@@ -228,7 +228,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                     {
                         i.Id = 0;
                         totalweight += i.Weight;
-                        string CodeTransferOut = GenerateCode("EFR-KB/EXP");
+                        string CodeTransferOut = GenerateCode("EVR-KB/EXP");
                         var SPK = dbContext.SPKDocs.Where(x => x.PackingList == i.PackingList).Single();
                         SPK.IsDistributed = true;
                         transferOutDoc.Code = CodeTransferOut;

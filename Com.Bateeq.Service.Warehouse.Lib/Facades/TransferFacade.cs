@@ -84,7 +84,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             {
                 try
                 {
-                    string code = GenerateCode("EFR-TB/BBP");
+                    string code = GenerateCode("EVR-TB/BBP");
                     model.Code = code;
 
 
