@@ -63,11 +63,11 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
             {
                 try
                 {
-                    string code = GenerateCode("EFR-ADJ/INT");
+                    string code = GenerateCode("EVR-ADJ/INT");
                     var storages = GetStorage(model.StorageCode);
 
-                    string inventoryMovementIn = GenerateCode("EFR-TB/ADJ");
-                    string inventoryMovementOut = GenerateCode("EFR-KB/ADJ");
+                    string inventoryMovementIn = GenerateCode("EVR-TB/ADJ");
+                    string inventoryMovementOut = GenerateCode("EVR-KB/ADJ");
 
                     List<TransferInDocItem> transferInDocsItems = new List<TransferInDocItem>();
                     List<InventoryMovement> inventoryMovements = new List<InventoryMovement>();
@@ -375,7 +375,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
         //{
         //    var Query = from a in dbContext.TransferOutDocs
         //               join b in dbContext.SPKDocs on a.Code equals b.Reference
-        //               where a.Code.Contains("EFR-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
+        //               where a.Code.Contains("EVR-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
         //               select new TransferStockViewModel
         //               {
         //                   id = (int)a.Id,

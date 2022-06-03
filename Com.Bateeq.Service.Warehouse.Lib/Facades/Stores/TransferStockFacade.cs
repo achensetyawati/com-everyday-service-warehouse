@@ -1,5 +1,6 @@
 ﻿using Com.Bateeq.Service.Warehouse.Lib.Helpers;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
+using Com.Bateeq.Service.Warehouse.Lib.Interfaces.Stores.TransferStocksInterfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Models.Expeditions;
 using Com.Bateeq.Service.Warehouse.Lib.Models.InventoryModel;
 using Com.Bateeq.Service.Warehouse.Lib.Models.SPKDocsModel;
@@ -22,7 +23,7 @@ using System.Threading.Tasks;
 
 namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 {
-    public class TransferStockFacade
+    public class TransferStockFacade : ITransferStock
     {
         private string USER_AGENT = "Facade";
 
