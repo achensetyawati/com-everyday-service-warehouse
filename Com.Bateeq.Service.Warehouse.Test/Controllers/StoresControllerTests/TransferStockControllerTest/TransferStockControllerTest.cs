@@ -205,5 +205,69 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.StoresControllerTests.Tr
 			var response = controller.Get(1);
 			Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
 		}
+		[Fact]
+		public void Should_POST_Get()
+		{
+			var validateMock = new Mock<IValidateService>();
+			validateMock.Setup(s => s.Validate(It.IsAny<TransferStockViewModel>())).Verifiable();
+
+			var mockFacade = new Mock<ITransferStock>();
+
+
+			mockFacade.Setup(x => x.Read(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
+				.Returns(Tuple.Create(new List<TransferOutDoc>(), 0, new Dictionary<string, string>()));
+
+			var mockMapper = new Mock<IMapper>();
+			mockMapper.Setup(x => x.Map<List<TransferOutDocViewModel>>(It.IsAny<List<TransferOutDoc>>()))
+				.Returns(new List<TransferOutDocViewModel> { ViewModel });
+
+			TransferStockController controller = GetController(mockFacade, validateMock, mockMapper);
+		 
+			IActionResult response =   controller.Post(ViewModel).Result;
+			//Assert
+			int statusCode = this.GetStatusCode(response);
+			Assert.NotEqual((int)HttpStatusCode.NotFound, statusCode);
+ 
+		}
+		[Fact]
+		public void POST_InternalServerError()
+		{
+			//Setup
+			var validateMock = new Mock<IValidateService>();
+			validateMock.Setup(s => s.Validate(null)).Throws(new Exception());
+
+			var mockFacade = new Mock<ITransferStock>();
+
+			var mockMapper = new Mock<IMapper>();
+			TransferStockController controller = GetController(mockFacade, validateMock, mockMapper);
+
+			IActionResult response = controller.Post(null).Result;
+
+			//Assert
+			int statusCode = this.GetStatusCode(response);
+			Assert.Equal((int)HttpStatusCode.InternalServerError, statusCode);
+		}
+
+		[Fact]
+		public async void GetPending_Return_OK()
+		{
+			var validateMock = new Mock<IValidateService>();
+			validateMock.Setup(s => s.Validate(It.IsAny<TransferStockViewModel>())).Verifiable();
+
+			var mockFacade = new Mock<ITransferStock>();
+
+
+			mockFacade.Setup(x => x.ReadModel(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
+				.Returns(Tuple.Create(new List<TransferStockViewModel>(), 0, new Dictionary<string, string>()));
+
+			var mockMapper = new Mock<IMapper>();
+			mockMapper.Setup(x => x.Map<List<TransferOutDocViewModel>>(It.IsAny<List<TransferOutDoc>>()))
+				.Returns(new List<TransferOutDocViewModel> { ViewModel });
+
+			TransferStockController controller = GetController(mockFacade, validateMock, mockMapper);
+			var response = controller.GetPending();
+			Assert.Equal((int)HttpStatusCode.OK, GetStatusCode(response));
+		}
+
 	}
 }
