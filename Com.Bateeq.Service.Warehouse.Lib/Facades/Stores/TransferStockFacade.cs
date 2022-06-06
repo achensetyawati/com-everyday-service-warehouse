@@ -352,7 +352,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                         inventoryMovements.Add(new InventoryMovement
                         {
                             Before = 0,
-                            After = 1,
+                            After = i.Quantity,
                             Date = DateTimeOffset.Now,
                             ItemCode = i.ItemCode,
                             ItemDomesticCOGS = i.ItemDomesticCOGS,
@@ -378,7 +378,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                         });
                         inventoryMovements.Add(new InventoryMovement
                         {
-                            Before = 1,
+                            Before = i.Quantity,
                             After = 0,
                             Date = DateTimeOffset.Now,
                             ItemCode = i.ItemCode,
