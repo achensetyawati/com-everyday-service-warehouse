@@ -144,6 +144,17 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.Stores.TransferStockFacades
             var Response = returnToCenterFacade.ReadById((int)model.Id);
             Assert.NotNull(Response);
         }
-        
-    }
+		[Fact]
+		public async Task Should_Success_ReadModel()
+		{
+			TransferOutFacade facade = new TransferOutFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+			TransferStockFacade returnToCenterFacade = new TransferStockFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+			var model = await dataUtil(facade, GetCurrentMethod()).GetNewData();
+			var viewmodel = dataUtil(facade, GetCurrentMethod()).MapToViewModel(model);
+			await returnToCenterFacade.Create(viewmodel, model, USERNAME);
+			var Response = returnToCenterFacade.ReadModel((int)model.Id);
+			Assert.NotNull(Response);
+		}
+
+	}
 }
