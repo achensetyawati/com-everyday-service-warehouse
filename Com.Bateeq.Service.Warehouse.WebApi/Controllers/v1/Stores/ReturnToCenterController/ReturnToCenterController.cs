@@ -24,11 +24,11 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.Stores.ReturnToCent
     {
         private string ApiVersion = "1.0.0";
         private readonly IMapper mapper;
-        private readonly IReturnToCenter facade;
+        private readonly ReturnToCenterFacade facade;
         private readonly IdentityService identityService;
         public readonly IServiceProvider serviceProvider;
 
-        public ReturnToCenterController(IServiceProvider serviceProvider, IMapper mapper, IReturnToCenter facade)
+        public ReturnToCenterController(IServiceProvider serviceProvider, IMapper mapper, ReturnToCenterFacade facade)
         {
             this.serviceProvider = serviceProvider;
             this.mapper = mapper;
