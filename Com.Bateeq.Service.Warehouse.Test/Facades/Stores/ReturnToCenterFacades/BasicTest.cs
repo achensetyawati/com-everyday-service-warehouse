@@ -97,14 +97,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.Stores.ReturnToCenterFacades
             var Response = returnToCenterFacade.ReadForRetur();
             Assert.NotEmpty(Response.Item1);
         }
-        //[Fact]
-        //public async Task Should_Success_Get_All_Data_For_Expedition()
-        //{
-        //    TransferOutFacade facade = new TransferOutFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-        //    var model = await dataUtil(facade, GetCurrentMethod()).GetTestData();
-        //    var Response = facade.ReadForRetur();
-        //    Assert.NotEmpty(Response.Item1);
-        //}
+      
         [Fact]
         public async Task Should_Success_Get_Data_By_Id()
         {

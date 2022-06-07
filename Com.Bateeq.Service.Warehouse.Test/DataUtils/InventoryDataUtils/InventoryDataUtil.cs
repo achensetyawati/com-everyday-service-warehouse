@@ -27,7 +27,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.InventoryDataUtils
             return new Inventory
             {
                 ItemArticleRealizationOrder = "art1",
-                ItemCode = "code",
+                ItemCode = "itemcode1",
                 ItemDomesticCOGS = 0,
                 ItemDomesticRetail = 0,
                 ItemDomesticSale = 0,
@@ -37,7 +37,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.InventoryDataUtils
                 ItemInternationalRetail = 0,
                 ItemInternationalSale = 0,
                 ItemInternationalWholeSale = 0,
-                ItemName = "name",
+                ItemName = "name12",
                 ItemSize = "size",
                 Quantity = 1,
                 ItemUom = "uom",
@@ -54,7 +54,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.InventoryDataUtils
             return new Inventory
             {
                 ItemArticleRealizationOrder = "art1",
-                ItemCode = "code",
+                ItemCode = "itemcode",
                 ItemDomesticCOGS = 0,
                 ItemDomesticRetail = 0,
                 ItemDomesticSale = 0,

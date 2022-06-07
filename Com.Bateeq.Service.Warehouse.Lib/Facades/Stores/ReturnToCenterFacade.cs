@@ -1,4 +1,5 @@
 ﻿using Com.Bateeq.Service.Warehouse.Lib.Helpers;
+using Com.Bateeq.Service.Warehouse.Lib.Interfaces.Stores.ReturnToCenterInterfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Models.Expeditions;
 using Com.Bateeq.Service.Warehouse.Lib.Models.InventoryModel;
 using Com.Bateeq.Service.Warehouse.Lib.Models.SPKDocsModel;
@@ -20,8 +21,8 @@ using System.Threading.Tasks;
 
 namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 {
-    public class ReturnToCenterFacade
-    {
+    public class ReturnToCenterFacade : IReturnToCenter
+	{
         private string USER_AGENT = "Facade";
 
         private readonly WarehouseDbContext dbContext;
