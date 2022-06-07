@@ -57,7 +57,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.TransferStockContr
 			return (int)response.GetType().GetProperty("StatusCode").GetValue(response, null);
 		}
 
-		private TransferStockController GetController(Mock<ITransferStock> facadeM, Mock<IValidateService> validateM, Mock<IMapper> mapper)
+		private TransferStockController GetController(Mock<TransferStockFacade> facadeM, Mock<IValidateService> validateM, Mock<IMapper> mapper)
 		{
 			var user = new Mock<ClaimsPrincipal>();
 			var claims = new Claim[]
@@ -148,7 +148,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.TransferStockContr
 			var validateMock = new Mock<IValidateService>();
 			validateMock.Setup(s => s.Validate(It.IsAny<TransferStockViewModel>())).Verifiable();
 
-			var mockFacade = new Mock<ITransferStock>();
+			var mockFacade = new Mock<TransferStockFacade>();
 
 
 			mockFacade.Setup(x => x.Read(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
@@ -169,7 +169,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.TransferStockContr
 			var validateMock = new Mock<IValidateService>();
 			validateMock.Setup(s => s.Validate(It.IsAny<TransferStockViewModel>())).Verifiable();
 
-			var mockFacade = new Mock<ITransferStock>();
+			var mockFacade = new Mock<TransferStockFacade>();
 
 
 			mockFacade.Setup(x => x.Read(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
@@ -190,7 +190,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.TransferStockContr
 			var validateMock = new Mock<IValidateService>();
 			validateMock.Setup(s => s.Validate(It.IsAny<TransferStockViewModel>())).Verifiable();
 
-			var mockFacade = new Mock<ITransferStock>();
+			var mockFacade = new Mock<TransferStockFacade>();
 
 
 			mockFacade.Setup(x => x.Read(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
@@ -211,7 +211,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.TransferStockContr
 			var validateMock = new Mock<IValidateService>();
 			validateMock.Setup(s => s.Validate(It.IsAny<TransferStockViewModel>())).Verifiable();
 
-			var mockFacade = new Mock<ITransferStock>();
+			var mockFacade = new Mock<TransferStockFacade>();
 
 
 			mockFacade.Setup(x => x.Read(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
@@ -236,7 +236,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.TransferStockContr
 			var validateMock = new Mock<IValidateService>();
 			validateMock.Setup(s => s.Validate(null)).Throws(new Exception());
 
-			var mockFacade = new Mock<ITransferStock>();
+			var mockFacade = new Mock<TransferStockFacade>();
 
 			var mockMapper = new Mock<IMapper>();
 			TransferStockController controller = GetController(mockFacade, validateMock, mockMapper);
@@ -254,7 +254,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.TransferStockContr
 			var validateMock = new Mock<IValidateService>();
 			validateMock.Setup(s => s.Validate(It.IsAny<TransferStockViewModel>())).Verifiable();
 
-			var mockFacade = new Mock<ITransferStock>();
+			var mockFacade = new Mock<TransferStockFacade>();
 
 
 			mockFacade.Setup(x => x.ReadModel(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))

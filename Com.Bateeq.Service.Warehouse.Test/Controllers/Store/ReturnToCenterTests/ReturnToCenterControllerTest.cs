@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Com.Bateeq.Service.Warehouse.Lib;
+using Com.Bateeq.Service.Warehouse.Lib.Facades.Stores;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces.Stores.ReturnToCenterInterfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces.Stores.TransferStocksInterfaces;
@@ -65,7 +66,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.ReturnToCenterTest
 			return (int)response.GetType().GetProperty("StatusCode").GetValue(response, null);
 		}
 
-		private ReturnToCenterController GetController(Mock<IReturnToCenter> facadeM, Mock<IValidateService> validateM, Mock<IMapper> mapper)
+		private ReturnToCenterController GetController(Mock<ReturnToCenterFacade> facadeM, Mock<IValidateService> validateM, Mock<IMapper> mapper)
 		{
 			var user = new Mock<ClaimsPrincipal>();
 			var claims = new Claim[]
@@ -82,7 +83,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.ReturnToCenterTest
 					.Returns(validateM.Object);
 			}
 
-			ReturnToCenterController controller = new ReturnToCenterController(servicePMock.Object, mapper.Object, facadeM.Object)
+			ReturnToCenterController controller = new ReturnToCenterController(servicePMock.Object, mapper.Object,facadeM.Object)
 			{
 				ControllerContext = new ControllerContext()
 				{
@@ -156,7 +157,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.ReturnToCenterTest
 			var validateMock = new Mock<IValidateService>();
 			validateMock.Setup(s => s.Validate(It.IsAny<TransferOutReadViewModel>())).Verifiable();
 
-			var mockFacade = new Mock<IReturnToCenter>();
+			var mockFacade = new Mock<ReturnToCenterFacade>();
 
 			mockFacade.Setup(x => x.ReadForRetur(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
 				.Returns(Tuple.Create(new List<TransferOutReadViewModel>(), 0, new Dictionary<string, string>()));
@@ -176,7 +177,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.ReturnToCenterTest
 			var validateMock = new Mock<IValidateService>();
 			validateMock.Setup(s => s.Validate(It.IsAny<TransferOutReadViewModel>())).Verifiable();
 
-			var mockFacade = new Mock<IReturnToCenter>();
+			var mockFacade = new Mock<ReturnToCenterFacade>();
 
 			mockFacade.Setup(x => x.ReadById(It.IsAny<int>()))
 				.Returns(new TransferOutDoc());
@@ -196,7 +197,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.ReturnToCenterTest
 			var validateMock = new Mock<IValidateService>();
 			validateMock.Setup(s => s.Validate(It.IsAny<TransferOutDocViewModel>())).Verifiable();
 
-			var mockFacade = new Mock<IReturnToCenter>();
+			var mockFacade = new Mock<ReturnToCenterFacade>();
 
 
 			mockFacade.Setup(x => x.ReadForRetur(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
@@ -221,7 +222,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.ReturnToCenterTest
 			var validateMock = new Mock<IValidateService>();
 			validateMock.Setup(s => s.Validate(null)).Throws(new Exception());
 
-			var mockFacade = new Mock<IReturnToCenter>();
+			var mockFacade = new Mock<ReturnToCenterFacade>();
 
 			var mockMapper = new Mock<IMapper>();
 			ReturnToCenterController controller = GetController(mockFacade, validateMock, mockMapper);
@@ -237,7 +238,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.ReturnToCenterTest
 		public void getExcel()
 		{
 			var validateMock = new Mock<IValidateService>();
-			var mockFacade = new Mock<IReturnToCenter>();
+			var mockFacade = new Mock<ReturnToCenterFacade>();
 			mockFacade.Setup(x => x.GenerateExcel(It.IsAny<int>()))
 				.Returns(new MemoryStream());
 			var mockMapper = new Mock<IMapper>(); 
@@ -265,7 +266,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.ReturnToCenterTest
 		public void Should_Error_Get_Excel()
 		{
 			var validateMock = new Mock<IValidateService>();
-			var mockFacade = new Mock<IReturnToCenter>();
+			var mockFacade = new Mock<ReturnToCenterFacade>();
 			var mockMapper = new Mock<IMapper>(); 
 
 			ReturnToCenterController controller = GetController(mockFacade, validateMock, mockMapper);
