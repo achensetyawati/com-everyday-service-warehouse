@@ -53,7 +53,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.ExpeditionDataUtils
                         Password = dataSPK.Password,
                         SourceCode = dataSPK.SourceCode,
                         Reference = dataSPK.Reference,
-                        SourceId = (int)dataSPK.SourceId,
+                        SourceId =1,
                         SourceName = dataSPK.SourceName,
                         SPKDocsId = (int)dataSPK.Id,
                         Weight = dataSPK.Weight,
@@ -75,6 +75,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.ExpeditionDataUtils
                                 Size = Item[0].ItemSize,
                                 Uom = Item[0].ItemUom,
                                 SPKDocsId = (int)dataSPK.Id,
+								
                                 
                             }
                         }

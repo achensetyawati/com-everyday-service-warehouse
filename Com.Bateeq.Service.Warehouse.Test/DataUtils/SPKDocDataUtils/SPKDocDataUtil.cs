@@ -95,7 +95,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.SPKDocDataUtils
 					SourceId = 1,
 					SourceName = "SourceName",
 					Weight = 1,
-					Reference = "EFR-KB/RTT",
+					Reference = "EVR-KB/RTT",
 					Items = new List<SPKDocsItem>
 				{
 					new SPKDocsItem
