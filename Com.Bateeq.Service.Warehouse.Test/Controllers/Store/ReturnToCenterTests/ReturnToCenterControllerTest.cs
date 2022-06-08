@@ -66,7 +66,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.ReturnToCenterTest
 			return (int)response.GetType().GetProperty("StatusCode").GetValue(response, null);
 		}
 
-		private ReturnToCenterController GetController(Mock<ReturnToCenterFacade> facadeM, Mock<IValidateService> validateM, Mock<IMapper> mapper)
+		private ReturnToCenterController GetController(IServiceProvider serviceProvider, IMapper mapper, ReturnToCenterFacade service)
 		{
 			var user = new Mock<ClaimsPrincipal>();
 			var claims = new Claim[]
@@ -76,14 +76,8 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.ReturnToCenterTest
 			user.Setup(u => u.Claims).Returns(claims);
 
 			var servicePMock = GetServiceProvider();
-			if (validateM != null)
-			{
-				servicePMock
-					.Setup(x => x.GetService(typeof(IValidateService)))
-					.Returns(validateM.Object);
-			}
-
-			ReturnToCenterController controller = new ReturnToCenterController(servicePMock.Object, mapper.Object,facadeM.Object)
+		 
+			ReturnToCenterController controller = new ReturnToCenterController(servicePMock.Object, mapper,service)
 			{
 				ControllerContext = new ControllerContext()
 				{
@@ -139,77 +133,86 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.ReturnToCenterTest
 			return method.Name;
 
 		}
-		public TransferOutReadViewModel GetTestData(WarehouseDbContext dbContext)
+		public TransferOutDoc GetTestData(WarehouseDbContext dbContext)
 		{
 			TransferOutDoc data = new TransferOutDoc();
 			dbContext.TransferOutDocs.Add(data);
 			dbContext.SaveChanges();
-			TransferOutReadViewModel viewModel = new TransferOutReadViewModel();
-			viewModel.code = data.Code;
-
-			return viewModel;
+			return data;
 
 		}
-
+		private TransferOutDoc Model
+		{
+			get
+			{
+				return new TransferOutDoc
+				{
+					Code = "Code",
+					Items = new List<TransferOutDocItem>
+					{
+						new TransferOutDocItem
+						{
+							ArticleRealizationOrder = "RO"
+						}
+					}
+				};
+			}
+		}
 		[Fact]
 		public void Should_Error_Get()
 		{
-			var validateMock = new Mock<IValidateService>();
-			validateMock.Setup(s => s.Validate(It.IsAny<TransferOutReadViewModel>())).Verifiable();
+			WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+			Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+			ReturnToCenterFacade service = new ReturnToCenterFacade(serviceProvider.Object, dbContext);
+			serviceProvider.Setup(s => s.GetService(typeof(ReturnToCenterFacade))).Returns(service);
+			Mock<IMapper> imapper = new Mock<IMapper>();
 
-			var mockFacade = new Mock<ReturnToCenterFacade>();
+			//Act
+			IActionResult response = GetController(serviceProvider.Object, imapper.Object, service).Get(1);
 
-			mockFacade.Setup(x => x.ReadForRetur(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
-				.Returns(Tuple.Create(new List<TransferOutReadViewModel>(), 0, new Dictionary<string, string>()));
-
-			var mockMapper = new Mock<IMapper>();
-			mockMapper.Setup(x => x.Map<List<TransferOutReadViewModel>>(It.IsAny<List<TransferOutReadViewModel>>()))
-				.Returns(new List<TransferOutReadViewModel> { readViewModel });
-
-			ReturnToCenterController controller = GetController(mockFacade, validateMock, mockMapper);
-			var response = controller.GetRetur(1, 25, "", "", "");
-			Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
+			//Assert
+			int statusCode = this.GetStatusCode(response);
+			Assert.Equal((int)HttpStatusCode.InternalServerError, statusCode);
 		}
 
 		[Fact]
 		public void Should_Error_GetById()
 		{
-			var validateMock = new Mock<IValidateService>();
-			validateMock.Setup(s => s.Validate(It.IsAny<TransferOutReadViewModel>())).Verifiable();
+			WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+			Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+			Mock<IMapper> imapper = new Mock<IMapper>();
 
-			var mockFacade = new Mock<ReturnToCenterFacade>();
+			ReturnToCenterFacade service = new ReturnToCenterFacade(serviceProvider.Object, dbContext);
 
-			mockFacade.Setup(x => x.ReadById(It.IsAny<int>()))
-				.Returns(new TransferOutDoc());
+			serviceProvider.Setup(s => s.GetService(typeof(ReturnToCenterFacade))).Returns(service);
+			serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
 
-			var mockMapper = new Mock<IMapper>();
-			mockMapper.Setup(x => x.Map<List<TransferOutDocViewModel>>(It.IsAny<List<TransferOutDocViewModel>>()))
-				.Returns(new List<TransferOutDocViewModel> { ViewModel });
+			TransferOutDoc testData = GetTestData(dbContext);
 
+			//Act
+			IActionResult response = GetController(serviceProvider.Object, imapper.Object, service).Get(1);
 
-			ReturnToCenterController controller = GetController(mockFacade, validateMock, mockMapper);
-			var response = controller.Get(1);
 			Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
 		}
 		[Fact]
 		public void Should_POST_OK()
 		{
-			var validateMock = new Mock<IValidateService>();
-			validateMock.Setup(s => s.Validate(It.IsAny<TransferOutDocViewModel>())).Verifiable();
-
-			var mockFacade = new Mock<ReturnToCenterFacade>();
-
-
-			mockFacade.Setup(x => x.ReadForRetur(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<string>()))
-				.Returns(Tuple.Create(new List<TransferOutReadViewModel>(), 0, new Dictionary<string, string>()));
+			WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+			Mock<IServiceProvider> serviceProvider = GetServiceProvider();
 
 			var mockMapper = new Mock<IMapper>();
-			mockMapper.Setup(x => x.Map<List<TransferOutDocViewModel>>(It.IsAny<List<TransferOutDoc>>()))
-				.Returns(new List<TransferOutDocViewModel> { ViewModel });
+			mockMapper.Setup(x => x.Map<TransferOutDoc>(ViewModel))
+				.Returns(Model);
 
-			ReturnToCenterController controller = GetController(mockFacade, validateMock, mockMapper);
+			ReturnToCenterFacade service = new ReturnToCenterFacade(serviceProvider.Object, dbContext);
 
-			IActionResult response = controller.Post(ViewModel).Result;
+			serviceProvider.Setup(s => s.GetService(typeof(ReturnToCenterFacade))).Returns(service);
+			serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+
+			TransferOutDoc testData = GetTestData(dbContext);
+			//Act
+			IActionResult response = GetController(serviceProvider.Object, mockMapper.Object, service).Post(ViewModel).Result;
+
 			//Assert
 			int statusCode = this.GetStatusCode(response);
 			Assert.NotEqual((int)HttpStatusCode.NotFound, statusCode);
@@ -218,16 +221,14 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.ReturnToCenterTest
 		[Fact]
 		public void POST_InternalServerError()
 		{
-			//Setup
-			var validateMock = new Mock<IValidateService>();
-			validateMock.Setup(s => s.Validate(null)).Throws(new Exception());
+			WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+			Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+			Mock<IMapper> imapper = new Mock<IMapper>();
 
-			var mockFacade = new Mock<ReturnToCenterFacade>();
+			ReturnToCenterFacade service = new ReturnToCenterFacade(serviceProvider.Object, dbContext);
 
-			var mockMapper = new Mock<IMapper>();
-			ReturnToCenterController controller = GetController(mockFacade, validateMock, mockMapper);
-
-			IActionResult response = controller.Post(null).Result;
+			//Act
+			IActionResult response = GetController(serviceProvider.Object, imapper.Object, service).Post(ViewModel).Result;
 
 			//Assert
 			int statusCode = this.GetStatusCode(response);
@@ -237,42 +238,23 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.ReturnToCenterTest
 		[Fact]
 		public void getExcel()
 		{
-			var validateMock = new Mock<IValidateService>();
-			var mockFacade = new Mock<ReturnToCenterFacade>();
-			mockFacade.Setup(x => x.GenerateExcel(It.IsAny<int>()))
-				.Returns(new MemoryStream());
-			var mockMapper = new Mock<IMapper>(); 
-			//var INVFacade = new Mock<IGarmentInvoice>();
+			WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+			Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+			Mock<IMapper> imapper = new Mock<IMapper>();
+
+			ReturnToCenterFacade service = new ReturnToCenterFacade(serviceProvider.Object, dbContext);
+
 			var user = new Mock<ClaimsPrincipal>();
 			var claims = new Claim[]
 			{
 				new Claim("username", "unittestusername")
 			};
 			user.Setup(u => u.Claims).Returns(claims);
-			ReturnToCenterController controller = GetController(mockFacade, validateMock, mockMapper);
-			controller.ControllerContext = new ControllerContext()
-			{
-				HttpContext = new DefaultHttpContext()
-				{
-					User = user.Object
-				}
-			};
+			 
 
-			controller.ControllerContext.HttpContext.Request.Headers["x-timezone-offset"] = "0";
-			var response = controller.GetXls(It.IsAny<int>());
+			IActionResult response = GetController(serviceProvider.Object, imapper.Object, service).GetXls(It.IsAny<int>());
 			Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", response.GetType().GetProperty("ContentType").GetValue(response, null));
 		}
-		[Fact]
-		public void Should_Error_Get_Excel()
-		{
-			var validateMock = new Mock<IValidateService>();
-			var mockFacade = new Mock<ReturnToCenterFacade>();
-			var mockMapper = new Mock<IMapper>(); 
-
-			ReturnToCenterController controller = GetController(mockFacade, validateMock, mockMapper);
-			var response = controller.GetXls(It.IsAny<int>());
-			Assert.Equal((int)HttpStatusCode.InternalServerError, GetStatusCode(response));
-		}
-
+		 
 	}
 }
