@@ -63,11 +63,11 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
             {
                 try
                 {
-                    string code = GenerateCode("EFR-ADJ/INT");
+                    string code = GenerateCode("EVR-ADJ/INT");
                     var storages = GetStorage(model.StorageCode);
 
-                    string inventoryMovementIn = GenerateCode("EFR-TB/ADJ");
-                    string inventoryMovementOut = GenerateCode("EFR-KB/ADJ");
+                    string inventoryMovementIn = GenerateCode("EVR-TB/ADJ");
+                    string inventoryMovementOut = GenerateCode("EVR-KB/ADJ");
 
                     List<TransferInDocItem> transferInDocsItems = new List<TransferInDocItem>();
                     List<InventoryMovement> inventoryMovements = new List<InventoryMovement>();
@@ -82,40 +82,44 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
                         {
                             var SourceQuantity = 0.0;
 
-                            var inventoriesAvailable = dbContext.Inventories.Where(x => x.ItemId == i.ItemId && x.StorageId == storages.Id).FirstOrDefault();    
-                            if (inventoriesAvailable == null)
-                            {
-                                Inventory inventory = new Inventory
-                                {
-                                    ItemArticleRealizationOrder = i.ItemArticleRealizationOrder,
-                                    ItemCode = i.ItemCode,
-                                    ItemDomesticCOGS = i.ItemDomesticCOGS,
-                                    ItemDomesticRetail = i.ItemDomesticRetail,
-                                    ItemDomesticSale = i.ItemDomesticSale,
-                                    ItemDomesticWholeSale = i.ItemDomesticWholeSale,
-                                    ItemId = i.ItemId,
-                                    ItemInternationalCOGS = 0,
-                                    ItemInternationalRetail = 0,
-                                    ItemInternationalSale = 0,
-                                    ItemInternationalWholeSale = 0,
-                                    ItemName = i.ItemName,
-                                    ItemSize = i.ItemSize,
-                                    ItemUom = i.ItemUom,
-                                    Quantity = i.QtyAdjustment,
-                                    StorageCode = model.StorageCode,
-                                    StorageId = model.StorageId,
-                                    StorageName = model.StorageName,
-                                    StorageIsCentral = model.StorageName.Contains("GUDANG") ? true : false
-                                };
-                                EntityExtension.FlagForCreate(inventory, username, USER_AGENT);
-                                dbSetInventory.Add(inventory);
-                            }
-                            else
+                            var inventoriesAvailable = dbContext.Inventories.Where(x => x.ItemId == i.ItemId && x.StorageId == storages.Id).FirstOrDefault();
+
+                            if (inventoriesAvailable != null)
                             {
                                 SourceQuantity = inventoriesAvailable.Quantity;
                                 inventoriesAvailable.Quantity = inventoriesAvailable.Quantity + i.QtyAdjustment;
                                 EntityExtension.FlagForUpdate(inventoriesAvailable, username, USER_AGENT);
                             }
+                            else {
+                                throw new Exception("data tidak ada di inventory");
+                            }
+                            //else
+                            //{
+                            //    Inventory inventory = new Inventory
+                            //    {
+                            //        ItemArticleRealizationOrder = i.ItemArticleRealizationOrder,
+                            //        ItemCode = i.ItemCode,
+                            //        ItemDomesticCOGS = i.ItemDomesticCOGS,
+                            //        ItemDomesticRetail = i.ItemDomesticRetail,
+                            //        ItemDomesticSale = i.ItemDomesticSale,
+                            //        ItemDomesticWholeSale = i.ItemDomesticWholeSale,
+                            //        ItemId = i.ItemId,
+                            //        ItemInternationalCOGS = 0,
+                            //        ItemInternationalRetail = 0,
+                            //        ItemInternationalSale = 0,
+                            //        ItemInternationalWholeSale = 0,
+                            //        ItemName = i.ItemName,
+                            //        ItemSize = i.ItemSize,
+                            //        ItemUom = i.ItemUom,
+                            //        Quantity = i.QtyAdjustment,
+                            //        StorageCode = model.StorageCode,
+                            //        StorageId = model.StorageId,
+                            //        StorageName = model.StorageName,
+                            //        StorageIsCentral = model.StorageName.Contains("GUDANG") ? true : false
+                            //    };
+                            //    EntityExtension.FlagForCreate(inventory, username, USER_AGENT);
+                            //    dbSetInventory.Add(inventory);
+                            //}
 
                             i.QtyBeforeAdjustment = SourceQuantity;
 
@@ -136,7 +140,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
                             });
                             EntityExtension.FlagForCreate(i, username, USER_AGENT);
 
-                            inventoryMovements.Add(new InventoryMovement
+                            var im = new InventoryMovement
                             {
                                 Before = SourceQuantity,
                                 After = SourceQuantity + i.QtyAdjustment,
@@ -163,7 +167,9 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
                                 Reference = inventoryMovementIn,
                                 Remark = i.Remark,
                                 StorageIsCentral = model.StorageName.Contains("GUDANG") ? true : false
-                            });
+                            };
+
+                            inventoryMovements.Add(im);
                         }
                         else
                         {
@@ -178,31 +184,35 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
                             }
                             else
                             {
-                                Inventory inventory = new Inventory
-                                {
-                                    ItemArticleRealizationOrder = i.ItemArticleRealizationOrder,
-                                    ItemCode = i.ItemCode,
-                                    ItemDomesticCOGS = i.ItemDomesticCOGS,
-                                    ItemDomesticRetail = i.ItemDomesticRetail,
-                                    ItemDomesticSale = i.ItemDomesticSale,
-                                    ItemDomesticWholeSale = i.ItemDomesticWholeSale,
-                                    ItemId = i.ItemId,
-                                    ItemInternationalCOGS = 0,
-                                    ItemInternationalRetail = 0,
-                                    ItemInternationalSale = 0,
-                                    ItemInternationalWholeSale = 0,
-                                    ItemName = i.ItemName,
-                                    ItemSize = i.ItemSize,
-                                    ItemUom = i.ItemUom,
-                                    Quantity = i.QtyAdjustment,
-                                    StorageCode = model.StorageCode,
-                                    StorageId = model.StorageId,
-                                    StorageName = model.StorageName,
-                                    StorageIsCentral = model.StorageName.Contains("GUDANG") ? true : false
-                                };
-                                EntityExtension.FlagForCreate(inventory, username, USER_AGENT);
-                                dbSetInventory.Add(inventory);
+                                throw new Exception("data tidak ada di inventory");
                             }
+                            //else
+                            //{
+                            //    Inventory inventory = new Inventory
+                            //    {
+                            //        ItemArticleRealizationOrder = i.ItemArticleRealizationOrder,
+                            //        ItemCode = i.ItemCode,
+                            //        ItemDomesticCOGS = i.ItemDomesticCOGS,
+                            //        ItemDomesticRetail = i.ItemDomesticRetail,
+                            //        ItemDomesticSale = i.ItemDomesticSale,
+                            //        ItemDomesticWholeSale = i.ItemDomesticWholeSale,
+                            //        ItemId = i.ItemId,
+                            //        ItemInternationalCOGS = 0,
+                            //        ItemInternationalRetail = 0,
+                            //        ItemInternationalSale = 0,
+                            //        ItemInternationalWholeSale = 0,
+                            //        ItemName = i.ItemName,
+                            //        ItemSize = i.ItemSize,
+                            //        ItemUom = i.ItemUom,
+                            //        Quantity = i.QtyAdjustment,
+                            //        StorageCode = model.StorageCode,
+                            //        StorageId = model.StorageId,
+                            //        StorageName = model.StorageName,
+                            //        StorageIsCentral = model.StorageName.Contains("GUDANG") ? true : false
+                            //    };
+                            //    EntityExtension.FlagForCreate(inventory, username, USER_AGENT);
+                            //    dbSetInventory.Add(inventory);
+                            //}
 
                             i.QtyBeforeAdjustment = SourceQuantity;
 
@@ -223,7 +233,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
                             });
                             EntityExtension.FlagForCreate(i, username, USER_AGENT);
 
-                            inventoryMovements.Add(new InventoryMovement
+                            var im = new InventoryMovement()
                             {
                                 Before = SourceQuantity,
                                 After = SourceQuantity - i.QtyAdjustment,
@@ -250,7 +260,9 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
                                 Reference = inventoryMovementOut,
                                 Remark = i.Remark,
                                 StorageIsCentral = model.StorageName.Contains("GUDANG") ? true : false,
-                            });
+                            };
+
+                            inventoryMovements.Add(im);
 
                         }
                     }
@@ -326,6 +338,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
                 return Created;
             }
         }
+
         private StorageViewModel2 GetStorage(string code)
         {
             string itemUri = "master/storages/code";
@@ -375,7 +388,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
         //{
         //    var Query = from a in dbContext.TransferOutDocs
         //               join b in dbContext.SPKDocs on a.Code equals b.Reference
-        //               where a.Code.Contains("EFR-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
+        //               where a.Code.Contains("EVR-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
         //               select new TransferStockViewModel
         //               {
         //                   id = (int)a.Id,
@@ -401,6 +414,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
         //
         //    return Tuple.Create(Data, TotalData, OrderDictionary);
         //}
+
         public AdjustmentDocs ReadById(int id)
         {
             var model = dbSetAdjustment.Where(m => m.Id == id)
@@ -408,6 +422,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
                 .FirstOrDefault();
             return model;
         }
+
+        #region readByStorage
 
         public List<AdjustmentDocs> ReadByStorage(int id)
         {
@@ -417,8 +433,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
 
             return modelList;
         }
-
-        #region readByStorage
 
         #endregion
     }

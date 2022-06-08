@@ -109,6 +109,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.Adjustment
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]AdjustmentDocsViewModel ViewModel)
         {
@@ -122,9 +123,12 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.Adjustment
 
                 var model = mapper.Map<AdjustmentDocs>(ViewModel);
 
-                await facade.Create(model, identityService.Username);
+                if(model == null)
+                {
+                    throw new Exception("Invalid Data");
+                }
 
-                // await facade.Crea
+                await facade.Create(model, identityService.Username);
 
                 Dictionary<string, object> Result =
                     new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)

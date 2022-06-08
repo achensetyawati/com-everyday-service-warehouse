@@ -3,6 +3,8 @@ using Com.Bateeq.Service.Warehouse.Lib.Facades;
 using Com.Bateeq.Service.Warehouse.Lib.Facades.Stores;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Models.InventoryModel;
+using Com.Bateeq.Service.Warehouse.Lib.Models.SPKDocsModel;
+using Com.Bateeq.Service.Warehouse.Lib.Models.TransferModel;
 using Com.Bateeq.Service.Warehouse.Lib.Services;
 using Com.Bateeq.Service.Warehouse.Test.DataUtils.SPKDocDataUtils;
 using Com.Bateeq.Service.Warehouse.Test.DataUtils.TransferDataUtils;
@@ -77,6 +79,52 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.Stores.TransferInStoreFacade
             return new TransferDataUtil(facade, sPKDocDataUtil);
         }
 
+        private TransferInDoc TransInModel
+        {
+            get
+            {
+                return new TransferInDoc
+                {
+                    Code = "code",
+                    Date = DateTimeOffset.Now,
+                    DestinationId = 1,
+                    DestinationCode = "code",
+                    DestinationName = "name",
+                    Reference = "GDG.",
+                    SourceId = 1,
+                    SourceCode = "1",
+                    SourceName = "source",
+                    
+                };
+            }
+        }
+
+        private SPKDocs spkDocsModel
+        {
+            get
+            {
+                return new SPKDocs
+                {
+                    Code = "code",
+                    Date = DateTimeOffset.Now,
+                    DestinationId = 1,
+                    DestinationCode = "code",
+                    DestinationName = "name",
+                    IsDistributed = true,
+                    IsDraft = false,
+                    IsReceived = false,
+                    PackingList = "EFR-FN",
+                    Password = "1",
+                    Reference = "EFR-FN",
+                    SourceId = 1,
+                    SourceCode = "1",
+                    SourceName = "source",
+                    Weight = 0,
+                    FinishingOutIdentity = "00123"
+                };
+            }
+        }
+
         [Fact]
         public async Task Should_Success_Create_Data()
         {
@@ -135,12 +183,14 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.Stores.TransferInStoreFacade
         [Fact]
         public async Task Should_Success_Get_All_Data()
         {
-            TransferFacade facade = new TransferFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-            TransferInStoreFacade facadestore = new TransferInStoreFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-            var model = await dataUtil(facade, GetCurrentMethod()).GetNewData();
-            await facadestore.Create(model, USERNAME);
-            var Response = facadestore.Read();
-            Assert.NotEmpty(Response.Item1);
+            DbSet<TransferInDoc> dbSet = _dbContext(GetCurrentMethod()).Set<TransferInDoc>();
+
+            dbSet.Add(this.TransInModel);
+            await _dbContext(GetCurrentMethod()).SaveChangesAsync();
+            TransferInStoreFacade facade = new TransferInStoreFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+
+            var Response = facade.Read();
+            Assert.NotEqual(null, Response);
         }
         [Fact]
         public async Task Should_Success_Get_Data_By_Id()
@@ -151,6 +201,19 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.Stores.TransferInStoreFacade
             await facadestore.Create(model, USERNAME);
             var Response = facadestore.ReadById((int)model.Id);
             Assert.NotNull(Response);
+        }
+
+        [Fact]
+        public async Task Should_Success_Get_All_Data_Pending()
+        {
+            DbSet<SPKDocs> dbSetSpk = _dbContext(GetCurrentMethod()).Set<SPKDocs>();
+
+            dbSetSpk.Add(spkDocsModel);
+            await _dbContext(GetCurrentMethod()).SaveChangesAsync();
+            TransferInStoreFacade facade = new TransferInStoreFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+
+            var Response = facade.ReadPending();
+            Assert.NotEqual(null, Response);
         }
     }
 }

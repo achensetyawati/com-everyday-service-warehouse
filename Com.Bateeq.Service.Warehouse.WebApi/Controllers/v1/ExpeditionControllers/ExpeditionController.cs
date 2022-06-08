@@ -34,8 +34,8 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.ExpeditionControlle
             this.mapper = mapper;
             this.facade = facade;
             identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));
-
         }
+
         [HttpGet]
         public IActionResult Get(int page = 1, int size = 25, string order = "{}", string keyword = null, string filter = "{}")
         {
@@ -83,6 +83,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.ExpeditionControlle
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
@@ -109,6 +110,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.ExpeditionControlle
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]ExpeditionViewModel ViewModel)
         {
@@ -144,6 +146,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.ExpeditionControlle
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
         [HttpGet("pdf/{id}")]
         public IActionResult GetExpeditionPDF(int id)
         {
@@ -171,6 +174,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.ExpeditionControlle
                 {
                     int clientTimeZoneOffset = int.Parse(Request.Headers["x-timezone-offset"].First());
 
+                    #region comment
                     //foreach (var item in viewModel.items)
                     //{
                     //    var garmentInvoice = invoiceFacade.ReadById((int)item.garmentInvoice.Id);
@@ -184,6 +188,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.ExpeditionControlle
                     //        detail.deliveryOrder = deliveryOrderViewModel;
                     //    }
                     //}
+                    #endregion
 
                     ExpeditionPdfTemplate PdfTemplateLocal = new ExpeditionPdfTemplate();
                     MemoryStream stream = PdfTemplateLocal.GeneratePdfTemplate(viewModel, serviceProvider, clientTimeZoneOffset);

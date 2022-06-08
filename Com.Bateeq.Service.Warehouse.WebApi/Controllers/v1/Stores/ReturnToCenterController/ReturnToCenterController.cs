@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Com.Bateeq.Service.Warehouse.Lib.Facades.Stores;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
+using Com.Bateeq.Service.Warehouse.Lib.Interfaces.Stores.ReturnToCenterInterfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Models.TransferModel;
 using Com.Bateeq.Service.Warehouse.Lib.Services;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.TransferViewModels;
@@ -17,7 +18,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.Stores.ReturnToCent
 {
     [Produces("application/json")]
     [ApiVersion("1.0")]
-    [Route("v{version:apiVersion}/stores/efr-kb-rtp")]
+    [Route("v{version:apiVersion}/stores/evr-kb-rtp")]
     [Authorize]
     public class ReturnToCenterController : Controller
     {

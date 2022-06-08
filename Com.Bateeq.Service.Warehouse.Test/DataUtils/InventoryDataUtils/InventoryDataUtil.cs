@@ -27,7 +27,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.InventoryDataUtils
             return new Inventory
             {
                 ItemArticleRealizationOrder = "art1",
-                ItemCode = "code",
+                ItemCode = "itemcode1",
                 ItemDomesticCOGS = 0,
                 ItemDomesticRetail = 0,
                 ItemDomesticSale = 0,
@@ -37,7 +37,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.InventoryDataUtils
                 ItemInternationalRetail = 0,
                 ItemInternationalSale = 0,
                 ItemInternationalWholeSale = 0,
-                ItemName = "name",
+                ItemName = "name12",
                 ItemSize = "size",
                 Quantity = 1,
                 ItemUom = "uom",
@@ -48,13 +48,14 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.InventoryDataUtils
 
             };
         }
+
         public Inventory GetNewData_Transfer()
         {
             //var datas = await Task.Run(() => garmentPurchaseOrderDataUtil.GetTestDataByTags());
             return new Inventory
             {
                 ItemArticleRealizationOrder = "art1",
-                ItemCode = "code",
+                ItemCode = "itemcode",
                 ItemDomesticCOGS = 0,
                 ItemDomesticRetail = 0,
                 ItemDomesticSale = 0,
@@ -75,6 +76,34 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.InventoryDataUtils
 
             };
         }
+        public Inventory GetNewData_Adjustment()
+        {
+            //var datas = await Task.Run(() => garmentPurchaseOrderDataUtil.GetTestDataByTags());
+            return new Inventory
+            {
+                ItemArticleRealizationOrder = "art1",
+                ItemCode = "itemcode1",
+                ItemDomesticCOGS = 0,
+                ItemDomesticRetail = 0,
+                ItemDomesticSale = 0,
+                ItemDomesticWholeSale = 0,
+                ItemId = 1,
+                ItemInternationalCOGS = 0,
+                ItemInternationalRetail = 0,
+                ItemInternationalSale = 0,
+                ItemInternationalWholeSale = 0,
+                ItemName = "itemname1",
+                ItemSize = "size1",
+                Quantity = 1,
+                ItemUom = "uom1",
+                StorageCode = "storagecode",
+                StorageId = 1,
+                StorageIsCentral = true,
+                StorageName = "storagename",
+
+            };
+        }
+
         public async Task<Inventory> GetTestData()
         {
             var data = GetNewData();
@@ -90,5 +119,15 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.InventoryDataUtils
             await dbContext.SaveChangesAsync();
             return data;
         }
+
+        public async Task<Inventory> GetTestDataForAdjusment()
+        {
+            var data = GetNewData_Adjustment();
+            dbSetInventory.Add(data);
+            await dbContext.SaveChangesAsync();
+            return data;
+        }
+
+
     }
 }

@@ -291,7 +291,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
                     SPKDocs data = new SPKDocs()
                     {
-                        Code = GenerateCode("EFR-PK/PBJ"),
+                        Code = GenerateCode("EVR-PK/PBJ"),
                         Date = viewModel.FinishingOutDate,
                         DestinationId = (long)viewModel.DestinationStorageId,
                         DestinationCode = viewModel.DestinationStorageCode,
@@ -414,11 +414,11 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
         //    return Inserted;
         //}
 
-        public string GeneratePackingList() // nomor urut/EFR-FN/bulan/tahun
+        public string GeneratePackingList() // nomor urut/EVR-FN/bulan/tahun
         {
             var generatedNo = "";
             var date = DateTime.Now;
-            var lastSPKDoc = dbContext.SPKDocs.OrderByDescending(entity => entity.Id).FirstOrDefault(entity => entity.PackingList.Contains("EFR-FN"));
+            var lastSPKDoc = dbContext.SPKDocs.OrderByDescending(entity => entity.Id).FirstOrDefault(entity => entity.PackingList.Contains("EVR-FN"));
             string lastPackingListCode = "";
 
             if (lastSPKDoc != null)
@@ -428,11 +428,11 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                 int nomorUrut = int.Parse(code.ElementAt(0));
                 nomorUrut++;
 
-                generatedNo = $"{nomorUrut.ToString("0000")}/EFR-FN/{date.ToString("MM")}/{date.ToString("yy")}";
+                generatedNo = $"{nomorUrut.ToString("0000")}/EVR-FN/{date.ToString("MM")}/{date.ToString("yy")}";
             }
             else
             {
-                generatedNo = $"0001/EFR-FN/{date.ToString("MM")}/{date.ToString("yy")}";
+                generatedNo = $"0001/EVR-FN/{date.ToString("MM")}/{date.ToString("yy")}";
             }
 
             return generatedNo;
