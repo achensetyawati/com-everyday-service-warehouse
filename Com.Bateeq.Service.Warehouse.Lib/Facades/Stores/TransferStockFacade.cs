@@ -607,6 +607,13 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                            transfername = b.SourceName,
                            transfercode = b.SourceCode
                        };
+            List<string> searchAttributes = new List<string>()
+            {
+                "Code","DestinationName","SourceName"
+            };
+
+            Query = QueryHelper<TransferStockViewModel>.ConfigureSearch(Query, searchAttributes, Keyword);
+
 
             Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
             //Query = QueryHelper<TransferOutDoc>.ConfigureOrder(Query, OrderDictionary);
