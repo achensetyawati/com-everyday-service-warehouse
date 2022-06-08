@@ -53,8 +53,8 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.ExpeditionDataUtils
                         Password = dataSPK.Password,
                         SourceCode = dataSPK.SourceCode,
                         Reference = dataSPK.Reference,
-                        SourceId =1,
-                        SourceName = dataSPK.SourceName,
+                        SourceId =(int)dataSPK.SourceId,
+						SourceName = dataSPK.SourceName,
                         SPKDocsId = (int)dataSPK.Id,
                         Weight = dataSPK.Weight,
                         Details = new List<ExpeditionDetail>
