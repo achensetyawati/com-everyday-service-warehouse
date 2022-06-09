@@ -6,6 +6,8 @@ using Com.Bateeq.Service.Warehouse.Lib.Models.InventoryModel;
 using Com.Bateeq.Service.Warehouse.Lib.Models.SPKDocsModel;
 using Com.Bateeq.Service.Warehouse.Lib.Models.TransferModel;
 using Com.Bateeq.Service.Warehouse.Lib.Services;
+using Com.Bateeq.Service.Warehouse.Test.DataUtils.ExpeditionDataUtils;
+using Com.Bateeq.Service.Warehouse.Test.DataUtils.InventoryDataUtils;
 using Com.Bateeq.Service.Warehouse.Test.DataUtils.SPKDocDataUtils;
 using Com.Bateeq.Service.Warehouse.Test.DataUtils.TransferDataUtils;
 using Microsoft.EntityFrameworkCore;
@@ -79,6 +81,23 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.Stores.TransferInStoreFacade
             return new TransferDataUtil(facade, sPKDocDataUtil);
         }
 
+        private TransferInStoreDataUtil dataUtilTransfer(TransferFacade facade, string testName)
+        {
+            var pkbbjfacade = new Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade(ServiceProvider, _dbContext(testName));
+            var expeditionfacade = new Com.Bateeq.Service.Warehouse.Lib.Facades.ExpeditionFacade(ServiceProvider, _dbContext(testName));
+            var inventoryfacade = new Com.Bateeq.Service.Warehouse.Lib.Facades.InventoryFacade(ServiceProvider, _dbContext(testName));
+
+            var sPKDocDataUtil = new SPKDocDataUtil(pkbbjfacade);
+            var inventoryDataUtil = new InventoryDataUtil(inventoryfacade, _dbContext(testName));
+            var expeditionDataUtil = new ExpeditionDataUtil(expeditionfacade, inventoryDataUtil, sPKDocDataUtil);
+
+            var transferFacade = new TransferFacade(ServiceProvider, _dbContext(testName));
+            //var transferDataUtil = new TransferDataUtil(transferFacade, sPKDocDataUtil);
+            var tranferInStore = new TransferInStoreDataUtil(transferFacade, expeditionDataUtil);
+
+            return new TransferInStoreDataUtil(facade, expeditionDataUtil);
+        }
+
         private TransferInDoc TransInModel
         {
             get
@@ -131,7 +150,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.Stores.TransferInStoreFacade
 
             TransferFacade facade = new TransferFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
             TransferInStoreFacade facadestore = new TransferInStoreFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-            var model = await dataUtil(facade, GetCurrentMethod()).GetNewData();
+            var model = await dataUtilTransfer(facade, GetCurrentMethod()).GetNewData();
             var Response = await facadestore.Create(model, USERNAME);
             Assert.NotEqual(0, Response);
         }
@@ -168,14 +187,13 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.Stores.TransferInStoreFacade
 
             TransferFacade facade = new TransferFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
             TransferInStoreFacade facadestore = new TransferInStoreFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-            var model = await dataUtil(facade, GetCurrentMethod()).GetNewData();
+            var model = await dataUtilTransfer(facade, GetCurrentMethod()).GetNewData();
             model.DestinationId = inventory.StorageId;
             model.DestinationName = inventory.StorageName;
             model.DestinationCode = inventory.StorageCode;
             foreach (var item in model.Items)
             {
                 item.ItemId = inventory.ItemId;
-
             }
             var Response = await facadestore.Create(model, USERNAME);
             Assert.NotEqual(0, Response);
@@ -192,12 +210,13 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.Stores.TransferInStoreFacade
             var Response = facade.Read();
             Assert.NotEqual(null, Response);
         }
+
         [Fact]
         public async Task Should_Success_Get_Data_By_Id()
         {
             TransferFacade facade = new TransferFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
             TransferInStoreFacade facadestore = new TransferInStoreFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-            var model = await dataUtil(facade, GetCurrentMethod()).GetNewData();
+            var model = await dataUtilTransfer(facade, GetCurrentMethod()).GetNewData();
             await facadestore.Create(model, USERNAME);
             var Response = facadestore.ReadById((int)model.Id);
             Assert.NotNull(Response);
