@@ -128,7 +128,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.ExpeditionFacades
 		{
 
 			ExpeditionFacade facade = new ExpeditionFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-			var model = await dataUtil(facade, GetCurrentMethod()).GetNewData();
+			var model = await dataUtil(facade, GetCurrentMethod()).GetNewData2();
 			
 			var Response = await facade.Create(model, USERNAME);
 			Assert.NotEqual(0, Response);
@@ -156,7 +156,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.ExpeditionFacades
         public async Task Should_Success_Get_All_Data()
         {
             ExpeditionFacade facade = new ExpeditionFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-            var model = await dataUtil(facade, GetCurrentMethod()).GetTestData();
+            var model = await dataUtil(facade, GetCurrentMethod()).GetTestData2();
             var Response = facade.Read();
             Assert.NotEmpty(Response.Item1);
         }
