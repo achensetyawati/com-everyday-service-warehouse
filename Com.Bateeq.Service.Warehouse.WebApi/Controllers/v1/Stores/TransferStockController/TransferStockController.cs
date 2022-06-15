@@ -150,7 +150,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.Stores.TransferStoc
 
                 var model = mapper.Map<TransferOutDoc>(ViewModel);
 
-                await facade.Create(ViewModel,model, identityService.Username);
+                await facade.Create(ViewModel, model, identityService.Username);
 
                 // await facade.Crea
 
