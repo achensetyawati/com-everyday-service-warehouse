@@ -90,7 +90,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                              && a.Date.AddHours(offset).Date >= DateFrom.Date
                              && a.Date.AddHours(offset).Date <= DateTo.Date
                              && b.IsReceived == status
-                             && (transaction == 0 ? (!b.Reference.Contains("EVR-KB/RTP") && !b.Reference.Contains("EVR-KB/RTU")) : (b.Reference.Contains("EVR-KB/RTP") && b.Reference.Contains("EVR-KB/RTU")))
+                             && (transaction == 0 ? (!b.Reference.Contains("EVR-KB/RTP") && !b.Reference.Contains("EVR-KB/RTU")) : (b.Reference.Contains("EVR-KB/RTP") || b.Reference.Contains("EVR-KB/RTU")))
                              && b.PackingList.Contains(string.IsNullOrWhiteSpace(packingList) ? b.PackingList : packingList)
 
                          select new ExpeditionReportViewModel
