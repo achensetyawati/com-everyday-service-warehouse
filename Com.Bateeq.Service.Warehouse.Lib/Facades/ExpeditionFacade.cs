@@ -85,13 +85,12 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                              && b.IsDeleted == false
                              && c.IsDeleted == false
                              && b.DestinationCode == (string.IsNullOrWhiteSpace(destinationCode) ? b.DestinationCode : destinationCode)
-                             && !b.Reference.Contains("RTT")
                              && a.CreatedBy == (string.IsNullOrWhiteSpace(username) ? a.CreatedBy : username)
                              // && a.Code == (string.IsNullOrWhiteSpace(code) ? a.Code : code)
                              && a.Date.AddHours(offset).Date >= DateFrom.Date
                              && a.Date.AddHours(offset).Date <= DateTo.Date
                              && b.IsReceived == status
-                             && (transaction == 0 ? b.SourceName.Contains("GUDANG") : !b.SourceName.Contains("GUDANG") && !b.Reference.Contains("RTP"))
+                             && (transaction == 0 ? (!b.Reference.Contains("EVR-RTP") && !b.Reference.Contains("EVR-RTU")) : (b.Reference.Contains("EVR-RTP") && b.Reference.Contains("EVR-RTU")))
                              && b.PackingList.Contains(string.IsNullOrWhiteSpace(packingList) ? b.PackingList : packingList)
 
                          select new ExpeditionReportViewModel
