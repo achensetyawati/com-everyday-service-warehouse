@@ -646,7 +646,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
         }
         public Tuple<List<TransferOutDoc>, int, Dictionary<string, string>> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            IQueryable<TransferOutDoc> Query = this.dbSet.Include(m => m.Items);
+            IQueryable<TransferOutDoc> Query = this.dbSet.Include(m => m.Items).OrderByDescending(x => x.Date);
 
             List<string> searchAttributes = new List<string>()
             {
@@ -670,24 +670,25 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 
         public Tuple<List<TransferStockViewModel>, int, Dictionary<string, string>> ReadModel(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            var Query = from a in dbContext.TransferOutDocs
-                       join b in dbContext.SPKDocs on a.Code equals b.Reference
-                       where a.Code.Contains("EVR-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
-                       select new TransferStockViewModel
-                       {
-                           id = (int)a.Id,
-                           code = a.Code,
-                           createdBy = a.CreatedBy,
-                           createdDate = a.CreatedUtc,
-                           destinationname = a.DestinationName,
-                           destinationcode = a.DestinationCode,
-                           sourcename = a.SourceName,
-                           sourcecode = a.SourceCode,
-                           password = b.Password,
-                           referensi = a.Reference,
-                           transfername = b.SourceName,
-                           transfercode = b.SourceCode
-                       };
+            var Query =  from a in dbContext.TransferOutDocs
+                         join b in dbContext.SPKDocs on a.Code equals b.Reference
+                         where a.Code.Contains("EVR-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
+                         orderby a.Date descending
+                         select new TransferStockViewModel
+                         {
+                             id = (int)a.Id,
+                             code = a.Code,
+                             createdBy = a.CreatedBy,
+                             createdDate = a.CreatedUtc,
+                             destinationname = a.DestinationName,
+                             destinationcode = a.DestinationCode,
+                             sourcename = a.SourceName,
+                             sourcecode = a.SourceCode,
+                             password = b.Password,
+                             referensi = a.Reference,
+                             transfername = b.SourceName,
+                             transfercode = b.SourceCode
+                         };
             List<string> searchAttributes = new List<string>()
             {
                 "Code","DestinationName","SourceName"
