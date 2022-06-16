@@ -19,6 +19,7 @@ using Xunit;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.TransferViewModels;
 using System.Linq;
 using Com.Bateeq.Service.Warehouse.Lib.Models.InventoryModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Com.Bateeq.Service.Warehouse.Test.Facades.TransferOutFacades
 {
@@ -94,7 +95,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.TransferOutFacades
             TransferOutFacade facade = new TransferOutFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
             var model = await dataUtil(facade, GetCurrentMethod()).GetNewData();
             var viewmodel = dataUtil(facade, GetCurrentMethod()).MapToViewModel(model);
-            var Response = await facade.Create(viewmodel,model, USERNAME);
+            var Response = await facade.Create(viewmodel, model, USERNAME);
             Assert.NotEqual(0, Response);
         }
         [Fact]
@@ -166,9 +167,17 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.TransferOutFacades
                 }
             };
             Assert.True(ViewModel.Validate(null).Count() > 0);
+
             DbSet<Inventory> dbSetInventory = _dbContext(GetCurrentMethod()).Set<Inventory>();
             InventoryFacade facade = new InventoryFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
             var model = await invendataUtil(facade, GetCurrentMethod(), _dbContext(GetCurrentMethod())).GetTestData();
+
+            var mockServiceProvider = GetServiceProvider();
+            mockServiceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext)))
+                .Returns(_dbContext(GetCurrentMethod()));
+
+            var validationContext = new ValidationContext(ViewModelitem, mockServiceProvider.Object, null);
+
             TransferOutDocViewModel ViewModelitemquantity = new TransferOutDocViewModel
             {
                 destination = new Lib.ViewModels.NewIntegrationViewModel.DestinationViewModel
@@ -199,7 +208,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.TransferOutFacades
                 }
                 
             };
-            Assert.True(ViewModelitemquantity.Validate(null).Count() > 0);
+            Assert.True(ViewModelitemquantity.Validate(validationContext).Count() > 0);
 
             TransferOutDocViewModel ViewModelitemremark = new TransferOutDocViewModel
             {
@@ -233,7 +242,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.TransferOutFacades
                 }
 
             };
-            Assert.True(ViewModelitemquantity.Validate(null).Count() > 0);
+            Assert.True(ViewModelitemquantity.Validate(validationContext).Count() > 0);
         }
     }
 }

@@ -33,12 +33,12 @@ namespace Com.MM.Service.Core.WebApi.Controllers.v1.UploadControllers
         private readonly IdentityService identityService;
         private readonly string ContentType = "application/vnd.openxmlformats";
         private readonly string FileName = string.Concat("Error Log - ", typeof(SPKDocs).Name, " ", DateTime.Now.ToString("dd MMM yyyy"), ".csv");
-        public PkpbjUploadController(IMapper mapper, IPkpbjFacade facade, IdentityService identityService) //: base(facade, ApiVersion)
+        public PkpbjUploadController(IMapper mapper, IPkpbjFacade facade, IServiceProvider serviceProvider) //: base(facade, ApiVersion)
         {
             this.mapper = mapper;
             this.facade = facade;
-            this.identityService = identityService;
-        }
+			this.identityService = (IdentityService)serviceProvider.GetService(typeof(IdentityService));
+		}
 
         //private Action<COAModel> Transfrom => (coaModel) =>
         //{
@@ -65,7 +65,7 @@ namespace Com.MM.Service.Core.WebApi.Controllers.v1.UploadControllers
                     //VerifyUser();
                     var UploadedFile = Request.Form.Files[0];
                     StreamReader Reader = new StreamReader(UploadedFile.OpenReadStream());
-                    List<string> FileHeader = new List<string>(Reader.ReadLine().Split(","));
+                    List<string> FileHeader = new List<string>(Reader.ReadLine().Replace("\"",string.Empty).Split(","));
                     var ValidHeader = facade.CsvHeader.SequenceEqual(FileHeader, StringComparer.OrdinalIgnoreCase);
 
                     if (ValidHeader)
@@ -83,7 +83,7 @@ namespace Com.MM.Service.Core.WebApi.Controllers.v1.UploadControllers
 
                         SPKDocsViewModel Data1 = await facade.MapToViewModel(Data, source, sourcec, sourcen, destination, destinationc, destinationn, date);
 
-                        Tuple<bool, List<object>> Validated = facade.UploadValidate(ref Data, Request.Form.ToList());
+                         Tuple<bool, List<object>> Validated = facade.UploadValidate(ref Data, Request.Form.ToList());
 
                         Reader.Close();
 

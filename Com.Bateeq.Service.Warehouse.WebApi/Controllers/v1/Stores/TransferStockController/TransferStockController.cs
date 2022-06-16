@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Com.Bateeq.Service.Warehouse.Lib.Facades.Stores;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
+using Com.Bateeq.Service.Warehouse.Lib.Interfaces.Stores.TransferStocksInterfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Models.TransferModel;
 using Com.Bateeq.Service.Warehouse.Lib.Services;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.TransferViewModels;

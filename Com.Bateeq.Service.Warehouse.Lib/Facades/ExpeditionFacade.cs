@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 
 namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 {
-    public class ExpeditionFacade
+    public class ExpeditionFacade 
     {
         private string USER_AGENT = "Facade";
 
@@ -209,6 +209,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             string code = String.Format("{0}/{1}/{2}", hashids.Encode(diff), ModuleId, DateTime.Now.ToString("MM/yyyy"));
             return code;
         }
+
         public async Task<int> Create(Expedition model, string username, int clientTimeZoneOffset = 7)
         {
             int Created = 0;
@@ -218,16 +219,16 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                 try
                 {
                     int totalweight = 0;
-                    string code = GenerateCode("EFR-KB/EXP");
+                    string code = GenerateCode("EVR-KB/EXP");
                     
                     model.Code = code;
                     model.Date = DateTimeOffset.Now;
-                    TransferOutDoc transferOutDoc = new TransferOutDoc();
                     foreach (var i in model.Items)
                     {
+                        TransferOutDoc transferOutDoc = new TransferOutDoc();
                         i.Id = 0;
                         totalweight += i.Weight;
-                        string CodeTransferOut = GenerateCode("EFR-KB/EXP");
+                        string CodeTransferOut = GenerateCode("EVR-KB/EXP");
                         var SPK = dbContext.SPKDocs.Where(x => x.PackingList == i.PackingList).Single();
                         SPK.IsDistributed = true;
                         transferOutDoc.Code = CodeTransferOut;
@@ -243,36 +244,37 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         foreach (var d in i.Details)
                         {
                             d.Id = 0;
-                            //var inven = dbContext.Inventories.Where(x => x.ItemArticleRealizationOrder == d.ArticleRealizationOrder && x.ItemCode == d.ItemCode && x.ItemName == d.ItemName && x.StorageId == i.SourceId).Single();
-                            
-                            //InventoryMovement movement = new InventoryMovement { 
-                            //    After = inven.Quantity - d.SendQuantity,
-                            //    Before = inven.Quantity,
-                            //    Date = DateTimeOffset.Now,
-                            //    ItemArticleRealizationOrder = d.ArticleRealizationOrder,
-                            //    ItemCode = d.ItemCode,
-                            //    ItemDomesticCOGS = d.DomesticCOGS,
-                            //    ItemDomesticRetail = d.DomesticRetail,
-                            //    ItemDomesticSale = d.DomesticSale,
-                            //    ItemDomesticWholeSale = d.DomesticWholesale,
-                            //    ItemInternationalCOGS = 0,
-                            //    ItemInternationalRetail = 0,
-                            //    ItemInternationalSale = 0,
-                            //    ItemInternationalWholeSale = 0,
-                            //    ItemId = d.ItemId,
-                            //    ItemName = d.ItemName,
-                            //    ItemSize = d.Size,
-                            //    Quantity = d.Quantity,
-                            //    Reference = CodeTransferOut,
-                            //    Remark = d.Remark,
-                            //    StorageCode = i.SourceCode,
-                            //    StorageIsCentral = i.SourceName.Contains("GUDANG") ? true : false,
-                            //    StorageId = i.SourceId,
-                            //    StorageName = i.DestinationName,
-                            //    Type = "OUT"
-                            //};
+                            var inven = dbContext.Inventories.Where(x => x.ItemArticleRealizationOrder == d.ArticleRealizationOrder && x.ItemCode == d.ItemCode && x.ItemName == d.ItemName && x.StorageId == i.SourceId).Single();
 
-                            //inven.Quantity = inven.Quantity - d.SendQuantity;
+                            InventoryMovement movement = new InventoryMovement
+                            {
+                                After = inven.Quantity - d.SendQuantity,
+                                Before = inven.Quantity,
+                                Date = DateTimeOffset.Now,
+                                ItemArticleRealizationOrder = d.ArticleRealizationOrder,
+                                ItemCode = d.ItemCode,
+                                ItemDomesticCOGS = d.DomesticCOGS,
+                                ItemDomesticRetail = d.DomesticRetail,
+                                ItemDomesticSale = d.DomesticSale,
+                                ItemDomesticWholeSale = d.DomesticWholesale,
+                                ItemInternationalCOGS = 0,
+                                ItemInternationalRetail = 0,
+                                ItemInternationalSale = 0,
+                                ItemInternationalWholeSale = 0,
+                                ItemId = d.ItemId,
+                                ItemName = d.ItemName,
+                                ItemSize = d.Size,
+                                Quantity = d.Quantity,
+                                Reference = CodeTransferOut,
+                                Remark = d.Remark,
+                                StorageCode = i.SourceCode,
+                                StorageIsCentral = i.SourceName.Contains("GUDANG") ? true : false,
+                                StorageId = i.SourceId,
+                                StorageName = i.DestinationName,
+                                Type = "OUT"
+                            };
+
+                            inven.Quantity = inven.Quantity - d.SendQuantity;
                             TransferOutDocItem transferItem = new TransferOutDocItem
                             {
                                 ArticleRealizationOrder = d.ArticleRealizationOrder,
@@ -288,7 +290,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                 Size = d.Size,
                                 Uom = d.Uom
                             };
-                            EntityExtension.FlagForCreate(transferItem, username, USER_AGENT);
                             transferOutDocItems.Add(transferItem);
                             //transferOutDoc.Items.Add(transferItem);
                             //transferOutDoc.Items.Add(new TransferOutDocItem
@@ -309,14 +310,20 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
                             //});
                             EntityExtension.FlagForCreate(d, username, USER_AGENT);
-                            //EntityExtension.FlagForCreate(movement, username, USER_AGENT);
-                            //this.dbSetInventoryMovement.Add(movement);
+                            EntityExtension.FlagForCreate(movement, username, USER_AGENT);
+                            this.dbSetInventoryMovement.Add(movement);
                         }
-                        transferOutDoc.Items = transferOutDocItems;
-                        EntityExtension.FlagForCreate(i, username, USER_AGENT);
                         EntityExtension.FlagForCreate(transferOutDoc, username, USER_AGENT);
                         this.dbSetTransfer.Add(transferOutDoc);
-                        
+
+                        transferOutDoc.Items = transferOutDocItems;
+                        foreach (var trfOut in transferOutDocItems)
+                        {
+                            EntityExtension.FlagForCreate(trfOut, username, USER_AGENT);
+                        }
+
+                        EntityExtension.FlagForCreate(i, username, USER_AGENT);
+
                     }
                     model.Weight = totalweight;
                     model.Remark = "";

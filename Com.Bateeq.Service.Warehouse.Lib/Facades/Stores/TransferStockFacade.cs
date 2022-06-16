@@ -1,5 +1,6 @@
 ﻿using Com.Bateeq.Service.Warehouse.Lib.Helpers;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
+using Com.Bateeq.Service.Warehouse.Lib.Interfaces.Stores.TransferStocksInterfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Models.Expeditions;
 using Com.Bateeq.Service.Warehouse.Lib.Models.InventoryModel;
 using Com.Bateeq.Service.Warehouse.Lib.Models.SPKDocsModel;
@@ -22,7 +23,7 @@ using System.Threading.Tasks;
 
 namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 {
-    public class TransferStockFacade
+    public class TransferStockFacade : ITransferStock
     {
         private string USER_AGENT = "Facade";
 
@@ -57,9 +58,9 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
             return code;
         }
 
-        public IQueryable<TransferStockReportViewModel> GetReportQuery(DateTime? dateFrom, DateTime? dateTo, string status, string code, int offset)
+        public IQueryable<TransferStockReportViewModel> GetReportQuery(DateTime? datEVRom, DateTime? dateTo, string status, string code, int offset)
         {
-            DateTime DateFrom = dateFrom == null ? new DateTime(1970, 1, 1) : (DateTime)dateFrom;
+            DateTime DatEVRom = datEVRom == null ? new DateTime(1970, 1, 1) : (DateTime)datEVRom;
             DateTime DateTo = dateTo == null ? DateTime.Now : (DateTime)dateTo;
 
             var Query = (from a in dbContext.TransferOutDocs
@@ -68,10 +69,10 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                          where a.IsDeleted == false
                              && b.IsDeleted == false
                              && c.IsDeleted == false
-                             && a.Date.AddHours(offset).Date >= DateFrom.Date
+                             && a.Date.AddHours(offset).Date >= DatEVRom.Date
                              && a.Date.AddHours(offset).Date <= DateTo.Date
                              && a.Code.Contains(string.IsNullOrWhiteSpace(code) ? a.Code : code)
-                             && b.Reference.Contains("EFR-KB/RTT")
+                             && b.Reference.Contains("EVR-KB/RTT")
                              && b.DestinationName != "GUDANG TRANSFER STOCK"
                              && b.IsReceived == (status.Equals("Semua") ? b.IsReceived : (status.Equals("Belum Diterima") ? false : true)) 
 
@@ -99,9 +100,9 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
             return Query.AsQueryable();
         }
 
-        public Tuple<List<TransferStockReportViewModel>, int> GetReport(DateTime? dateFrom, DateTime? dateTo, string status, string code, int page, int size, string Order, int offset)
+        public Tuple<List<TransferStockReportViewModel>, int> GetReport(DateTime? datEVRom, DateTime? dateTo, string status, string code, int page, int size, string Order, int offset)
         {
-            var Query = GetReportQuery(dateFrom, dateTo, status, code, offset);
+            var Query = GetReportQuery(datEVRom, dateTo, status, code, offset);
 
             Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
             if (OrderDictionary.Count.Equals(0))
@@ -131,12 +132,12 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
             {
                 try
                 {
-                    string codeOut = GenerateCode("EFR-KB/RTT");
-                    string packingList1 = GenerateCode("EFR-KB/PLR");
-                    string CodeIn = GenerateCode("EFR-TB/BRT");
-                    string packingList2 = GenerateCode("EFR-KB/PLB");
-                    string expCode = GenerateCode("EFR-KB/EXP");
-                    string codetransferin = GenerateCode("EFR-TB/BRT");
+                    string codeOut = GenerateCode("EVR-KB/RTT");
+                    string packingList1 = GenerateCode("EVR-KB/PLR");
+                    string CodeIn = GenerateCode("EVR-TB/BRT");
+                    string packingList2 = GenerateCode("EVR-KB/PLB");
+                    string expCode = GenerateCode("EVR-KB/EXP");
+                    string codetransferin = GenerateCode("EVR-TB/BRT");
                     model2.Code = codeOut;
                     model2.Date = DateTimeOffset.Now;
                     var storages = GetStorage("GDG.05");
@@ -255,7 +256,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                     }
                     SPKDocs sPKDocs1 = new SPKDocs
                     {
-                        Code = GenerateCode("EFR-PK/PBJ"),
+                        Code = GenerateCode("EVR-PK/PBJ"),
                         Date = DateTimeOffset.Now,
                         SourceId = model2.SourceId,
                         SourceCode = model2.SourceCode,
@@ -292,7 +293,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 
                     SPKDocs sPKDocs2 = new SPKDocs
                     {
-                        Code = GenerateCode("EFR-PK/PBJ"),
+                        Code = GenerateCode("EVR-PK/PBJ"),
                         Date = DateTimeOffset.Now,
                         DestinationId = model2.DestinationId,
                         DestinationCode = model2.DestinationCode,
@@ -352,7 +353,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                         inventoryMovements.Add(new InventoryMovement
                         {
                             Before = 0,
-                            After = 1,
+                            After = i.Quantity,
                             Date = DateTimeOffset.Now,
                             ItemCode = i.ItemCode,
                             ItemDomesticCOGS = i.ItemDomesticCOGS,
@@ -378,7 +379,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                         });
                         inventoryMovements.Add(new InventoryMovement
                         {
-                            Before = 1,
+                            Before = i.Quantity,
                             After = 0,
                             Date = DateTimeOffset.Now,
                             ItemCode = i.ItemCode,
@@ -590,7 +591,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
         {
             var Query = from a in dbContext.TransferOutDocs
                        join b in dbContext.SPKDocs on a.Code equals b.Reference
-                       where a.Code.Contains("EFR-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
+                       where a.Code.Contains("EVR-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
                        select new TransferStockViewModel
                        {
                            id = (int)a.Id,
@@ -606,6 +607,13 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                            transfername = b.SourceName,
                            transfercode = b.SourceCode
                        };
+            List<string> searchAttributes = new List<string>()
+            {
+                "Code","DestinationName","SourceName"
+            };
+
+            Query = QueryHelper<TransferStockViewModel>.ConfigureSearch(Query, searchAttributes, Keyword);
+
 
             Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
             //Query = QueryHelper<TransferOutDoc>.ConfigureOrder(Query, OrderDictionary);
@@ -621,7 +629,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
             var Query = from a in dbContext.TransferOutDocs
                         join b in dbContext.SPKDocs on a.Code equals b.Reference
                         join c in dbContext.TransferOutDocItems on a.Id equals c.TransferOutDocsId
-                        where a.Code.Contains("EFR-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
+                        where a.Code.Contains("EVR-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
                         && a.Id == id
                         select new 
                         {

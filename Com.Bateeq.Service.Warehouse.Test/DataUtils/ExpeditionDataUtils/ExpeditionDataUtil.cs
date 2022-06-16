@@ -20,6 +20,8 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.ExpeditionDataUtils
         {
             this.facade = facade;
             this.inventoryDataUtils = inventoryDataUtils;
+            this.sPKDocDataUtils = sPKDocDataUtils;
+            this.facade = facade;
         }
 
         public async Task<Expedition> GetNewData()
@@ -51,8 +53,8 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.ExpeditionDataUtils
                         Password = dataSPK.Password,
                         SourceCode = dataSPK.SourceCode,
                         Reference = dataSPK.Reference,
-                        SourceId = (int)dataSPK.SourceId,
-                        SourceName = dataSPK.SourceName,
+                        SourceId =(int)dataSPK.SourceId,
+						SourceName = dataSPK.SourceName,
                         SPKDocsId = (int)dataSPK.Id,
                         Weight = dataSPK.Weight,
                         Details = new List<ExpeditionDetail>
@@ -73,6 +75,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.ExpeditionDataUtils
                                 Size = Item[0].ItemSize,
                                 Uom = Item[0].ItemUom,
                                 SPKDocsId = (int)dataSPK.Id,
+								
                                 
                             }
                         }

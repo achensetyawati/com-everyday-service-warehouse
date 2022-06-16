@@ -65,9 +65,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.PDFTemplates
             //document.Add(address);
             //bold_font.SetStyle(Font.NORMAL);
 
-
-
-
             PdfPTable tableInternNoteHeader = new PdfPTable(2);
             tableInternNoteHeader.SetWidths(new float[] { 7.5f, 4.5f });
             PdfPCell cellInternNoteHeaderLeft = new PdfPCell() { Border = Rectangle.NO_BORDER, HorizontalAlignment = Element.ALIGN_LEFT };
@@ -118,9 +115,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.PDFTemplates
             cellInternNoteHeaderRight.Phrase = new Phrase("Keterangan" + "      : " + "" + "\n\n", normal_font);
             tableInternNoteHeader.AddCell(cellInternNoteHeaderRight);
 
-
-
-
             PdfPCell cellInternNoteHeader = new PdfPCell(tableInternNoteHeader); // dont remove
             tableInternNoteHeader.ExtendLastRow = false;
             tableInternNoteHeader.SpacingAfter = 10f;
@@ -159,12 +153,12 @@ namespace Com.Bateeq.Service.Warehouse.Lib.PDFTemplates
                     No =  index++,
                     Product = item.item.code,
                     ProductName = item.item.name,
-                    Quantity = item.quantity,
-                    Price = String.Format("{0:n}", item.quantity * item.item.domesticSale)
+                    Quantity = item.sendquantity,
+                    Price = String.Format("{0:n}", item.sendquantity * item.item.domesticSale)
                 });
 
-                totalPriceTotal += item.quantity * item.item.domesticSale;
-                total += item.quantity;
+                totalPriceTotal += item.sendquantity * item.item.domesticSale;
+                total += item.sendquantity;
 
             }
 

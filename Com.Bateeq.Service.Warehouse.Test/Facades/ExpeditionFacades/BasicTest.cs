@@ -4,6 +4,7 @@ using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Models.InventoryModel;
 using Com.Bateeq.Service.Warehouse.Lib.Services;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.ExpeditionViewModel;
+using Com.Bateeq.Service.Warehouse.Lib.ViewModels.NewIntegrationViewModel;
 using Com.Bateeq.Service.Warehouse.Test.DataUtils.ExpeditionDataUtils;
 using Com.Bateeq.Service.Warehouse.Test.DataUtils.InventoryDataUtils;
 using Com.Bateeq.Service.Warehouse.Test.DataUtils.SPKDocDataUtils;
@@ -12,6 +13,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
@@ -37,6 +39,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.ExpeditionFacades
 
             return string.Concat(sf.GetMethod().Name, "_", ENTITY);
         }
+
         private Mock<IServiceProvider> GetServiceProvider()
         {
             HttpResponseMessage message = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
@@ -84,6 +87,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.ExpeditionFacades
 
             return serviceProvider;
         }
+
         private WarehouseDbContext _dbContext(string testName)
         {
             DbContextOptionsBuilder<WarehouseDbContext> optionsBuilder = new DbContextOptionsBuilder<WarehouseDbContext>();
@@ -108,6 +112,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.ExpeditionFacades
 
             return new ExpeditionDataUtil(expeditionFacade,inventoryDataUtil,sPKDocDataUtil);
         }
+
         private InventoryDataUtil invendataUtil(InventoryFacade facade, string testName, WarehouseDbContext dbContext)
         {
             var pkbbjfacade = new InventoryFacade(ServiceProvider, _dbContext(testName));
@@ -117,15 +122,36 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.ExpeditionFacades
 
             return new InventoryDataUtil(facade, dbContext);
         }
-        [Fact]
-        public async Task Should_Success_Create_Data()
+
+		[Fact]
+		public async Task Should_Success_Create_Data()
+		{
+
+			ExpeditionFacade facade = new ExpeditionFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+			var model = await dataUtil(facade, GetCurrentMethod()).GetNewData();
+			
+			var Response = await facade.Create(model, USERNAME);
+			Assert.NotEqual(0, Response);
+		}
+
+		[Fact]
+        public async Task Should_Exceptioon_Create_Data()
         {
 
             ExpeditionFacade facade = new ExpeditionFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
             var model = await dataUtil(facade, GetCurrentMethod()).GetNewData();
-            var Response = await facade.Create(model, USERNAME);
-            Assert.NotEqual(0, Response);
+
+            foreach (var item in model.Items)
+            {
+                item.PackingList = null;
+            }
+
+            //var Response = await facade.Create(model, USERNAME);
+
+            await Assert.ThrowsAnyAsync<Exception>(() => facade.Create(model, USERNAME));
+            //Assert.Equal(0, Response);
         }
+
         [Fact]
         public async Task Should_Success_Get_All_Data()
         {
@@ -134,17 +160,22 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.ExpeditionFacades
             var Response = facade.Read();
             Assert.NotEmpty(Response.Item1);
         }
+
         [Fact]
-        public async Task Should_Success_Get_Data_By_Id()
+        public async Task Should_Error_Get_Data_By_Id()
         {
             ExpeditionFacade facade = new ExpeditionFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-            var model = await dataUtil(facade, GetCurrentMethod()).GetTestData();
+            var model = await dataUtil(facade, GetCurrentMethod()).GetNewData();
             var Response = facade.ReadById((int)model.Id);
-            Assert.NotNull(Response);
+            Assert.Null(Response);
         }
+
         [Fact]
         public async Task Should_Success_Validate_DataAsync()
         {
+
+            DbSet<Inventory> dbSetInventory = _dbContext(GetCurrentMethod()).Set<Inventory>();
+
             ExpeditionViewModel ViewModel = new ExpeditionViewModel
             {
 
@@ -163,6 +194,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.ExpeditionFacades
 
             };
             Assert.True(expservice.Validate(null).Count() > 0);
+
             ExpeditionViewModel itemViewModel = new ExpeditionViewModel
             {
                 expeditionService = new Lib.ViewModels.NewIntegrationViewModel.ExpeditionServiceViewModel
@@ -184,6 +216,9 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.ExpeditionFacades
 
             };
             Assert.True(itemViewModel.Validate(null).Count() > 0);
+
+            InventoryFacade facade = new InventoryFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+            var model = await invendataUtil(facade, GetCurrentMethod(), _dbContext(GetCurrentMethod())).GetTestData();
             ExpeditionViewModel detailViewModel = new ExpeditionViewModel
             {
                 expeditionService = new Lib.ViewModels.NewIntegrationViewModel.ExpeditionServiceViewModel
@@ -199,22 +234,39 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.ExpeditionFacades
                         {
                             code = "test",
                             Weight = 5,
-                            
+                            source = new Lib.ViewModels.NewIntegrationViewModel.SourceViewModel
+                            {
+                                code = model.StorageCode,
+                                name = model.StorageName,
+                                _id = model.StorageId
+                            }
+
                         },
                         details = new List<ExpeditionDetailViewModel>{
                             new ExpeditionDetailViewModel
                             {
                                 sendQuantity = 0,
+                                item = new Lib.ViewModels.NewIntegrationViewModel.ItemViewModel
+                                {
+                                    articleRealizationOrder = model.ItemArticleRealizationOrder,
+                                    code = model.ItemCode,
+                                    name = model.ItemName,
+
+                                }
                             }
                         }
                     }
                 }
-
             };
-            Assert.True(detailViewModel.Validate(null).Count() > 0);
-            DbSet<Inventory> dbSetInventory = _dbContext(GetCurrentMethod()).Set<Inventory>();
-            InventoryFacade facade = new InventoryFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-            var model = await invendataUtil(facade, GetCurrentMethod(), _dbContext(GetCurrentMethod())).GetTestData();
+
+            var mockServiceProvider = GetServiceProvider();
+            mockServiceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext)))
+                  .Returns(_dbContext(GetCurrentMethod()));
+
+            var validationContext = new ValidationContext(detailViewModel, mockServiceProvider.Object, null);
+
+            Assert.True(detailViewModel.Validate(validationContext).Count() > 0);
+
             ExpeditionViewModel detailViewModel2 = new ExpeditionViewModel
             {
                 expeditionService = new Lib.ViewModels.NewIntegrationViewModel.ExpeditionServiceViewModel
@@ -253,9 +305,9 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.ExpeditionFacades
                         }
                     }
                 }
-
             };
-            Assert.True(detailViewModel2.Validate(null).Count() > 0);
+            Assert.True(detailViewModel2.Validate(validationContext).Count() > 0);
+
             ExpeditionViewModel detailViewModel3 = new ExpeditionViewModel
             {
                 expeditionService = new Lib.ViewModels.NewIntegrationViewModel.ExpeditionServiceViewModel
@@ -298,7 +350,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.ExpeditionFacades
                 }
 
             };
-            Assert.True(detailViewModel3.Validate(null).Count() > 0);
+            Assert.True(detailViewModel3.Validate(validationContext).Count() > 0);
 
             ExpeditionViewModel detailViewModel4 = new ExpeditionViewModel
             {
@@ -343,7 +395,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.ExpeditionFacades
                 }
 
             };
-            Assert.True(detailViewModel4.Validate(null).Count() > 0);
+            Assert.True(detailViewModel4.Validate(validationContext).Count() > 0);
         }
     }
 }
