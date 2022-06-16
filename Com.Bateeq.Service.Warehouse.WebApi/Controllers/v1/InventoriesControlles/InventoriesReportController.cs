@@ -83,9 +83,6 @@ namespace Com.MM.Service.Warehouse.WebApi.Controllers.v1.InventoryControllers
             try
             {
                 byte[] xlsInBytes;
-                //int offset = Convert.ToInt32(Request.Headers["x-timezone-offset"]);
-                //DateTime DateFrom = dateFrom == null ? new DateTime(1970, 1, 1) : Convert.ToDateTime(dateFrom);
-                //DateTime DateTo = dateTo == null ? DateTime.Now : Convert.ToDateTime(dateTo);
                 string filename;
 
                 var xls = facade.GenerateExcelReportByUser(storageId, filter);
