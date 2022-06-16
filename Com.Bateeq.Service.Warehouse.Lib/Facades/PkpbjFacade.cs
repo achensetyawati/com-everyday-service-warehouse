@@ -346,10 +346,10 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                 {
                     ErrorMessage = string.Concat(ErrorMessage, "Nama tidak boleh kosong, ");
                 }
-                else if (Data.Any(d => d != productVM && d.name.Equals(productVM.name)))
-                {
-                    ErrorMessage = string.Concat(ErrorMessage, "Nama tidak boleh duplikat, ");
-                }
+                //else if (Data.Any(d => d != productVM && d.name.Equals(productVM.name)))
+                //{
+                //    ErrorMessage = string.Concat(ErrorMessage, "Nama tidak boleh duplikat, ");
+                //}
 
                 if (string.IsNullOrWhiteSpace(productVM.size))
                 {
