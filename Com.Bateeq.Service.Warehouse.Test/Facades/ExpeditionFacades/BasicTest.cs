@@ -123,18 +123,19 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.ExpeditionFacades
             return new InventoryDataUtil(facade, dbContext);
         }
 
-        [Fact]
-        public async Task Should_Success_Create_Data()
-        {
+		[Fact]
+		public async Task Should_Success_Create_Data()
+		{
 
-            ExpeditionFacade facade = new ExpeditionFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-            var model = await dataUtil(facade, GetCurrentMethod()).GetNewData();
-            var Response = await facade.Create(model, USERNAME);
-            Assert.NotEqual(0, Response);
-        }
+			ExpeditionFacade facade = new ExpeditionFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+			var model = await dataUtil(facade, GetCurrentMethod()).GetNewData2();
+			
+			var Response = await facade.Create(model, USERNAME);
+			Assert.NotEqual(0, Response);
+		}
 
-        [Fact]
-        public async Task Should_Error_Create_Data()
+		[Fact]
+        public async Task Should_Exceptioon_Create_Data()
         {
 
             ExpeditionFacade facade = new ExpeditionFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
@@ -155,18 +156,18 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.ExpeditionFacades
         public async Task Should_Success_Get_All_Data()
         {
             ExpeditionFacade facade = new ExpeditionFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-            var model = await dataUtil(facade, GetCurrentMethod()).GetTestData();
+            var model = await dataUtil(facade, GetCurrentMethod()).GetTestData2();
             var Response = facade.Read();
             Assert.NotEmpty(Response.Item1);
         }
 
         [Fact]
-        public async Task Should_Success_Get_Data_By_Id()
+        public async Task Should_Error_Get_Data_By_Id()
         {
             ExpeditionFacade facade = new ExpeditionFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
-            var model = await dataUtil(facade, GetCurrentMethod()).GetTestData();
+            var model = await dataUtil(facade, GetCurrentMethod()).GetNewData();
             var Response = facade.ReadById((int)model.Id);
-            Assert.NotNull(Response);
+            Assert.Null(Response);
         }
 
         [Fact]

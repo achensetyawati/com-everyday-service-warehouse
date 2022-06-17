@@ -39,7 +39,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 
         public Tuple<List<TransferInDoc>, int, Dictionary<string, string>> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            IQueryable<TransferInDoc> Query = this.dbSet.Include(m => m.Items).Where(x=>x.SourceCode.Contains("GDG."));
+            IQueryable<TransferInDoc> Query = this.dbSet.Include(m => m.Items).Where(x=>x.SourceCode.Contains("GDG.")).OrderByDescending(x=>x.Date);
 
             List<string> searchAttributes = new List<string>()
             {
@@ -141,12 +141,15 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                     string code = GenerateCode("EVR-TB/BBT");
                     model.Code = code;
                     var SPK = dbContext.SPKDocs.Where(x => x.PackingList == model.Reference).Single();
+                    var ExpItem = dbContext.ExpeditionItems.Where(x => x.SPKDocsId == SPK.Id).Single();
+
                     var Id = SPK.Id;
                     //var ExpeditionCode = (from a in dbContext.Expeditions
                     //                      join b in dbContext.ExpeditionItems on a.Id equals b.ExpeditionId
                     //                      where b.SPKDocsId == SPK.Id
                     //                      select a.Code).Single();
-
+                    
+                    ExpItem.IsReceived = true;
                     SPK.IsReceived = true;
 
                     List<InventoryMovement> inventoryMovement = new List<InventoryMovement>();

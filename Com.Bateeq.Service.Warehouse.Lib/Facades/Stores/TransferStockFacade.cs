@@ -137,6 +137,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                     string CodeIn = GenerateCode("EVR-TB/BRT");
                     string packingList2 = GenerateCode("EVR-KB/PLB");
                     string expCode = GenerateCode("EVR-KB/EXP");
+                    string expCode2 = GenerateCode("EVR-KB/EXP");
                     string codetransferin = GenerateCode("EVR-TB/BRT");
                     model2.Code = codeOut;
                     model2.Date = DateTimeOffset.Now;
@@ -144,12 +145,15 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                     var expeditionService = GetExpedition("Dikirim Sendiri");
                     List<ExpeditionItem> expeditionItems = new List<ExpeditionItem>();
                     List<ExpeditionDetail> expeditionDetails = new List<ExpeditionDetail>();
+                    List<ExpeditionItem> expeditionItems2 = new List<ExpeditionItem>();
+                    List<ExpeditionDetail> expeditionDetails2 = new List<ExpeditionDetail>();
                     List<SPKDocsItem> sPKDocsItem1 = new List<SPKDocsItem>();
                     List<SPKDocsItem> sPKDocsItem2 = new List<SPKDocsItem>();
                     List<TransferInDocItem> transferInDocs = new List<TransferInDocItem>();
                     List<InventoryMovement> inventoryMovements = new List<InventoryMovement>();
                     List<TransferOutDocItem> transferOutDocItems = new List<TransferOutDocItem>();
                     EntityExtension.FlagForCreate(model2, username, USER_AGENT);
+
                     foreach (var i in model2.Items)
                     {
                         var invenInTransfer = dbContext.Inventories.Where(x => x.ItemId == i.ItemId && x.StorageId == storages.Id).FirstOrDefault();
@@ -179,26 +183,24 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                             };
                             EntityExtension.FlagForCreate(inventory, username, USER_AGENT);
                             dbSetInventory.Add(inventory);
-                            transferOutDocItems.Add(new TransferOutDocItem
-                            {
-                                ArticleRealizationOrder = i.ArticleRealizationOrder,
-                                DomesticCOGS = i.DomesticCOGS,
-                                DomesticRetail = i.DomesticRetail,
-                                DomesticSale = i.DomesticSale,
-                                DomesticWholeSale = i.DomesticWholeSale,
-                                ItemCode = i.ItemCode,
-                                ItemId = i.ItemId,
-                                ItemName = i.ItemName,
-                                Quantity = i.Quantity,
-                                Remark = i.Remark,
-                                Size = i.Size,
-                                Uom = i.Uom
-                            });
                         }
-                        else
+
+                        transferOutDocItems.Add(new TransferOutDocItem
                         {
-                            invenInTransfer.Quantity = invenInTransfer.Quantity - i.Quantity;
-                        }
+                            ArticleRealizationOrder = i.ArticleRealizationOrder,
+                            DomesticCOGS = i.DomesticCOGS,
+                            DomesticRetail = i.DomesticRetail,
+                            DomesticSale = i.DomesticSale,
+                            DomesticWholeSale = i.DomesticWholeSale,
+                            ItemCode = i.ItemCode,
+                            ItemId = i.ItemId,
+                            ItemName = i.ItemName,
+                            Quantity = i.Quantity,
+                            Remark = i.Remark,
+                            Size = i.Size,
+                            Uom = i.Uom
+                        });
+
                         sPKDocsItem1.Add(new SPKDocsItem
                         {
                             ItemArticleRealizationOrder = i.ArticleRealizationOrder,
@@ -215,6 +217,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                             Remark = i.Remark,
                             SendQuantity = i.Quantity
                         });
+
                         sPKDocsItem2.Add(new SPKDocsItem
                         {
                             ItemArticleRealizationOrder = i.ArticleRealizationOrder,
@@ -231,13 +234,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                             Remark = i.Remark,
                             SendQuantity = i.Quantity
                         });
-                        EntityExtension.FlagForCreate(i, username, USER_AGENT);
-                    }
-                    EntityExtension.FlagForCreate(model2, username, USER_AGENT);
-                    foreach (var i in model2.Items)
-                    {
-                        //var inventorymovement = new InventoryMovement();
-                        
+
                         transferInDocs.Add(new TransferInDocItem
                         {
                             ArticleRealizationOrder = i.ArticleRealizationOrder,
@@ -253,7 +250,11 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                             Quantity = i.Quantity,
                             Remark = i.Remark
                         });
+
+                        EntityExtension.FlagForCreate(i, username, USER_AGENT);
                     }
+                    EntityExtension.FlagForCreate(model2, username, USER_AGENT);
+
                     SPKDocs sPKDocs1 = new SPKDocs
                     {
                         Code = GenerateCode("EVR-PK/PBJ"),
@@ -274,6 +275,11 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                         Items = sPKDocsItem1
                     };
                     EntityExtension.FlagForCreate(sPKDocs1, username, USER_AGENT);
+                    foreach(var i in sPKDocs1.Items)
+                    {
+                        EntityExtension.FlagForCreate(i, username, USER_AGENT);
+                    }
+                    dbSetSpk.Add(sPKDocs1);
 
                     TransferInDoc transferInDoc = new TransferInDoc
                     {
@@ -311,8 +317,15 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                         Items = sPKDocsItem2
                     };
                     EntityExtension.FlagForCreate(sPKDocs2, username, USER_AGENT);
+                    foreach (var i in sPKDocs2.Items)
+                    {
+                        EntityExtension.FlagForCreate(i, username, USER_AGENT);
+                    }
+                    dbSetSpk.Add(sPKDocs2);
 
-                    foreach (var i in sPKDocs1.Items)
+                    await dbContext.SaveChangesAsync();
+
+                    foreach(var i in sPKDocs1.Items)
                     {
                         var QtySource = 0.0;
                         var invenOutSource = dbContext.Inventories.Where(x => x.ItemId == i.ItemId && x.StorageId == model2.SourceId).FirstOrDefault();
@@ -350,6 +363,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                             Remark = model2.Remark,
                             StorageIsCentral = model2.SourceName.Contains("GUDANG") ? true : false,
                         });
+
                         inventoryMovements.Add(new InventoryMovement
                         {
                             Before = 0,
@@ -377,6 +391,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                             Remark = model2.Remark,
                             StorageIsCentral = storages.Name.Contains("GUDANG") ? true : false,
                         });
+
                         inventoryMovements.Add(new InventoryMovement
                         {
                             Before = i.Quantity,
@@ -396,15 +411,16 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                             ItemSize = i.ItemSize,
                             ItemUom = i.ItemUom,
                             Quantity = i.Quantity,
-                            StorageCode = model2.DestinationCode,
-                            StorageId = model2.DestinationId,
-                            StorageName = model2.DestinationName,
+                            StorageCode = storages.Code,
+                            StorageId = storages.Id,
+                            StorageName = storages.Name,
                             Type = "OUT",
                             Reference = expCode,
                             Remark = model2.Remark,
                             StorageIsCentral = model2.DestinationName.Contains("GUDANG") ? true : false,
                         });
-                        expeditionDetails.Add(new ExpeditionDetail
+
+                        expeditionDetails2.Add(new ExpeditionDetail
                         {
                             ArticleRealizationOrder = i.ItemArticleRealizationOrder,
                             DomesticCOGS = i.ItemDomesticCOGS,
@@ -422,8 +438,30 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                             //SPKDocsId = (int)dbContext.SPKDocs.OrderByDescending(x=>x.Id).FirstOrDefault().Id + 1
                             SPKDocsId = (int)sPKDocs1.Id
                         });
-                        EntityExtension.FlagForCreate(i, username, USER_AGENT);
                     }
+                    
+                    foreach(var i in sPKDocs2.Items)
+                    {
+                        expeditionDetails.Add(new ExpeditionDetail
+                        {
+                            ArticleRealizationOrder = i.ItemArticleRealizationOrder,
+                            DomesticCOGS = i.ItemDomesticCOGS,
+                            DomesticRetail = i.ItemDomesticRetail,
+                            DomesticSale = i.ItemDomesticSale,
+                            DomesticWholesale = i.ItemDomesticWholesale,
+                            ItemCode = i.ItemCode,
+                            ItemId = i.ItemId,
+                            ItemName = i.ItemName,
+                            Quantity = i.Quantity,
+                            Remark = i.Remark,
+                            SendQuantity = i.SendQuantity,
+                            Uom = i.ItemUom,
+                            Size = i.ItemSize,
+                            //SPKDocsId = (int)dbContext.SPKDocs.OrderByDescending(x=>x.Id).FirstOrDefault().Id + 1
+                            SPKDocsId = (int)sPKDocs2.Id
+                        });
+                    }
+
                     expeditionItems.Add(new ExpeditionItem
                     {
                         Code = sPKDocs2.Code,
@@ -446,6 +484,28 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                         Details = expeditionDetails
                     });
 
+                    expeditionItems2.Add(new ExpeditionItem
+                    {
+                        Code = sPKDocs1.Code,
+                        Date = sPKDocs1.Date,
+                        DestinationCode = sPKDocs1.DestinationCode,
+                        DestinationId = (int)sPKDocs1.DestinationId,
+                        DestinationName = sPKDocs1.DestinationName,
+                        IsDistributed = sPKDocs1.IsDistributed,
+                        IsDraft = sPKDocs1.IsDraft,
+                        IsReceived = sPKDocs1.IsReceived,
+                        PackingList = sPKDocs1.PackingList,
+                        Password = sPKDocs1.Password,
+                        Reference = codeOut,
+                        SourceCode = sPKDocs1.SourceCode,
+                        SourceId = (int)sPKDocs1.SourceId,
+                        SourceName = sPKDocs1.SourceName,
+                        //SPKDocsId = (int)dbContext.SPKDocs.OrderByDescending(x => x.Id).FirstOrDefault().Id + 1,
+                        SPKDocsId = (int)sPKDocs1.Id,
+                        Weight = sPKDocs1.Weight,
+                        Details = expeditionDetails2
+                    });
+
                     Expedition expedition = new Expedition
                     {
                         Code = expCode,
@@ -459,6 +519,20 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 
                     };
                     EntityExtension.FlagForCreate(expedition, username, USER_AGENT);
+
+                    Expedition expedition2 = new Expedition
+                    {
+                        Code = expCode2,
+                        Date = DateTimeOffset.Now,
+                        ExpeditionServiceCode = expeditionService.code,
+                        ExpeditionServiceId = (int)expeditionService._id,
+                        ExpeditionServiceName = expeditionService.name,
+                        Remark = "",
+                        Weight = 0,
+                        Items = expeditionItems2,
+
+                    };
+                    EntityExtension.FlagForCreate(expedition2, username, USER_AGENT);
 
                     TransferOutDoc transferOutDoc2 = new TransferOutDoc
                     {
@@ -475,15 +549,13 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                         Items = transferOutDocItems
                     };
                     EntityExtension.FlagForCreate(transferOutDoc2, username, USER_AGENT);
+
                     #region Saving
                     foreach(var i in transferOutDoc2.Items)
                     {
                         EntityExtension.FlagForCreate(i, username, USER_AGENT);
                     }
-                    foreach (var i in sPKDocs2.Items)
-                    {
-                        EntityExtension.FlagForCreate(i, username, USER_AGENT);
-                    }
+
                     foreach (var i in expedition.Items)
                     {
                         EntityExtension.FlagForCreate(i, username, USER_AGENT);
@@ -492,7 +564,15 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                             EntityExtension.FlagForCreate(d, username, USER_AGENT);
                         }
                     }
-                    foreach(var i in transferInDoc.Items)
+                    foreach (var i in expedition2.Items)
+                    {
+                        EntityExtension.FlagForCreate(i, username, USER_AGENT);
+                        foreach (var d in i.Details)
+                        {
+                            EntityExtension.FlagForCreate(d, username, USER_AGENT);
+                        }
+                    }
+                    foreach (var i in transferInDoc.Items)
                     {
                         EntityExtension.FlagForCreate(i, username, USER_AGENT);
                     }
@@ -501,9 +581,9 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                         EntityExtension.FlagForCreate(i, username, USER_AGENT);
                         dbSetInventoryMovement.Add(i);
                     }
+
                     dbSetExpedition.Add(expedition);
-                    dbSetSpk.Add(sPKDocs1);
-                    dbSetSpk.Add(sPKDocs2);
+                    dbSetExpedition.Add(expedition2);
                     dbSet.Add(model2);
                     dbSet.Add(transferOutDoc2);
                     dbSetTransferIn.Add(transferInDoc);
@@ -523,6 +603,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                 return Created;
             }
         }
+
         private StorageViewModel2 GetStorage(string code)
         {
             string itemUri = "master/storages/code";
@@ -565,7 +646,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
         }
         public Tuple<List<TransferOutDoc>, int, Dictionary<string, string>> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            IQueryable<TransferOutDoc> Query = this.dbSet.Include(m => m.Items);
+            IQueryable<TransferOutDoc> Query = this.dbSet.Include(m => m.Items).OrderByDescending(x => x.Date);
 
             List<string> searchAttributes = new List<string>()
             {
@@ -589,24 +670,32 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 
         public Tuple<List<TransferStockViewModel>, int, Dictionary<string, string>> ReadModel(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            var Query = from a in dbContext.TransferOutDocs
-                       join b in dbContext.SPKDocs on a.Code equals b.Reference
-                       where a.Code.Contains("EVR-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
-                       select new TransferStockViewModel
-                       {
-                           id = (int)a.Id,
-                           code = a.Code,
-                           createdBy = a.CreatedBy,
-                           createdDate = a.CreatedUtc,
-                           destinationname = a.DestinationName,
-                           destinationcode = a.DestinationCode,
-                           sourcename = a.SourceName,
-                           sourcecode = a.SourceCode,
-                           password = b.Password,
-                           referensi = a.Reference,
-                           transfername = b.SourceName,
-                           transfercode = b.SourceCode
-                       };
+            var Query =  from a in dbContext.TransferOutDocs
+                         join b in dbContext.SPKDocs on a.Code equals b.Reference
+                         where a.Code.Contains("EVR-KB/RTT") && b.DestinationName != "GUDANG TRANSFER STOCK"
+                         orderby a.Date descending
+                         select new TransferStockViewModel
+                         {
+                             id = (int)a.Id,
+                             code = a.Code,
+                             createdBy = a.CreatedBy,
+                             createdDate = a.CreatedUtc,
+                             destinationname = a.DestinationName,
+                             destinationcode = a.DestinationCode,
+                             sourcename = a.SourceName,
+                             sourcecode = a.SourceCode,
+                             password = b.Password,
+                             referensi = a.Reference,
+                             transfername = b.SourceName,
+                             transfercode = b.SourceCode
+                         };
+            List<string> searchAttributes = new List<string>()
+            {
+                "Code","DestinationName","SourceName"
+            };
+
+            Query = QueryHelper<TransferStockViewModel>.ConfigureSearch(Query, searchAttributes, Keyword);
+
 
             Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
             //Query = QueryHelper<TransferOutDoc>.ConfigureOrder(Query, OrderDictionary);

@@ -85,13 +85,12 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                              && b.IsDeleted == false
                              && c.IsDeleted == false
                              && b.DestinationCode == (string.IsNullOrWhiteSpace(destinationCode) ? b.DestinationCode : destinationCode)
-                             && !b.Reference.Contains("RTT")
                              && a.CreatedBy == (string.IsNullOrWhiteSpace(username) ? a.CreatedBy : username)
                              // && a.Code == (string.IsNullOrWhiteSpace(code) ? a.Code : code)
                              && a.Date.AddHours(offset).Date >= DateFrom.Date
                              && a.Date.AddHours(offset).Date <= DateTo.Date
                              && b.IsReceived == status
-                             && (transaction == 0 ? b.SourceName.Contains("GUDANG") : !b.SourceName.Contains("GUDANG") && !b.Reference.Contains("RTP"))
+                             && (transaction == 0 ? (!b.Reference.Contains("EVR-KB/RTP") && !b.Reference.Contains("EVR-KB/RTU")) : (b.Reference.Contains("EVR-KB/RTP") || b.Reference.Contains("EVR-KB/RTU")))
                              && b.PackingList.Contains(string.IsNullOrWhiteSpace(packingList) ? b.PackingList : packingList)
 
                          select new ExpeditionReportViewModel
@@ -184,7 +183,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                     string date = item.date == null ? "-" : item.date.ToOffset(new TimeSpan(offset, 0, 0)).ToString("dd MMM yyyy", new CultureInfo("id-ID"));
                     //string prDate = item.expectedDeliveryDatePR == new DateTime(1970, 1, 1) ? "-" : item.expectedDeliveryDatePR.ToOffset(new TimeSpan(offset, 0, 0)).ToString("dd MMM yyyy", new CultureInfo("id-ID"));
                     //string epoDate = item.expectedDeliveryDatePO == new DateTime(1970, 1, 1) ? "-" : item.expectedDeliveryDatePO.ToOffset(new TimeSpan(offset, 0, 0)).ToString("dd MMM yyyy", new CultureInfo("id-ID"));
-                    result.Rows.Add(item.code, item.date, item.sourceName, item.destinationName, item.packingList, item.itemCode, item.itemName, item.itemSize, item.itemArticleRealizationOrder, item.itemUom, item.Quantity, item.isReceived);
+                    result.Rows.Add(item.date, item.code, item.sourceName, item.destinationName, item.packingList, item.itemCode, item.itemName, item.itemSize, item.itemArticleRealizationOrder, item.itemUom, item.Quantity, item.isReceived ? "Diterima" : "Belum Diterima");
                 }
             }
 

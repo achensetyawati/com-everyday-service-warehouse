@@ -53,7 +53,76 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.ExpeditionDataUtils
                         Password = dataSPK.Password,
                         SourceCode = dataSPK.SourceCode,
                         Reference = dataSPK.Reference,
-                        SourceId = (int)dataSPK.SourceId,
+                        SourceId =(int)dataSPK.SourceId,
+						SourceName = dataSPK.SourceName,
+                        SPKDocsId = (int)dataSPK.Id,
+                        Weight = dataSPK.Weight,
+                        Details = new List<ExpeditionDetail>
+                        {
+                            new ExpeditionDetail
+                            {
+                                ArticleRealizationOrder = Item[0].ItemArticleRealizationOrder,
+                                DomesticCOGS = Item[0].ItemDomesticCOGS,
+                                DomesticRetail = Item[0].ItemDomesticRetail,
+                                DomesticSale = Item[0].ItemDomesticSale,
+                                DomesticWholesale = Item[0].ItemDomesticWholesale,
+                                ItemCode = Item[0].ItemCode,
+                                ItemName = Item[0].ItemName,
+                                ItemId = Item[0].ItemId,
+                                Quantity = Item[0].Quantity,
+                                Remark = Item[0].Remark,
+                                SendQuantity =Item[0].SendQuantity,
+                                Size = Item[0].ItemSize,
+                                Uom = Item[0].ItemUom,
+                                SPKDocsId = (int)dataSPK.Id,
+								
+                                
+                            }
+                        }
+
+                    }
+                }
+            };
+
+        }
+
+        public async Task<Expedition> GetTestData()
+        {
+            var data = await GetNewData();
+            await facade.Create(data, "Unit Test");
+            return data;
+        }
+
+        public async Task<Expedition> GetNewData2()
+        {
+            var datas = await Task.Run(() => inventoryDataUtils.GetTestData());
+            var dataSPK = await Task.Run(() => sPKDocDataUtils.GetTestDataExpedition());
+            List<SPKDocsItem> Item = new List<SPKDocsItem>(dataSPK.Items);
+            return new Expedition
+            {
+                Code = "code",
+                Date = DateTimeOffset.Now,
+                ExpeditionServiceCode = "codeex",
+                ExpeditionServiceName = "exname",
+                ExpeditionServiceId = 1,
+                Remark = "remark",
+                Weight = 2,
+                Items = new List<ExpeditionItem>
+                {
+                    new ExpeditionItem
+                    {
+                        Code = dataSPK.Code,
+                        Date = dataSPK.Date,
+                        DestinationCode = dataSPK.DestinationCode,
+                        DestinationName = dataSPK.DestinationName,
+                        DestinationId = (int)dataSPK.DestinationId,
+                        IsDistributed = true,
+                        IsReceived = false,
+                        PackingList = dataSPK.PackingList,
+                        Password = dataSPK.Password,
+                        SourceCode = dataSPK.SourceCode,
+                        Reference = dataSPK.Reference,
+                        SourceId =(int)dataSPK.SourceId,
                         SourceName = dataSPK.SourceName,
                         SPKDocsId = (int)dataSPK.Id,
                         Weight = dataSPK.Weight,
@@ -75,7 +144,8 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.ExpeditionDataUtils
                                 Size = Item[0].ItemSize,
                                 Uom = Item[0].ItemUom,
                                 SPKDocsId = (int)dataSPK.Id,
-                                
+
+
                             }
                         }
 
@@ -85,9 +155,9 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.ExpeditionDataUtils
 
         }
 
-        public async Task<Expedition> GetTestData()
+        public async Task<Expedition> GetTestData2()
         {
-            var data = await GetNewData();
+            var data = await GetNewData2();
             await facade.Create(data, "Unit Test");
             return data;
         }

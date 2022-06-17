@@ -45,7 +45,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.ViewModels.AdjustmentDocsViewModel
                     }
                     else
                     {
-                        var itemsExist = items.Where(i => i.item._id != 0 && item.item._id != 0 && i.item._id.Equals(item.item._id)).Count();
+                        var itemsExist = items.Where(i => i.item._id != 0 && i.item._id.Equals(item.item._id)).Count();
                         if (itemsExist > 1)
                         {
                             itemErrorCount++;

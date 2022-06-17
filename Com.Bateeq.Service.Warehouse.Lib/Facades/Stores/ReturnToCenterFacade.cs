@@ -1,4 +1,5 @@
 ﻿using Com.Bateeq.Service.Warehouse.Lib.Helpers;
+using Com.Bateeq.Service.Warehouse.Lib.Interfaces.Stores.ReturnToCenterInterfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Models.Expeditions;
 using Com.Bateeq.Service.Warehouse.Lib.Models.InventoryModel;
 using Com.Bateeq.Service.Warehouse.Lib.Models.SPKDocsModel;
@@ -20,8 +21,8 @@ using System.Threading.Tasks;
 
 namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 {
-    public class ReturnToCenterFacade
-    {
+    public class ReturnToCenterFacade : IReturnToCenter
+	{
         private string USER_AGENT = "Facade";
 
         private readonly WarehouseDbContext dbContext;
@@ -43,7 +44,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 
         public Tuple<List<TransferOutReadViewModel>, int, Dictionary<string, string>> ReadForRetur(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            IQueryable<TransferOutReadViewModel> Query = from a in dbContext.TransferOutDocs
+            IQueryable<TransferOutReadViewModel> Query = (from a in dbContext.TransferOutDocs
                                                          //join b in dbContext.TransferOutDocItems on a.Id equals b.TransferOutDocsId
                                                          //join c in dbContext.SPKDocs on a.Code equals c.Reference
                                                          //join d in dbContext.SPKDocsItems on c.Id equals d.SPKDocsId
@@ -79,8 +80,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
                                                              reference = a.Reference,
                                                              createdby = a.CreatedBy
 
-                                                         };
-			IQueryable<TransferOutDoc> QueryDoc = this.dbSet.Include(m => m.Items);
+                                                         }).OrderByDescending(x => x.date);
+			IQueryable<TransferOutDoc> QueryDoc = this.dbSet.Include(m => m.Items).OrderByDescending(m => m.Date);
 
 			List<string> searchAttributes = new List<string>()
 			{

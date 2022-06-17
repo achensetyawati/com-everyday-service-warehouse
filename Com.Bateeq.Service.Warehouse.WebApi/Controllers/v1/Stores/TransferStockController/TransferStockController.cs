@@ -24,11 +24,11 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.Stores.TransferStoc
     {
         private string ApiVersion = "1.0.0";
         private readonly IMapper mapper;
-        private readonly ITransferStock  facade;
+        private readonly TransferStockFacade facade;
         private readonly IdentityService identityService;
         public readonly IServiceProvider serviceProvider;
 
-        public TransferStockController(IServiceProvider serviceProvider, IMapper mapper, ITransferStock facade)
+        public TransferStockController(IServiceProvider serviceProvider, IMapper mapper, TransferStockFacade facade)
         {
             this.serviceProvider = serviceProvider;
             this.mapper = mapper;
@@ -150,7 +150,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.Stores.TransferStoc
 
                 var model = mapper.Map<TransferOutDoc>(ViewModel);
 
-                await facade.Create(ViewModel,model, identityService.Username);
+                await facade.Create(ViewModel, model, identityService.Username);
 
                 // await facade.Crea
 

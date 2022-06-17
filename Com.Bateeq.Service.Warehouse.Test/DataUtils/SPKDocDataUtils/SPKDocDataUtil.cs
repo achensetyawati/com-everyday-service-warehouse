@@ -66,7 +66,6 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.SPKDocDataUtils
 			return data;
 		}
 
-
 		public class SPKDocDataUtilRTT
 		{
 			private readonly PkpbjFacade pkpbjFacade;
@@ -95,7 +94,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.SPKDocDataUtils
 					SourceId = 1,
 					SourceName = "SourceName",
 					Weight = 1,
-					Reference = "EFR-KB/RTT",
+					Reference = "EVR-KB/RTT",
 					Items = new List<SPKDocsItem>
 				{
 					new SPKDocsItem
@@ -231,6 +230,55 @@ namespace Com.Bateeq.Service.Warehouse.Test.DataUtils.SPKDocDataUtils
 
 			}
 
+		}
+
+		public SPKDocs GetNewDataExpedition()
+		{
+			//var datas = await Task.Run(() => garmentPurchaseOrderDataUtil.GetTestDataByTags());
+			return new SPKDocs
+			{
+				Code = "codetest",
+				Date = DateTimeOffset.Now,
+				DestinationCode = "destinationcode1",
+				DestinationName = "destinationname",
+				DestinationId = 1,
+				IsDistributed = false,
+				IsDraft = false,
+				IsReceived = false,
+				PackingList = "packinglist",
+				Password = "password",
+				SourceCode = "SourceCode",
+				SourceId = 1,
+				SourceName = "SourceName",
+				Weight = 1,
+				Reference = "reference",
+				Items = new List<SPKDocsItem>
+				{
+					new SPKDocsItem
+					{
+						ItemArticleRealizationOrder = "art1",
+						ItemCode = "code",
+						ItemDomesticCOGS = 0,
+						ItemDomesticRetail = 0,
+						ItemDomesticSale = 0,
+						ItemDomesticWholesale = 0,
+						ItemId = 1,
+						ItemName = "name",
+						ItemSize = "size",
+						ItemUom =  "uom",
+						Quantity = 0,
+						Remark = "remark",
+						SendQuantity = 0
+					}
+				}
+			};
+		}
+
+		public async Task<SPKDocs> GetTestDataExpedition()
+		{
+			var data = GetNewDataExpedition();
+			await pkpbjFacade.Create(data, "Unit Test");
+			return data;
 		}
 	}
 }

@@ -3,6 +3,7 @@ using Com.Bateeq.Service.Warehouse.Lib;
 using Com.Bateeq.Service.Warehouse.Lib.Facades;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Models.Expeditions;
+using Com.Bateeq.Service.Warehouse.Lib.Models.InventoryModel;
 using Com.Bateeq.Service.Warehouse.Lib.Models.SPKDocsModel;
 using Com.Bateeq.Service.Warehouse.Lib.Services;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.ExpeditionViewModel;
@@ -159,6 +160,35 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
                 };
             }
         }
+        private Expedition ModelTestExpInventory
+        {
+            get
+            {
+                return new Expedition
+                {
+                    Id = 1,
+                    Code = "code",
+                    Items = new List<ExpeditionItem>
+                    {
+                        new ExpeditionItem
+                        {
+                            SourceId = 1,
+                            SourceName = "GUDANG",
+                            PackingList = "packinglist",
+                            Details = new List<ExpeditionDetail> {
+                                new ExpeditionDetail
+                                {
+                                    ItemCode = "code",
+                                    ItemName = "name",
+                                    ArticleRealizationOrder = "art1"
+                                }
+                            }
+                        }
+
+                    }
+                };
+            }
+        }
         private SPKDocs ModelTestSpk
         {
             get
@@ -171,6 +201,30 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
                     Items = new List<SPKDocsItem>
                     {
 
+                    }
+                };
+            }
+        }
+        private SPKDocs ModelTestSpkInventory
+        {
+            get
+            {
+                return new SPKDocs
+                {
+                    Id = 1,
+                    Code = "code",
+                    PackingList = "packinglist",
+                    SourceId = 1,
+                    SourceName = "GUDANG",
+                    SourceCode = "code",
+                    Items = new List<SPKDocsItem>
+                    {
+                        new SPKDocsItem
+                        {
+                            ItemCode = "code",
+                            ItemArticleRealizationOrder = "art1",
+                            ItemName = "name"
+                        }
                     }
                 };
             }
@@ -300,6 +354,20 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
                 };
             }
         }
+        private Inventory ModelTestInventory
+        {
+            get
+            {
+                return new Inventory
+                {
+                    ItemCode = "code",
+                    ItemName = "name",
+                    StorageId = 1,
+                    StorageName = "GUDANG",
+                    ItemArticleRealizationOrder = "art1"
+                };
+            }
+        }
 
         private ServiceValidationExeption GetServiceValidationExeption(ExpeditionViewModel exp, Mock<IServiceProvider> serviceProvider)
         {
@@ -371,6 +439,22 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
             dbContext.SaveChanges();
 
             return ModelTestSpk;
+        }
+
+        public SPKDocs GetTestDataSpkInventory(WarehouseDbContext dbContext)
+        {
+            dbContext.SPKDocs.Add(ModelTestSpkInventory);
+            dbContext.SaveChanges();
+
+            return ModelTestSpkInventory;
+        }
+
+        public Inventory GetTestDataInventory(WarehouseDbContext dbContext)
+        {
+            dbContext.Inventories.Add(ModelTestInventory);
+            dbContext.SaveChanges();
+
+            return ModelTestInventory;
         }
 
         public SPKDocs GetTestDataSpkError(WarehouseDbContext dbContext)
@@ -569,9 +653,11 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.ExpeditionTests
             serviceProvider.Setup(s => s.GetService(typeof(ExpeditionFacade))).Returns(facade);
             serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
             serviceProvider.Setup(s => s.GetService(typeof(IValidateService))).Returns(validateService.Object);
-            mockMapper.Setup(x => x.Map<Expedition>(It.IsAny<ExpeditionViewModel>())).Returns(ModelTest);
+            mockMapper.Setup(x => x.Map<Expedition>(It.IsAny<ExpeditionViewModel>())).Returns(ModelTestExpInventory);
 
-            SPKDocs testDataSpk = GetTestDataSpk(dbContext);
+            SPKDocs testDataSpk = GetTestDataSpkInventory(dbContext);
+
+            Inventory testDataInventory = GetTestDataInventory(dbContext);
 
             IActionResult response = await GetController(facade, mockMapper).Post(expviewModel);
 

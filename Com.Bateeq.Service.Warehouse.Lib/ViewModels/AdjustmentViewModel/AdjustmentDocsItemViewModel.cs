@@ -12,8 +12,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.ViewModels.AdjustmentDocsViewModel
         public string remark { get; set; }
         public string type { get; set; }
 
-        [MaxLength(255)]
-        public string UId { get; set; }
     }
 
 }
