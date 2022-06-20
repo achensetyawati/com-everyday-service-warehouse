@@ -2,10 +2,13 @@
 using Com.Bateeq.Service.Warehouse.Lib;
 using Com.Bateeq.Service.Warehouse.Lib.Facades;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
+using Com.Bateeq.Service.Warehouse.Lib.Models.Expeditions;
 using Com.Bateeq.Service.Warehouse.Lib.Models.InventoryModel;
 using Com.Bateeq.Service.Warehouse.Lib.Services;
 using Com.Bateeq.Service.Warehouse.Lib.ViewModels.InventoryViewModel;
+using Com.Bateeq.Service.Warehouse.Lib.ViewModels.NewIntegrationViewModel;
 using Com.Bateeq.Service.Warehouse.Test.Helpers;
+using Com.Bateeq.Service.Warehouse.WebApi.Helpers;
 using Com.MM.Service.Warehouse.WebApi.Controllers.v1.InventoryControllers;
 using Com.Moonlay.NetCore.Lib.Service;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +24,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
@@ -113,8 +117,13 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.InvetoriesTests
             Inventory data = new Inventory();
             data.ItemCode = "code";
             data.StorageId = 1;
+            data.StorageName = "name";
+            data.StorageCode = "code";
             data.ItemName = "name";
             data.StorageName = "name";
+            data.ItemArticleRealizationOrder = "ro";
+            data.ItemSize = "xl";
+            data.Quantity = 1;
             dbContext.Inventories.Add(data);
             dbContext.SaveChanges();
 
@@ -134,23 +143,101 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.InvetoriesTests
             return data;
         }
 
+        public Expedition GetTestDataExpedition(WarehouseDbContext dbContext)
+        {
+            Expedition data = new Expedition()
+            {
+                Code = "code",
+                Items = new List<ExpeditionItem>()
+                {
+                    new ExpeditionItem()
+                    {
+                        DestinationCode = "code",
+                        Details = new List<ExpeditionDetail>()
+                        {
+                            new ExpeditionDetail()
+                            {
+                                ItemCode = "code",
+                                ItemName = "name",
+                                ArticleRealizationOrder = "ro",
+                                Size = "xl",
+                                SendQuantity = 1
+                            }
+                        }
+                        
+                    }
+                }
+            };
+
+            dbContext.Expeditions.Add(data);
+            dbContext.SaveChanges();
+
+            return data;
+        }
+
         protected int GetStatusCode(IActionResult response)
         {
             return (int)response.GetType().GetProperty("StatusCode").GetValue(response, null);
         }
 
-
         Mock<IServiceProvider> GetServiceProvider()
         {
+            var data = new List<SalesDocByRoViewModel>
+            {
+                new SalesDocByRoViewModel()
+                {
+                    StoreCode = "code",
+                    StoreName = "name",
+                    StoreStorageCode = "code",
+                    StoreStorageName = "name",
+                    ItemCode = "code",
+                    ItemArticleRealizationOrder = "ro",
+                    size = "xl",
+                    quantityOnSales = 1,
+                }
+            };
+
+            Dictionary<string, object> result =
+                new ResultFormatter("1.0", General.OK_STATUS_CODE, General.OK_MESSAGE)
+                .Ok(data);
+
+            Mock<IServiceProvider> serviceProvider = new Mock<IServiceProvider>();
+            serviceProvider
+                .Setup(x => x.GetService(typeof(IdentityService)))
+                .Returns(new IdentityService() { Token = "Token", Username = "Test" });
+
+            var httpClientService = new Mock<IHttpClientService>();
+            httpClientService
+               .Setup(x => x.GetAsync(It.Is<string>(s => s.Contains("sales-docs/readbyro"))))
+               .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(JsonConvert.SerializeObject(result)) });
+
+            var validateService = new Mock<IValidateService>();
+
+            serviceProvider
+              .Setup(s => s.GetService(typeof(IValidateService)))
+              .Returns(validateService.Object);
+
+            serviceProvider
+               .Setup(x => x.GetService(typeof(IHttpClientService)))
+               .Returns(httpClientService.Object);
+
+            return serviceProvider;
+        }
+
+        Mock<IServiceProvider> GetServiceProviderReturnNull()
+        {
+           
             Mock<IServiceProvider> serviceProvider = new Mock<IServiceProvider>();
             serviceProvider
                 .Setup(x => x.GetService(typeof(IdentityService)))
                 .Returns(new IdentityService() { Token = "Token", Username = "Test" });
 
             var validateService = new Mock<IValidateService>();
+
             serviceProvider
               .Setup(s => s.GetService(typeof(IValidateService)))
               .Returns(validateService.Object);
+
             return serviceProvider;
         }
 
@@ -456,6 +543,107 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.InvetoriesTests
 
             //Assert
             Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", response.GetType().GetProperty("ContentType").GetValue(response, null));
+        }
+        #endregion
+
+        #region by-ro
+
+        [Fact]
+        public void Should_Success_Get_Data_ByRo()
+        {
+            //Setup
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+            Mock<IMapper> imapper = new Mock<IMapper>();
+
+            InventoryFacade service = new InventoryFacade(serviceProvider.Object, dbContext);
+
+            serviceProvider.Setup(s => s.GetService(typeof(InventoryFacade))).Returns(service);
+            serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+            var identityService = new IdentityService();
+
+            var inventory = GetTestData(dbContext);
+            var expedition = GetTestDataExpedition(dbContext);
+
+            //Act
+            IActionResult response = GetController(identityService, imapper.Object, service).GetInventoryStockByRo(inventory.ItemArticleRealizationOrder);
+
+            //Assert
+            int statusCode = this.GetStatusCode(response);
+            Assert.Equal((int)HttpStatusCode.OK, statusCode);
+        }
+
+        [Fact]
+        public void Should_Error_Get_Data_ByRo()
+        {
+            //Setup
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProviderReturnNull();
+            Mock<IMapper> imapper = new Mock<IMapper>();
+
+            InventoryFacade service = new InventoryFacade(serviceProvider.Object, dbContext);
+
+            serviceProvider.Setup(s => s.GetService(typeof(InventoryFacade))).Returns(service);
+            serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+            var identityService = new IdentityService();
+
+            var inventory = GetTestData(dbContext);
+
+            //Act
+            IActionResult response = GetController(identityService, imapper.Object, service).GetInventoryStockByRo(inventory.ItemArticleRealizationOrder);
+
+            //Assert
+            int statusCode = this.GetStatusCode(response);
+            Assert.Equal((int)HttpStatusCode.InternalServerError, statusCode);
+        }
+
+        [Fact]
+        public void Should_Success_Get_Xls_ByRo()
+        {
+            //Setup
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+            Mock<IMapper> imapper = new Mock<IMapper>();
+
+            InventoryFacade service = new InventoryFacade(serviceProvider.Object, dbContext);
+
+            serviceProvider.Setup(s => s.GetService(typeof(InventoryFacade))).Returns(service);
+            serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+            var identityService = new IdentityService();
+
+            var inventory = GetTestData(dbContext);
+            var expedition = GetTestDataExpedition(dbContext);
+
+            //Act
+            IActionResult response = GetController(identityService, imapper.Object, service).GetXls(inventory.ItemArticleRealizationOrder);
+
+            //Assert
+            Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", response.GetType().GetProperty("ContentType").GetValue(response, null));
+        }
+
+        [Fact]
+        public void Should_Error_Get_Xls_ByRo()
+        {
+            //Setup
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProviderReturnNull();
+            Mock<IMapper> imapper = new Mock<IMapper>();
+
+            InventoryFacade service = new InventoryFacade(serviceProvider.Object, dbContext);
+
+            serviceProvider.Setup(s => s.GetService(typeof(InventoryFacade))).Returns(service);
+            serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+            var identityService = new IdentityService();
+
+            var inventory = GetTestData(dbContext);
+            var expedition = GetTestDataExpedition(dbContext);
+
+            //Act
+            IActionResult response = GetController(identityService, imapper.Object, service).GetXls(inventory.ItemArticleRealizationOrder);
+
+            //Assert
+            int statusCode = this.GetStatusCode(response);
+            Assert.Equal((int)HttpStatusCode.InternalServerError, statusCode);
         }
         #endregion
     }
