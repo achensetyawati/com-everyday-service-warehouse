@@ -283,6 +283,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.TransferInFacades
                 };
             }
         }
+
         [Fact]
         public async Task Should_Success_Get_All_Data()
         {
@@ -295,6 +296,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.TransferInFacades
             var Response = facade.Read();
             Assert.NotEqual(null, Response);
         }
+
         [Fact]
         public async Task Should_Success_Get_Data_By_Id()
         {
