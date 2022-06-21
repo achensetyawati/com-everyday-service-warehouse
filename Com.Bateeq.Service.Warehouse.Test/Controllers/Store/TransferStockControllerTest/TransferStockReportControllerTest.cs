@@ -1,33 +1,33 @@
 ﻿using AutoMapper;
 using Com.Bateeq.Service.Warehouse.Lib;
-using Com.Bateeq.Service.Warehouse.Lib.Facades;
+using Com.Bateeq.Service.Warehouse.Lib.Facades.Stores;
 using Com.Bateeq.Service.Warehouse.Lib.Interfaces;
 using Com.Bateeq.Service.Warehouse.Lib.Models.SPKDocsModel;
+using Com.Bateeq.Service.Warehouse.Lib.Models.TransferModel;
 using Com.Bateeq.Service.Warehouse.Lib.Services;
-using Com.Bateeq.Service.Warehouse.Test.Helpers;
-using Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.SpkDocsControllers;
+using Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.TransferStockControllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
 using Xunit;
+using System.Net;
+using Newtonsoft.Json;
 
-namespace Com.Bateeq.Service.Warehouse.Test.Controllers.SPKDocsControllerTests
+namespace Com.Bateeq.Service.Warehouse.Test.Controllers.Store.TransferStockControllerTest
 {
-    public class SPKDocstReportControllerTest
+    public class TransferStockReportControllerTest
     {
-        protected SPKDocstReportController GetController(IdentityService identityService, IMapper mapper, SPKDocsFacade service)
+        protected TransferStockReportController GetController(IdentityService identityService, IMapper mapper, TransferStockFacade service)
         {
             var user = new Mock<ClaimsPrincipal>();
             var claims = new Claim[]
@@ -36,7 +36,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.SPKDocsControllerTests
             };
             user.Setup(u => u.Claims).Returns(claims);
 
-            SPKDocstReportController controller = new SPKDocstReportController(mapper, service, identityService);
+            TransferStockReportController controller = new TransferStockReportController(mapper, service, identityService);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext()
@@ -77,23 +77,23 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.SPKDocsControllerTests
 
         }
 
-        public SPKDocs GetTestData(WarehouseDbContext dbContext)
+        public TransferOutDoc GetTestData(WarehouseDbContext dbContext)
         {
             SPKDocs data = new SPKDocs();
-            data.Reference = "ref";
+            data.Reference = "EVR-KB/RTT";
             data.CreatedBy = "unittestusername";
             data.Id = 1;
             data.SourceCode = "GDG.01";
             data.DestinationCode = "code";
-
-            SPKDocsItem item = new SPKDocsItem();
-            item.SPKDocsId = data.Id;
-
-            dbContext.SPKDocsItems.Add(item);
             dbContext.SPKDocs.Add(data);
+
+            TransferOutDoc tf = new TransferOutDoc();
+            tf.Code = data.Reference;
+
+            dbContext.TransferOutDocs.Add(tf);
             dbContext.SaveChanges();
 
-            return data;
+            return tf;
         }
 
         protected int GetStatusCode(IActionResult response)
@@ -124,16 +124,16 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.SPKDocsControllerTests
             Mock<IServiceProvider> serviceProvider = GetServiceProvider();
             Mock<IMapper> imapper = new Mock<IMapper>();
 
-            SPKDocsFacade service = new SPKDocsFacade(serviceProvider.Object, dbContext);
+            TransferStockFacade service = new TransferStockFacade(serviceProvider.Object, dbContext);
 
-            serviceProvider.Setup(s => s.GetService(typeof(SPKDocsFacade))).Returns(service);
+            serviceProvider.Setup(s => s.GetService(typeof(TransferStockFacade))).Returns(service);
             serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
             var identityService = new IdentityService();
 
-            SPKDocs testData = GetTestData(dbContext);
+            TransferOutDoc testData = GetTestData(dbContext);
 
             //Act
-            IActionResult response = GetController(identityService, imapper.Object, service).GetReport(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>());
+            IActionResult response = GetController(identityService, imapper.Object, service).GetReport(It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>());
 
             //Assert
             int statusCode = this.GetStatusCode(response);
@@ -148,16 +148,16 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.SPKDocsControllerTests
             Mock<IServiceProvider> serviceProvider = GetServiceProvider();
             Mock<IMapper> imapper = new Mock<IMapper>();
 
-            SPKDocsFacade service = new SPKDocsFacade(serviceProvider.Object, dbContext);
+            TransferStockFacade service = new TransferStockFacade(serviceProvider.Object, dbContext);
 
-            serviceProvider.Setup(s => s.GetService(typeof(SPKDocsFacade))).Returns(service);
+            serviceProvider.Setup(s => s.GetService(typeof(TransferStockFacade))).Returns(service);
             serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
             var identityService = new IdentityService();
 
-            SPKDocs testData = GetTestData(dbContext);
+            TransferOutDoc testData = GetTestData(dbContext);
 
             //Act
-            IActionResult response = GetController(identityService, imapper.Object, service).GetReport(DateTime.Now.AddDays(-2), DateTime.Now.AddDays(2), testData.DestinationCode, false, 0, It.IsAny<string>(), 1, 25, "{}");
+            IActionResult response = GetController(identityService, imapper.Object, service).GetReport(DateTime.Now.AddDays(-2), DateTime.Now.AddDays(2), "Semua", testData.Code, 1, 25, "{}");
 
             //Assert
             int statusCode = this.GetStatusCode(response);
@@ -172,47 +172,25 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.SPKDocsControllerTests
             Mock<IServiceProvider> serviceProvider = GetServiceProvider();
             Mock<IMapper> imapper = new Mock<IMapper>();
 
-            SPKDocsFacade service = new SPKDocsFacade(serviceProvider.Object, dbContext);
+            TransferStockFacade service = new TransferStockFacade(serviceProvider.Object, dbContext);
 
-            serviceProvider.Setup(s => s.GetService(typeof(SPKDocsFacade))).Returns(service);
+            serviceProvider.Setup(s => s.GetService(typeof(TransferStockFacade))).Returns(service);
             serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
             var identityService = new IdentityService();
 
-            SPKDocs testData = GetTestData(dbContext);
+            TransferOutDoc testData = GetTestData(dbContext);
             Dictionary<string, string> order = new Dictionary<string, string>()
             {
                 {"DestinationCode", "asc" }
             };
 
             //Act
-            IActionResult response = GetController(identityService, imapper.Object, service).GetReport(DateTime.Now.AddDays(-2), DateTime.Now.AddDays(2), testData.DestinationCode, false, 0, It.IsAny<string>(), 1, 25, JsonConvert.SerializeObject(order));
+            IActionResult response = GetController(identityService, imapper.Object, service).GetReport(DateTime.Now.AddDays(-2), DateTime.Now.AddDays(2), "Semua", testData.Code, 1, 25, JsonConvert.SerializeObject(order));
 
             //Assert
             int statusCode = this.GetStatusCode(response);
             Assert.Equal((int)HttpStatusCode.OK, statusCode);
         }
 
-        [Fact]
-        public void Should_Success_Get_Data_GetXls()
-        {
-            //Setup
-            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
-            Mock<IServiceProvider> serviceProvider = GetServiceProvider();
-            Mock<IMapper> imapper = new Mock<IMapper>();
-
-            SPKDocsFacade service = new SPKDocsFacade(serviceProvider.Object, dbContext);
-
-            serviceProvider.Setup(s => s.GetService(typeof(SPKDocsFacade))).Returns(service);
-            serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
-            var identityService = new IdentityService();
-
-            SPKDocs testData = GetTestData(dbContext);
-
-            //Act
-            IActionResult response = GetController(identityService, imapper.Object, service).GetXls(DateTime.Now.AddDays(-2), DateTime.Now.AddDays(2), testData.DestinationCode, false, 0, It.IsAny<string>());
-
-            //Assert
-            Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", response.GetType().GetProperty("ContentType").GetValue(response, null));
-        }
     }
 }
