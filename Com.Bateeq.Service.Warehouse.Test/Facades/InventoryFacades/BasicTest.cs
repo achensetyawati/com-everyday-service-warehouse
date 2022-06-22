@@ -127,6 +127,18 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.InventoryFacades
             var Response = facade.getStock((int)model.StorageId, (int)model.ItemId);
             Assert.NotNull(Response);
         }
-
-    }
+		[Fact]
+		public async Task Should_Success_Get_Report()
+		{
+			DbSet<Inventory> dbSetInventory = _dbContext(GetCurrentMethod()).Set<Inventory>();
+			InventoryFacade facade = new InventoryFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+			var model = await dataUtil(facade, GetCurrentMethod(), _dbContext(GetCurrentMethod())).GetTestData();
+			//dbSetInventory.Add(model);
+			//var Created = await _dbContext(GetCurrentMethod()).SaveChangesAsync();
+			//InventoryFacade facade = new InventoryFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+			//var model = await dataUtil(facade, GetCurrentMethod()).GetTestData();
+			var Response = facade.GetAllStockByStorageId( model.StorageId.ToString());
+			Assert.NotNull(Response);
+		}
+	}
 }

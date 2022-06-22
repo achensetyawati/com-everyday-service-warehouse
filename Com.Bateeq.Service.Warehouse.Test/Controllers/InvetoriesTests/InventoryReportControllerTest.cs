@@ -457,6 +457,33 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.InvetoriesTests
             //Assert
             Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", response.GetType().GetProperty("ContentType").GetValue(response, null));
         }
-        #endregion
-    }
+		#endregion
+		#region stockAvailability
+
+		[Fact]
+		public void Should_Success_GetAllStockByStorageId()
+		{
+			//Setup
+			WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+			Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+			Mock<IMapper> imapper = new Mock<IMapper>();
+
+			InventoryFacade service = new InventoryFacade(serviceProvider.Object, dbContext);
+
+			serviceProvider.Setup(s => s.GetService(typeof(InventoryFacade))).Returns(service);
+			serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+			var identityService = new IdentityService();
+
+			Inventory testData = GetTestData(dbContext);
+
+			//Act
+			IActionResult response = GetController(identityService, imapper.Object, service).GetAllStockByStorageId(testData.StorageId.ToString());
+
+			//Assert
+			int statusCode = this.GetStatusCode(response);
+			Assert.Equal((int)HttpStatusCode.OK, statusCode);
+		}
+	 
+		#endregion
+	}
 }
