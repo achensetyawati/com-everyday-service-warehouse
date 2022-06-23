@@ -80,48 +80,49 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
                     {
                         if (i.Type == "IN")
                         {
-                            var SourceQuantity = 0.0;
+                            //var SourceQuantity = 0.0;
 
                             var inventoriesAvailable = dbContext.Inventories.Where(x => x.ItemId == i.ItemId && x.StorageId == storages.Id).FirstOrDefault();
 
                             if (inventoriesAvailable != null)
                             {
-                                SourceQuantity = inventoriesAvailable.Quantity;
+                                //SourceQuantity = inventoriesAvailable.Quantity;
                                 inventoriesAvailable.Quantity = inventoriesAvailable.Quantity + i.QtyAdjustment;
                                 EntityExtension.FlagForUpdate(inventoriesAvailable, username, USER_AGENT);
                             }
-                            else {
-                                throw new Exception("data tidak ada di inventory");
-                            }
-                            //else
-                            //{
-                            //    Inventory inventory = new Inventory
-                            //    {
-                            //        ItemArticleRealizationOrder = i.ItemArticleRealizationOrder,
-                            //        ItemCode = i.ItemCode,
-                            //        ItemDomesticCOGS = i.ItemDomesticCOGS,
-                            //        ItemDomesticRetail = i.ItemDomesticRetail,
-                            //        ItemDomesticSale = i.ItemDomesticSale,
-                            //        ItemDomesticWholeSale = i.ItemDomesticWholeSale,
-                            //        ItemId = i.ItemId,
-                            //        ItemInternationalCOGS = 0,
-                            //        ItemInternationalRetail = 0,
-                            //        ItemInternationalSale = 0,
-                            //        ItemInternationalWholeSale = 0,
-                            //        ItemName = i.ItemName,
-                            //        ItemSize = i.ItemSize,
-                            //        ItemUom = i.ItemUom,
-                            //        Quantity = i.QtyAdjustment,
-                            //        StorageCode = model.StorageCode,
-                            //        StorageId = model.StorageId,
-                            //        StorageName = model.StorageName,
-                            //        StorageIsCentral = model.StorageName.Contains("GUDANG") ? true : false
-                            //    };
-                            //    EntityExtension.FlagForCreate(inventory, username, USER_AGENT);
-                            //    dbSetInventory.Add(inventory);
+                            //else {
+                            //    //throw new Exception("data tidak ada di inventory");
                             //}
+                            else
+                            {
+                                Inventory inventory = new Inventory
+                                {
+                                    ItemArticleRealizationOrder = i.ItemArticleRealizationOrder,
+                                    ItemCode = i.ItemCode,
+                                    ItemDomesticCOGS = i.ItemDomesticCOGS,
+                                    ItemDomesticRetail = i.ItemDomesticRetail,
+                                    ItemDomesticSale = i.ItemDomesticSale,
+                                    ItemDomesticWholeSale = i.ItemDomesticWholeSale,
+                                    ItemId = i.ItemId,
+                                    ItemInternationalCOGS = 0,
+                                    ItemInternationalRetail = 0,
+                                    ItemInternationalSale = 0,
+                                    ItemInternationalWholeSale = 0,
+                                    ItemName = i.ItemName,
+                                    ItemSize = i.ItemSize,
+                                    ItemUom = i.ItemUom,
+                                    Quantity = i.QtyAdjustment,
+                                    StorageCode = model.StorageCode,
+                                    StorageId = model.StorageId,
+                                    StorageName = model.StorageName,
+                                    StorageIsCentral = model.StorageName.Contains("GUDANG") ? true : false
+                                };
 
-                            i.QtyBeforeAdjustment = SourceQuantity;
+                                EntityExtension.FlagForCreate(inventory, username, USER_AGENT);
+                                dbSetInventory.Add(inventory);
+                            }
+
+                            //i.QtyBeforeAdjustment = SourceQuantity;
 
                             transferInDocsItems.Add(new TransferInDocItem
                             {
@@ -142,8 +143,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
 
                             var im = new InventoryMovement
                             {
-                                Before = SourceQuantity,
-                                After = SourceQuantity + i.QtyAdjustment,
+                                Before = i.QtyBeforeAdjustment,
+                                After = i.QtyBeforeAdjustment + i.QtyAdjustment,
                                 Date = DateTimeOffset.Now,
                                 ItemArticleRealizationOrder = i.ItemArticleRealizationOrder,
                                 ItemCode = i.ItemCode,
@@ -173,12 +174,11 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
                         }
                         else
                         {
-                            var SourceQuantity = 0.0;
+                            //var SourceQuantity = 0.0;
 
                             var inventoriesAvailable = dbContext.Inventories.Where(x => x.ItemId == i.ItemId && x.StorageId == storages.Id).FirstOrDefault();
                             if (inventoriesAvailable != null)
                             {
-                                SourceQuantity = inventoriesAvailable.Quantity;
                                 inventoriesAvailable.Quantity = inventoriesAvailable.Quantity - i.QtyAdjustment;
                                 EntityExtension.FlagForUpdate(inventoriesAvailable, username, USER_AGENT);
                             }
@@ -214,7 +214,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
                             //    dbSetInventory.Add(inventory);
                             //}
 
-                            i.QtyBeforeAdjustment = SourceQuantity;
+                            //i.QtyBeforeAdjustment = SourceQuantity;
 
                             transferOutDocsItems.Add(new TransferOutDocItem
                             {
@@ -235,8 +235,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
 
                             var im = new InventoryMovement()
                             {
-                                Before = SourceQuantity,
-                                After = SourceQuantity - i.QtyAdjustment,
+                                Before = i.QtyBeforeAdjustment,
+                                After = i.QtyBeforeAdjustment - i.QtyAdjustment,
                                 Date = DateTimeOffset.Now,
                                 ItemArticleRealizationOrder = i.ItemArticleRealizationOrder,
                                 ItemCode = i.ItemCode,
@@ -293,7 +293,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
                         dbSetTransferIn.Add(transferInDoc);
                     }
 
-                    if (transferOutDocsItems.Count > 0)
+                    if(transferOutDocsItems.Count > 0)
                     {
                         TransferOutDoc transferOutDoc = new TransferOutDoc
                         {
