@@ -179,6 +179,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.AdjustmentFacade
                             var inventoriesAvailable = dbContext.Inventories.Where(x => x.ItemId == i.ItemId && x.StorageId == storages.Id).FirstOrDefault();
                             if (inventoriesAvailable != null)
                             {
+                                //SourceQuantity = inventoriesAvailable.Quantity;
                                 inventoriesAvailable.Quantity = inventoriesAvailable.Quantity - i.QtyAdjustment;
                                 EntityExtension.FlagForUpdate(inventoriesAvailable, username, USER_AGENT);
                             }
