@@ -137,6 +137,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.InvetoriesTests
             data.StorageId = 1;
             data.ItemName = "name";
             data.StorageName = "name";
+            data.StorageCode = "code";
             dbContext.InventoryMovements.Add(data);
             dbContext.SaveChanges();
 
@@ -546,6 +547,120 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.InvetoriesTests
         }
         #endregion
 
+        #region Monthly Stock
+        [Fact]
+        public void Should_InternalServerError_Get_Data_Monthly()
+        {
+            //Setup
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+            Mock<IMapper> imapper = new Mock<IMapper>();
+
+            InventoryFacade service = new InventoryFacade(serviceProvider.Object, dbContext);
+
+            serviceProvider.Setup(s => s.GetService(typeof(InventoryFacade))).Returns(service);
+            serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+            var identityService = new IdentityService();
+            InventoryMovement testData = GetTestDataMovement(dbContext);
+
+            //Act
+            IActionResult response = GetController(identityService, imapper.Object, service).GetOverallMonthlyStock(It.IsAny<string>(), It.IsAny<string>());
+
+            //Assert
+            int statusCode = this.GetStatusCode(response);
+            Assert.Equal((int)HttpStatusCode.InternalServerError, statusCode);
+        }
+
+        [Fact]
+        public void Should_Success_Get_Data_Monthly()
+        {
+            //Setup
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+            Mock<IMapper> imapper = new Mock<IMapper>();
+
+            InventoryFacade service = new InventoryFacade(serviceProvider.Object, dbContext);
+
+            serviceProvider.Setup(s => s.GetService(typeof(InventoryFacade))).Returns(service);
+            serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+            var identityService = new IdentityService();
+
+            InventoryMovement testData = GetTestDataMovement(dbContext);
+
+            //Act
+            IActionResult response = GetController(identityService, imapper.Object, service).GetOverallMonthlyStock(testData.Date.Month.ToString(), testData.Date.Year.ToString());
+            //Assert
+            int statusCode = this.GetStatusCode(response);
+            Assert.Equal((int)HttpStatusCode.OK, statusCode);
+        }
+
+        [Fact]
+        public void Should_InternalServerError_Get_Data_Monthly_Storage()
+        {
+            //Setup
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+            Mock<IMapper> imapper = new Mock<IMapper>();
+
+            InventoryFacade service = new InventoryFacade(serviceProvider.Object, dbContext);
+
+            serviceProvider.Setup(s => s.GetService(typeof(InventoryFacade))).Returns(service);
+            serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+            var identityService = new IdentityService();
+            InventoryMovement testData = GetTestDataMovement(dbContext);
+
+            //Act
+            IActionResult response = GetController(identityService, imapper.Object, service).GetOverallStorageStock(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>());
+            //Assert
+            int statusCode = this.GetStatusCode(response);
+            Assert.Equal((int)HttpStatusCode.InternalServerError, statusCode);
+        }
+
+        [Fact]
+        public void Should_Success_Get_Data_Monthly_Storage()
+        {
+            //Setup
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+            Mock<IMapper> imapper = new Mock<IMapper>();
+
+            InventoryFacade service = new InventoryFacade(serviceProvider.Object, dbContext);
+
+            serviceProvider.Setup(s => s.GetService(typeof(InventoryFacade))).Returns(service);
+            serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+            var identityService = new IdentityService();
+            InventoryMovement testData = GetTestDataMovement(dbContext);
+
+            //Act
+            IActionResult response = GetController(identityService, imapper.Object, service).GetOverallStorageStock(testData.StorageCode, testData.Date.Month.ToString(), testData.Date.Year.ToString());
+
+            //Assert
+            int statusCode = this.GetStatusCode(response);
+            Assert.Equal((int)HttpStatusCode.OK, statusCode);
+        }
+
+        [Fact]
+        public void Should_Success_Get_Data_Monthly_GetXls()
+        {
+            //Setup
+            WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+            Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+            Mock<IMapper> imapper = new Mock<IMapper>();
+
+            InventoryFacade service = new InventoryFacade(serviceProvider.Object, dbContext);
+
+            serviceProvider.Setup(s => s.GetService(typeof(InventoryFacade))).Returns(service);
+            serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+            var identityService = new IdentityService();
+
+            InventoryMovement testData = GetTestDataMovement(dbContext);
+
+            //Act
+            IActionResult response = GetController(identityService, imapper.Object, service).GenerateOverallStorageStockExcel(testData.StorageCode, testData.Date.Month.ToString(), testData.Date.Year.ToString());
+            //Assert
+            Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", response.GetType().GetProperty("ContentType").GetValue(response, null));
+        }
+        #endregion
         #region by-ro
 
         [Fact]
@@ -562,6 +677,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.InvetoriesTests
             serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
             var identityService = new IdentityService();
 
+            
             var inventory = GetTestData(dbContext);
             var expedition = GetTestDataExpedition(dbContext);
 
@@ -574,6 +690,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.InvetoriesTests
         }
 
         [Fact]
+        
         public void Should_Error_Get_Data_ByRo()
         {
             //Setup
@@ -587,6 +704,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.InvetoriesTests
             serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
             var identityService = new IdentityService();
 
+            
             var inventory = GetTestData(dbContext);
 
             //Act
@@ -598,6 +716,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.InvetoriesTests
         }
 
         [Fact]
+        
         public void Should_Success_Get_Xls_ByRo()
         {
             //Setup
@@ -611,6 +730,7 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.InvetoriesTests
             serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
             var identityService = new IdentityService();
 
+            
             var inventory = GetTestData(dbContext);
             var expedition = GetTestDataExpedition(dbContext);
 
