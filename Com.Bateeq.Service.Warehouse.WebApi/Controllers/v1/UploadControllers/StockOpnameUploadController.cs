@@ -61,7 +61,7 @@ namespace Com.MM.Service.Core.WebApi.Controllers.v1.UploadControllers
                     //VerifyUser();
                     var UploadedFile = Request.Form.Files[0];
                     StreamReader Reader = new StreamReader(UploadedFile.OpenReadStream());
-                    List<string> FileHeader = new List<string>(Reader.ReadLine().Split(","));
+                    List<string> FileHeader = new List<string>(Reader.ReadLine().Split(";"));
                     var ValidHeader = facade.CsvHeader.SequenceEqual(FileHeader, StringComparer.OrdinalIgnoreCase);
 
                     if (ValidHeader)
@@ -70,8 +70,8 @@ namespace Com.MM.Service.Core.WebApi.Controllers.v1.UploadControllers
                         Reader.BaseStream.Seek(0, SeekOrigin.Begin);
                         Reader.BaseStream.Position = 0;
                         CsvReader Csv = new CsvReader(Reader);
-                        Csv.Configuration.IgnoreQuotes = false;
-                        Csv.Configuration.Delimiter = ",";
+                        Csv.Configuration.IgnoreQuotes = true;
+                        Csv.Configuration.Delimiter = ";";
                         Csv.Configuration.RegisterClassMap<Bateeq.Service.Warehouse.Lib.Facades.SOFacade.SOMap>();
                         Csv.Configuration.HeaderValidated = null;
 
@@ -85,12 +85,8 @@ namespace Com.MM.Service.Core.WebApi.Controllers.v1.UploadControllers
                         {
                             SODocsViewModel Data1 = await facade.MapToViewModel(Data, source);
                             SODocs data = mapper.Map<SODocs>(Data1);
-                            //foreach (var item in data)
-                            //{
-                            //    Transfrom(item);
-                            //}
-                            await facade.UploadData(data, identityService.Username);
 
+                            await facade.UploadData(data, identityService.Username);
 
                             Dictionary<string, object> Result =
                                 new ResultFormatter(ApiVersion, General.CREATED_STATUS_CODE, General.OK_MESSAGE)
