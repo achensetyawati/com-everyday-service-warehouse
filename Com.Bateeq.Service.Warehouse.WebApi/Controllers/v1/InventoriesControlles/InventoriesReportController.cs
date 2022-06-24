@@ -372,7 +372,7 @@ namespace Com.MM.Service.Warehouse.WebApi.Controllers.v1.InventoryControllers
 
                 string filename;
 
-                var xls = facade.GenerateExcelForLatestStockByStorage(code, year, month);
+                var xls = facade.GenerateExcelForLatestStockByStorage(code, month, year);
 
                 filename = String.Format("Report Monthly Stock - {0} - {1}.xlsx", code, DateTime.UtcNow.ToString("MM-yyyy"));
 
