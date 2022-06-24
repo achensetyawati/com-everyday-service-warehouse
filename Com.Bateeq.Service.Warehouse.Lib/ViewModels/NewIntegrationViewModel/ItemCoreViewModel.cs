@@ -155,4 +155,44 @@ namespace Com.Bateeq.Service.Warehouse.Lib.ViewModels.NewIntegrationViewModel
 
         public string ImgFile { get; set; }
     }
+
+    public class ItemCustomViewModel
+    {
+        public int _id { get; set; }
+        public string code { get; set; }
+
+        public string name { get; set; }
+
+        public string Description { get; set; }
+
+        public string Uom { get; set; }
+
+        public string Tags { get; set; }
+
+        public string Remark { get; set; }
+
+        public string ArticleRealizationOrder { get; set; }
+
+        public string Size { get; set; }
+
+        public string ImagePath { get; set; }
+
+        public string ImgFile { get; set; }
+
+        public double? DomesticCOGS { get; set; }
+
+        public double? DomesticWholesale { get; set; }
+
+        public double? DomesticRetail { get; set; }
+
+        public double? DomesticSale { get; set; }
+
+        public double? InternationalCOGS { get; set; }
+
+        public double? InternationalWholesale { get; set; }
+
+        public double? InternationalRetail { get; set; }
+
+        public double? InternationalSale { get; set; }
+    }
 }
