@@ -139,6 +139,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             var Query2 = (from a in Query
                           where a.ItemName.Contains((string.IsNullOrWhiteSpace(filter) ? a.ItemName : filter))
                           || a.ItemArticleRealizationOrder.Contains((string.IsNullOrWhiteSpace(filter) ? a.ItemArticleRealizationOrder : filter))
+                          || a.ItemCode.Contains((string.IsNullOrWhiteSpace(filter) ? a.ItemArticleRealizationOrder : filter))
 
                           select new InventoriesReportViewModel
                           {

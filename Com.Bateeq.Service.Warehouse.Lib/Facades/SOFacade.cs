@@ -105,13 +105,14 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
             foreach (SODocsCsvViewModel productVM in Data)
             {
-                var item = dbContext.Inventories.Where(x => x.ItemCode == productVM.code && x.StorageId == storages.Id).FirstOrDefault();
+                //var item = dbContext.Inventories.Where(x => x.ItemCode == productVM.code && x.StorageId == storages.Id).FirstOrDefault();
                 ErrorMessage = "";
 
-                if (item == null)
-                {
-                    ErrorMessage = string.Concat(ErrorMessage, "Barang tidak ditemukan, ");
-                }
+                //if (item == null)
+                //{
+                //    ErrorMessage = string.Concat(ErrorMessage, "Barang tidak ditemukan, ");
+                //}
+
                 if (string.IsNullOrWhiteSpace(productVM.code))
                 {
                     ErrorMessage = string.Concat(ErrorMessage, "Barcode tidak boleh kosong, ");
@@ -178,28 +179,34 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             var storages = GetStorage(source);
             foreach (var i in csv)
             {
-                var item = dbContext.Inventories.Where(x => x.ItemCode == i.code && x.StorageId == storages.Id).FirstOrDefault();
+                var inventoryAvailable = dbContext.Inventories.Where(x => x.ItemCode == i.code && x.StorageId == storages.Id).FirstOrDefault();
+                var item = GetItems(i.code);
+
                 if(item != null)
                 {
                     soDocsItems.Add(new SODocsItemViewModel
                     {
                         item = new ItemViewModel
                         {
-                            articleRealizationOrder = item.ItemArticleRealizationOrder,
-                            _id = item.ItemId,
-                            code = i.code,
-                            domesticCOGS = Convert.ToDouble(item.ItemDomesticCOGS),
-                            domesticSale = Convert.ToDouble(item.ItemDomesticSale),
-                            domesticWholesale = Convert.ToDouble(item.ItemDomesticWholeSale),
-                            domesticRetail = Convert.ToDouble(item.ItemDomesticRetail),
-                            name = i.name,
-                            size = item.ItemSize,
-                            uom = item.ItemUom
+                            _id = item._id,
+                            articleRealizationOrder = item.ArticleRealizationOrder,
+                            code = item.code,
+                            name = item.name,
+                            domesticCOGS = Convert.ToDouble(item.DomesticCOGS),
+                            domesticRetail = Convert.ToDouble(item.DomesticRetail),
+                            domesticWholesale = Convert.ToDouble(item.DomesticWholesale),
+                            domesticSale = Convert.ToDouble(item.DomesticSale),
+                            size = item.Size,
+                            uom = item.Uom
                         },
                         qtySO = Convert.ToDouble(i.quantity),
-                        qtyBeforeSO = Convert.ToDouble(item.Quantity),
+                        qtyBeforeSO = inventoryAvailable == null ? 0 : Convert.ToDouble(inventoryAvailable.Quantity),
                         remark = ""
                     });
+                } 
+                else
+                {
+                    throw new Exception("data tidak ada di master barang");
                 }
             }
 
@@ -243,7 +250,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                     foreach (var i in viewModel.Items)
                     {
                         var inventoriesAvailable = dbContext.Inventories.Where(x => x.ItemId == i.ItemId && x.StorageId == viewModel.StorageId).FirstOrDefault();
-                        var sourceQty = inventoriesAvailable.Quantity;
+                        //var sourceQty = inventoriesAvailable == null ? 0 : inventoriesAvailable.Quantity;
 
                         if (i.IsAdjusted == true)
                         {
@@ -253,6 +260,40 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
                             if (i.QtyBeforeSO < i.QtySO)
                             {
+                                if(inventoriesAvailable == null)
+                                {
+                                    var inven = new Inventory
+                                    {
+                                        ItemArticleRealizationOrder = i.ItemArticleRealizationOrder,
+                                        ItemCode = i.ItemCode,
+                                        ItemDomesticCOGS = i.ItemDomesticCOGS,
+                                        ItemDomesticRetail = i.ItemDomesticRetail,
+                                        ItemDomesticSale = i.ItemDomesticSale,
+                                        ItemDomesticWholeSale = i.ItemDomesticWholeSale,
+                                        ItemId = i.ItemId,
+                                        ItemInternationalCOGS = 0,
+                                        ItemInternationalRetail = 0,
+                                        ItemInternationalSale = 0,
+                                        ItemInternationalWholeSale = 0,
+                                        ItemName = i.ItemName,
+                                        ItemSize = i.ItemSize,
+                                        ItemUom = i.ItemUom,
+                                        Quantity = i.QtySO,
+                                        StorageCode = model.StorageCode,
+                                        StorageId = model.StorageId,
+                                        StorageName = model.StorageName,
+                                        StorageIsCentral = model.StorageName.Contains("GUDANG") ? true : false
+                                    };
+
+                                    EntityExtension.FlagForCreate(inven, username, USER_AGENT);
+                                    dbSetInventory.Add(inven);
+                                } 
+                                else
+                                {
+                                    inventoriesAvailable.Quantity = i.QtySO;
+                                    EntityExtension.FlagForUpdate(inventoriesAvailable, username, USER_AGENT);
+                                }
+
                                 transferInDocsItems.Add(new TransferInDocItem
                                 {
                                     ArticleRealizationOrder = i.ItemArticleRealizationOrder,
@@ -271,8 +312,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
                                 inventoryMovements.Add(new InventoryMovement
                                 {
-                                    Before = sourceQty,
-                                    After = sourceQty + (i.QtySO - i.QtyBeforeSO),
+                                    Before = i.QtyBeforeSO,
+                                    After = i.QtySO,
                                     Date = DateTimeOffset.Now,
                                     ItemArticleRealizationOrder = i.ItemArticleRealizationOrder,
                                     ItemCode = i.ItemCode,
@@ -297,14 +338,45 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                     Remark = i.Remark,
                                     StorageIsCentral = viewModel.StorageName.Contains("GUDANG") ? true : false,
                                 });
-
-                                inventoriesAvailable.Quantity += (i.QtySO - i.QtyBeforeSO);
-                                EntityExtension.FlagForUpdate(inventoriesAvailable, username, USER_AGENT);
                                 EntityExtension.FlagForCreate(i, username, USER_AGENT);
                             }
 
                             else
                             {
+                                if (inventoriesAvailable == null)
+                                {
+                                    var inven = new Inventory
+                                    {
+                                        ItemArticleRealizationOrder = i.ItemArticleRealizationOrder,
+                                        ItemCode = i.ItemCode,
+                                        ItemDomesticCOGS = i.ItemDomesticCOGS,
+                                        ItemDomesticRetail = i.ItemDomesticRetail,
+                                        ItemDomesticSale = i.ItemDomesticSale,
+                                        ItemDomesticWholeSale = i.ItemDomesticWholeSale,
+                                        ItemId = i.ItemId,
+                                        ItemInternationalCOGS = 0,
+                                        ItemInternationalRetail = 0,
+                                        ItemInternationalSale = 0,
+                                        ItemInternationalWholeSale = 0,
+                                        ItemName = i.ItemName,
+                                        ItemSize = i.ItemSize,
+                                        ItemUom = i.ItemUom,
+                                        Quantity = i.QtySO,
+                                        StorageCode = model.StorageCode,
+                                        StorageId = model.StorageId,
+                                        StorageName = model.StorageName,
+                                        StorageIsCentral = model.StorageName.Contains("GUDANG") ? true : false
+                                    };
+
+                                    EntityExtension.FlagForCreate(inven, username, USER_AGENT);
+                                    dbSetInventory.Add(inven);
+                                }
+                                else
+                                {
+                                    inventoriesAvailable.Quantity = i.QtySO;
+                                    EntityExtension.FlagForUpdate(inventoriesAvailable, username, USER_AGENT);
+                                }
+
                                 transferOutDocsItems.Add(new TransferOutDocItem
                                 {
                                     ArticleRealizationOrder = i.ItemArticleRealizationOrder,
@@ -315,7 +387,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                     ItemCode = i.ItemCode,
                                     ItemId = i.ItemId,
                                     ItemName = i.ItemName,
-                                    Quantity = i.QtyBeforeSO-i.QtySO,
+                                    Quantity = i.QtyBeforeSO - i.QtySO,
                                     Remark = i.Remark,
                                     Size = i.ItemSize,
                                     Uom = i.ItemUom
@@ -323,8 +395,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
                                 inventoryMovements.Add(new InventoryMovement
                                 {
-                                    Before = sourceQty,
-                                    After = sourceQty - (i.QtyBeforeSO - i.QtySO),
+                                    Before = i.QtyBeforeSO,
+                                    After = i.QtySO,
                                     Date = DateTimeOffset.Now,
                                     ItemArticleRealizationOrder = i.ItemArticleRealizationOrder,
                                     ItemCode = i.ItemCode,
@@ -350,8 +422,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                     StorageIsCentral = viewModel.StorageName.Contains("GUDANG") ? true : false,
                                 });
 
-                                inventoriesAvailable.Quantity -= (i.QtyBeforeSO - i.QtySO);
-                                EntityExtension.FlagForUpdate(inventoriesAvailable, username, USER_AGENT);
                                 EntityExtension.FlagForCreate(i, username, USER_AGENT);
                             }
                         }
@@ -519,6 +589,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
         //
         //    return Tuple.Create(Data, TotalData, OrderDictionary);
         //}
+
         public SODocs ReadById(int id)
         {
             var model = dbSetSO.Where(m => m.Id == id)
@@ -527,10 +598,10 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             return model;
         }
 
-        private ItemViewModel GetItems(string code)
+        private ItemCustomViewModel GetItems(string code)
         {
-            string itemUri = "items/finished-goods/byCode";
-            string queryUri = "?code=" + code;
+            string itemUri = "items/finished-goods/code-discount/";
+            string queryUri = code;
             string uri = itemUri + queryUri;
             IHttpClientService httpClient = (IHttpClientService)serviceProvider.GetService(typeof(IHttpClientService));
             var response = httpClient.GetAsync($"{APIEndpoint.Core}{uri}").Result;
@@ -538,8 +609,9 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             {
                 var content = response.Content.ReadAsStringAsync().Result;
                 Dictionary<string, object> result = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
-                ItemViewModel viewModel = JsonConvert.DeserializeObject<ItemViewModel>(result.GetValueOrDefault("data").ToString());
-                return viewModel;//.Where(x => x.dataDestination[0].name == name && x.dataDestination[0].code == code).FirstOrDefault();
+                List<ItemCustomViewModel> viewModel = JsonConvert.DeserializeObject<List<ItemCustomViewModel>>(result.GetValueOrDefault("data").ToString());
+                return viewModel.FirstOrDefault();
+                //.Where(x => x.dataDestination[0].name == name && x.dataDestination[0].code == code).FirstOrDefault();
                 //throw new Exception(string.Format("{0}, {1}, {2}", response.StatusCode, response.Content, APIEndpoint.Purchasing));
             }
             else
