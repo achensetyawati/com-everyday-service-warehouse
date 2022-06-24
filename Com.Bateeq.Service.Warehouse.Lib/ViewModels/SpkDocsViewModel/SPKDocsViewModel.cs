@@ -15,18 +15,22 @@ namespace Com.Bateeq.Service.Warehouse.Lib.ViewModels.SpkDocsViewModel
         public DateTimeOffset? date { get; set; }
        
         public DestinationViewModel destination { get; set; }
-        //public UnitViewModel unit { get; set; }
-        //public CategoryViewModel category { get; set; }
-        public bool isDistributed { get; set; }
+		public string destinationName { get; set; }
+		//public UnitViewModel unit { get; set; }
+		//public CategoryViewModel category { get; set; }
+		public bool isDistributed { get; set; }
         public bool isDraft { get; set; }
         public bool isReceived { get; set; }
+		public string status { get; set; }
 
-        public string packingList { get; set; }
+		public string packingList { get; set; }
         public string password { get; set; }
         public string reference { get; set; }
 
         public SourceViewModel source { get; set; }
-        public string type { get; set; }
+		public string sourceName { get; set; }
+		public string sourceCode { get; set; }
+		public string type { get; set; }
 
         public int Weight { get; set; }
         public List<SPKDocsItemViewModel> items { get; set; }

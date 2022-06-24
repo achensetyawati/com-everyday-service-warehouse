@@ -483,7 +483,56 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.InvetoriesTests
 			int statusCode = this.GetStatusCode(response);
 			Assert.Equal((int)HttpStatusCode.OK, statusCode);
 		}
-	 
+
+		#endregion
+		#region stockAvailability
+
+		[Fact]
+		public void Should_Success_GetInventoryAge()
+		{
+			//Setup
+			WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+			Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+			Mock<IMapper> imapper = new Mock<IMapper>();
+
+			InventoryFacade service = new InventoryFacade(serviceProvider.Object, dbContext);
+
+			serviceProvider.Setup(s => s.GetService(typeof(InventoryFacade))).Returns(service);
+			serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+			var identityService = new IdentityService();
+
+			Inventory testData = GetTestData(dbContext);
+			long id = 1;
+			//Act
+			IActionResult response = GetController(identityService, imapper.Object, service).GetInventoryAge((int) testData.StorageId,"");
+
+			//Assert
+			int statusCode = this.GetStatusCode(response);
+			Assert.Equal((int)HttpStatusCode.OK, statusCode);
+		}
+		[Fact]
+		public void Should_Success_GetXlsAge()
+		{
+			//Setup
+			WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+			Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+			Mock<IMapper> imapper = new Mock<IMapper>();
+
+			InventoryFacade service = new InventoryFacade(serviceProvider.Object, dbContext);
+
+			serviceProvider.Setup(s => s.GetService(typeof(InventoryFacade))).Returns(service);
+			serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+			var identityService = new IdentityService();
+
+			InventoryMovement testData = GetTestDataMovement(dbContext);
+
+			//Act
+			IActionResult response = GetController(identityService, imapper.Object, service).GetAgeXls((int)testData.StorageId, testData.ItemCode);
+
+			//Assert
+			Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", response.GetType().GetProperty("ContentType").GetValue(response, null));
+
+		}
 		#endregion
 	}
 }
