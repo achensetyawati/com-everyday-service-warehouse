@@ -773,7 +773,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             result.Columns.Add(new DataColumn() { ColumnName = "Total Sale", DataType = typeof(double) });
 
             if (Query.ToArray().Count() == 0)
-                result.Rows.Add("", "", "", "", "", "", "", "", "");
+                result.Rows.Add("", "", 0, 0, "", "", 0, 0, 0);
 
             else
             {
