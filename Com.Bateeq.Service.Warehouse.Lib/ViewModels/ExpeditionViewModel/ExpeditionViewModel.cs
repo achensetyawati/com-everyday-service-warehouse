@@ -62,10 +62,11 @@ namespace Com.Bateeq.Service.Warehouse.Lib.ViewModels.ExpeditionViewModel
                                 detailError += "sendQuantity: 'sendQuantity can not 0', ";
                             }
                             WarehouseDbContext warehouseDbContext = (WarehouseDbContext)validationContext.GetService(typeof(WarehouseDbContext));
-                            if (detail.sendQuantity > warehouseDbContext.Inventories.Where(x => x.ItemArticleRealizationOrder == detail.item.articleRealizationOrder && x.ItemCode == detail.item.code && x.ItemName == detail.item.name && x.StorageId == item.spkDocsViewModel.source._id).FirstOrDefault().Quantity)
+                            var invQty = warehouseDbContext.Inventories.Where(x => x.ItemArticleRealizationOrder == detail.item.articleRealizationOrder && x.ItemCode == detail.item.code && x.ItemName == detail.item.name && x.StorageId == item.spkDocsViewModel.source._id).FirstOrDefault().Quantity;
+                            if (detail.sendQuantity > invQty)
                             {
                                 detailErrorCount++;
-                                detailError += "sendQuantity: 'sendQuantity can not more than inventory quantity', ";
+                                detailError += "sendQuantity: 'sendQuantity can not more than inventory quantity ', ";
                             }
 
                             if (detail.sendQuantity > detail.quantity)
