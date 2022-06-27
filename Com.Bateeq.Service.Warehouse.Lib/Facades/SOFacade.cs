@@ -82,8 +82,10 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             {
                 using (var streamWriter = new StreamWriter(stream))
                 {
+                    var configuration = new CsvHelper.Configuration.Configuration();
+                    configuration.Delimiter = ";";
 
-                    using (var csvWriter = new CsvWriter(streamWriter))
+                    using (var csvWriter = new CsvWriter(streamWriter, configuration))
                     {
                         foreach (var item in CsvHeader)
                         {
@@ -206,7 +208,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                 } 
                 else
                 {
-                    throw new Exception("data tidak ada di master barang");
+                    throw new Exception("data "+i.code+" tidak ada di master barang");
                 }
             }
 
