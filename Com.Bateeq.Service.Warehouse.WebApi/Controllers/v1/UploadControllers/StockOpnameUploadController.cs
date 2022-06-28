@@ -98,11 +98,16 @@ namespace Com.MM.Service.Core.WebApi.Controllers.v1.UploadControllers
                             using (MemoryStream memoryStream = new MemoryStream())
                             {
                                 using (StreamWriter streamWriter = new StreamWriter(memoryStream))
-                                using (CsvWriter csvWriter = new CsvWriter(streamWriter))
                                 {
-                                    csvWriter.WriteRecords(Validated.Item2);
+                                    var configuration = new CsvHelper.Configuration.Configuration();
+                                    configuration.Delimiter = ";";
+
+                                    using (CsvWriter csvWriter = new CsvWriter(streamWriter, configuration))
+                                    {
+                                        csvWriter.WriteRecords(Validated.Item2);
+                                    }
+                                    return File(memoryStream.ToArray(), ContentType, FileName);
                                 }
-                                return File(memoryStream.ToArray(), ContentType, FileName);
                             }
                         }
                     }
