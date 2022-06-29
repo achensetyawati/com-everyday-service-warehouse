@@ -104,7 +104,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
             List<string> searchAttributes = new List<string>()
             {
-                "PackingList", "SourceName", "DestinationName"
+                "PackingList", "SourceName", "DestinationName", "Reference"
             };
 
             Query = QueryHelper<SPKDocs>.ConfigureSearch(Query, searchAttributes, Keyword);
