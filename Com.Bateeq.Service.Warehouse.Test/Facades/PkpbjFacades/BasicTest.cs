@@ -172,7 +172,16 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.PkpbjFacades
             Assert.NotEmpty(Response.Item1);
         }
 
-        [Fact]
+		[Fact]
+		public async Task Should_Empty_ReadForUpload()
+		{
+			Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade facade = new Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+			var model = await dataUtil(facade, GetCurrentMethod()).GetTestDataUpload();
+			model.PackingList = "EVR-FN";
+			var Response = facade.ReadForUploadNew(1,25,"{}","","");
+			Assert.Empty(Response.Item1);
+		}
+		[Fact]
         public async Task Should_Success_Get_Data_By_Id()
         {
             Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade facade = new Com.Bateeq.Service.Warehouse.Lib.Facades.PkpbjFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));

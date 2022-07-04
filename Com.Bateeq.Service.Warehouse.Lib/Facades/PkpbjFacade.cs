@@ -104,7 +104,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
             List<string> searchAttributes = new List<string>()
             {
-                "PackingList", "SourceName", "DestinationName"
+                "PackingList", "SourceName", "DestinationName", "Reference"
             };
 
             Query = QueryHelper<SPKDocs>.ConfigureSearch(Query, searchAttributes, Keyword);
@@ -145,8 +145,57 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
             return Tuple.Create(Data, TotalData, OrderDictionary);
         }
+		public Tuple<List<SPKDocsViewModel>, int, Dictionary<string, string>> ReadForUploadNew(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
+		{
+			IQueryable<SPKDocs> Query = this.dbSet.Include(x => x.Items).Where(x => x.PackingList.Contains("EVR-FN"));
+			IQueryable<SPKDocsViewModel> QueryV = from a in Query
+												  select new SPKDocsViewModel
+												  {
+													  _id = a.Id,
+													  packingList = a.PackingList,
+													  date = a.Date,
+													  password = a.Password,
+													  reference = a.Reference,
+													  source = new SourceViewModel
+													  {
+														  code = a.SourceCode,
+														  name = a.SourceName
+													  },
+													  destination = new DestinationViewModel
+													  {
+														  code = a.DestinationCode,
+														  name = a.DestinationName
+													  },
+													  isReceived = a.IsReceived,
+													  code = a.SourceCode,
+													  sourceName = a.SourceName,
+													  destinationName = a.DestinationName,
+													  CreatedBy = a.CreatedBy,
+													  LastModifiedUtc = a.LastModifiedUtc,
+													  status = a.IsReceived == true ? "Sudah Diterima" : "Belum Diterima"
+												  }
 
-        public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadExpedition(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
+												  ;
+			List<string> searchAttributes = new List<string>()
+			{
+				"packingList", "sourceName", "destinationName","status"
+			};
+
+			QueryV = QueryHelper<SPKDocsViewModel>.ConfigureSearch(QueryV, searchAttributes, Keyword);
+
+			Dictionary<string, string> FilterDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Filter);
+			QueryV = QueryHelper<SPKDocsViewModel>.ConfigureFilter(QueryV, FilterDictionary);
+
+			Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
+			QueryV = QueryHelper<SPKDocsViewModel>.ConfigureOrder(QueryV, OrderDictionary);
+
+			Pageable<SPKDocsViewModel> pageable = new Pageable<SPKDocsViewModel>(QueryV, Page - 1, Size);
+			List<SPKDocsViewModel> Data = pageable.Data.ToList<SPKDocsViewModel>();
+			int TotalData = pageable.TotalCount;
+
+			return Tuple.Create(Data, TotalData, OrderDictionary);
+		}
+		public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadExpedition(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
             IQueryable<SPKDocs> Query = this.dbSet.Include(x=>x.Items).Where(x => x.IsDistributed == false);
 
