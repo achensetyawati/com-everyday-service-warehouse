@@ -161,7 +161,7 @@ namespace Com.MM.Service.Core.WebApi.Controllers.v1.UploadControllers
                     filter = filter.Replace("}", string.Concat(", ", filterUser, "}"));
                 }
 
-                var Data = facade.ReadForUpload(page, size, order, keyword, filter);
+                var Data = facade.ReadForUploadNew(page, size, order, keyword, filter);
 
                 var newData = mapper.Map<List<SPKDocsViewModel>>(Data.Item1);
 
@@ -174,8 +174,8 @@ namespace Com.MM.Service.Core.WebApi.Controllers.v1.UploadControllers
                         s.date,
                         s.password,
                         s.reference,
-                        SourceCode = s.source.code,
-                        SourceName = s.source.name,
+                        SourceCode = s.sourceCode,
+                        SourceName = s.sourceName,
                         DestinationCode = s.destination.code,
                         DestinationName = s.destination.name,
                         s.isReceived,

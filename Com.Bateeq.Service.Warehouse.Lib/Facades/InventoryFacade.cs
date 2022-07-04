@@ -774,7 +774,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             result.Columns.Add(new DataColumn() { ColumnName = "Total Sale", DataType = typeof(double) });
 
             if (Query.ToArray().Count() == 0)
-                result.Rows.Add("", "", "", "", "", "", "", "", "");
+                result.Rows.Add("", "", 0, 0, "", "", 0, 0, 0);
 
             else
             {
@@ -1166,7 +1166,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         StorageCode = item.StorageCode,
                         StorageName = item.StorageName,
                         Quantity = item.Quantity,
-                        DateDiff = Math.Truncate(Convert.ToDecimal(DateTime.Now.Subtract(item.CreatedUtc).TotalDays)),
+                        DateDiff = item.DateDiff,
                     });
 
                     if (!subTotalQty.ContainsKey(StoreName))
@@ -1182,9 +1182,6 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                 foreach (KeyValuePair<string, List<InventoryAgeReportViewModel>> StoreName in dataByToko)
                 {
                     int index = 0;
-
-                    result.Rows.Add("", "", "", "", "Total Quantity : " + Math.Round(subTotalQty[StoreName.Key], 2), "");
-
                     foreach (InventoryAgeReportViewModel item in StoreName.Value)
                     {
                         index++;
@@ -1195,6 +1192,9 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         result.Rows.Add(index, item.StorageCode, item.ItemCode, item.ItemName, item.Quantity, item.DateDiff);
 
                     }
+
+                    result.Rows.Add("", "", "", "", "Total Quantity : " + Math.Round(subTotalQty[StoreName.Key], 2), "");
+
                 }
             }
             

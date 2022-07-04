@@ -39,11 +39,11 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 
         public Tuple<List<TransferInDoc>, int, Dictionary<string, string>> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            IQueryable<TransferInDoc> Query = this.dbSet.Include(m => m.Items).Where(x=>x.SourceCode.Contains("GDG."));
+            IQueryable<TransferInDoc> Query = this.dbSet.Include(m => m.Items).Where(x=>x.SourceCode.Contains("GDG.")).OrderByDescending(x=>x.Date);
 
             List<string> searchAttributes = new List<string>()
             {
-                "Code"
+                "Code","DestinationName","SourceName","Reference"
             };
 
             Query = QueryHelper<TransferInDoc>.ConfigureSearch(Query, searchAttributes, Keyword);
