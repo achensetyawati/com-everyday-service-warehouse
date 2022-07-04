@@ -13,13 +13,15 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Interfaces.SOInterfaces
     {
         Tuple<List<SODocs>, int, Dictionary<string, string>> Read(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}");
         SODocs ReadById(int id);
-        Tuple<bool, List<object>> UploadValidate(ref List<SODocsCsvViewModel> Data, List<KeyValuePair<string, StringValues>> Body, string source);
-        List<string> CsvHeader { get; }
-        Task UploadData(SODocs data, string username);
+        //Tuple<bool, List<object>> UploadValidate(ref List<SODocsCsvViewModel> Data, List<KeyValuePair<string, StringValues>> Body, string source);
+        //List<string> CsvHeader { get; }
+        //Task UploadData(SODocs data, string username);
+        Task<int> Upload(Stream stream, string source, string username);
         Task<int> Process(SODocs model, string username, int clientTimeZoneOffset = 7);
-        Task<SODocsViewModel> MapToViewModel(List<SODocsCsvViewModel> data, string source);
+        //Task<SODocsViewModel> MapToViewModel(List<SODocsCsvViewModel> data, string source);
         Task<int> Delete(int id, string username);
-        MemoryStream DownloadTemplate();
+        //MemoryStream DownloadTemplate();
+        Stream DownloadTemplate();
         //Task<int> Process(SODocs model, string username, int clientTimeZoneOffset = 7);
     }
 }
