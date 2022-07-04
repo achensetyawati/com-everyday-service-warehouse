@@ -107,28 +107,28 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.SOControllers
                     throw new Exception("Invalid Id");
                 }
 
-        ////////        //if (indexAcceptPdf < 0)
-        ////////        //{
-                    return Ok(new
-                    {
-                        apiVersion = ApiVersion,
-                        statusCode = General.OK_STATUS_CODE,
-                        message = General.OK_MESSAGE,
-                        data = viewModel,
-                    });
-        ////////       // }
-        ////////        //else
-        ////////        //{
-        ////////        //    int clientTimeZoneOffset = int.Parse(Request.Headers["x-timezone-offset"].First());
+                ////////        //if (indexAcceptPdf < 0)
+                ////////        //{
+                return Ok(new
+                {
+                    apiVersion = ApiVersion,
+                    statusCode = General.OK_STATUS_CODE,
+                    message = General.OK_MESSAGE,
+                    data = viewModel,
+                });
+                ////////       // }
+                ////////        //else
+                ////////        //{
+                ////////        //    int clientTimeZoneOffset = int.Parse(Request.Headers["x-timezone-offset"].First());
 
-        ////////        //    PurchaseRequestPDFTemplate PdfTemplate = new PurchaseRequestPDFTemplate();
-        ////////        //    MemoryStream stream = PdfTemplate.GeneratePdfTemplate(viewModel, clientTimeZoneOffset);
+                ////////        //    PurchaseRequestPDFTemplate PdfTemplate = new PurchaseRequestPDFTemplate();
+                ////////        //    MemoryStream stream = PdfTemplate.GeneratePdfTemplate(viewModel, clientTimeZoneOffset);
 
-        ////////        //    return new FileStreamResult(stream, "application/pdf")
-        ////////        //    {
-        ////////        //        FileDownloadName = $"{viewModel.Code}.pdf"
-        ////////        //    };
-        ////////        //}
+                ////////        //    return new FileStreamResult(stream, "application/pdf")
+                ////////        //    {
+                ////////        //        FileDownloadName = $"{viewModel.Code}.pdf"
+                ////////        //    };
+                ////////        //}
             }
             catch (Exception e)
             {
@@ -140,7 +140,7 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.SOControllers
         }
 
         //[HttpGet("download")]
-        //public IActionResult DownloadTemplate()
+        //public IActionResult DownloadTemplate(string code)
         //{
         //    try
         //    {
@@ -168,21 +168,18 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.SOControllers
         {
             try
             {
-                byte[] csvInBytes;
-                var csv = facade.DownloadTemplate();
+                var stream = facade.DownloadTemplate();
+                stream.Position = 0;
 
-                string fileName = "Stock Opname Template.csv";
+                FileStreamResult fileStreamResult = new FileStreamResult(stream, "application/excel");
+                fileStreamResult.FileDownloadName = $"Stock Opname {code}.xlsx";
 
-                csvInBytes = csv.ToArray();
-
-                var file = File(csvInBytes, "text/csv", fileName);
-                return file;
+                return fileStreamResult;
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                Dictionary<string, object> Result =
-                  new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
-                  .Fail();
+                Dictionary<string, object> Result = new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail(e.Message);
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
@@ -246,118 +243,5 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.SOControllers
             }
 
         }
-
-        //[HttpGet("pdf/{id}")]
-        //public IActionResult GetPackingListPDF(int id)
-        //{
-        //    try
-        //    {
-        //        var indexAcceptPdf = Request.Headers["Accept"].ToList().IndexOf("application/pdf");
-
-        //        SPKDocs model = facade.ReadById(id);
-        //        SPKDocsViewModel viewModel = mapper.Map<SPKDocsViewModel>(model);
-        //        if (viewModel == null)
-        //        {
-        //            throw new Exception("Invalid Id");
-        //        }
-        //        if (indexAcceptPdf < 0)
-        //        {
-        //            return Ok(new
-        //            {
-        //                apiVersion = ApiVersion,
-        //                statusCode = General.OK_STATUS_CODE,
-        //                message = General.OK_MESSAGE,
-        //                data = viewModel,
-        //            });
-        //        }
-        //        else
-        //        {
-        //            int clientTimeZoneOffset = int.Parse(Request.Headers["x-timezone-offset"].First());
-
-        //            //foreach (var item in viewModel.items)
-        //            //{
-        //            //    var garmentInvoice = invoiceFacade.ReadById((int)item.garmentInvoice.Id);
-        //            //    var garmentInvoiceViewModel = mapper.Map<GarmentInvoiceViewModel>(garmentInvoice);
-        //            //    item.garmentInvoice = garmentInvoiceViewModel;
-
-        //            //    foreach (var detail in item.details)
-        //            //    {
-        //            //        var deliveryOrder = deliveryOrderFacade.ReadById((int)detail.deliveryOrder.Id);
-        //            //        var deliveryOrderViewModel = mapper.Map<GarmentDeliveryOrderViewModel>(deliveryOrder);
-        //            //        detail.deliveryOrder = deliveryOrderViewModel;
-        //            //    }
-        //            //}
-
-        //            PackingListPdfTemplate PdfTemplateLocal = new PackingListPdfTemplate();
-        //            MemoryStream stream = PdfTemplateLocal.GeneratePdfTemplate(viewModel, serviceProvider, clientTimeZoneOffset);
-
-        //            return new FileStreamResult(stream, "application/pdf")
-        //            {
-        //                FileDownloadName = $"{viewModel.packingList}.pdf"
-        //            };
-
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Dictionary<string, object> Result =
-        //            new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
-        //            .Fail();
-        //        return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
-        //    }
-        //}
-
-        //[HttpGet("byreference")]
-        //public IActionResult Getbyreference(string reference)
-        //{
-        //    try
-        //    {
-        //        var model = facade.ReadByReference(reference);
-        //        model.Password = "";
-        //        var viewModel = mapper.Map<SPKDocsViewModel>(model);
-        //        if (viewModel == null)
-        //        {
-        //            throw new Exception("Invalid Id");
-        //        }
-
-        //        Dictionary<string, object> Result =
-        //            new ResultFormatter(ApiVersion, General.OK_STATUS_CODE, General.OK_MESSAGE)
-        //            .Ok(viewModel);
-        //        return Ok(Result);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Dictionary<string, object> Result =
-        //            new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
-        //            .Fail();
-        //        return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
-        //    }
-        //}
-        //[HttpGet("transfer-stock/byreference")]
-        //public IActionResult Getbyreferencetransfer(string reference)
-        //{
-        //    try
-        //    {
-        //        var model = facade.ReadByReference(reference);
-        //        var viewModel = mapper.Map<SPKDocsViewModel>(model);
-        //        if (viewModel == null)
-        //        {
-        //            throw new Exception("Invalid Id");
-        //        }
-
-        //        Dictionary<string, object> Result =
-        //            new ResultFormatter(ApiVersion, General.OK_STATUS_CODE, General.OK_MESSAGE)
-        //            .Ok(viewModel);
-        //        return Ok(Result);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Dictionary<string, object> Result =
-        //            new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
-        //            .Fail();
-        //        return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
-        //    }
-        //}
-
     }
 }
