@@ -16,10 +16,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 using MongoDB.Bson;
 using Newtonsoft.Json;
-using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
@@ -63,297 +61,96 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             return code;
         }
 
-        //public List<string> CsvHeader { get; } = new List<string>()
-        //{
-        //    "Barcode", "Nama Barang", "Kuantitas Stock"
-        //};
-
-        //public sealed class SOMap : CsvHelper.Configuration.ClassMap<SODocsCsvViewModel>
-        //{
-        //    public SOMap()
-        //    {
-        //        Map(p => p.code).Index(0);
-        //        Map(p => p.name).Index(1);
-        //        Map(p => p.quantity).Index(2).TypeConverter<StringConverter>();
-        //    }
-        //}
-
-        //public MemoryStream DownloadTemplate()
-        //{
-        //    using (MemoryStream stream = new MemoryStream())
-        //    {
-        //        using (var streamWriter = new StreamWriter(stream))
-        //        {
-        //            var configuration = new CsvHelper.Configuration.Configuration();
-        //            configuration.Delimiter = ";";
-
-        //            using (var csvWriter = new CsvWriter(streamWriter, configuration))
-        //            {
-        //                foreach (var item in CsvHeader)
-        //                {
-        //                    csvWriter.WriteField(item);
-        //                }
-        //                csvWriter.NextRecord();
-        //            }
-        //        }
-        //        return stream;
-        //    }
-        //}
-
-        public Stream DownloadTemplate()
+        public List<string> CsvHeader { get; } = new List<string>()
         {
-            DataTable table = new DataTable();
-            table.Columns.Add(new DataColumn() { ColumnName = "Barcode", DataType = typeof(int) });
-            table.Columns.Add(new DataColumn() { ColumnName = "Nama Barang", DataType = typeof(string) });
-            table.Columns.Add(new DataColumn() { ColumnName = "Kuantitas Stock", DataType = typeof(string) });
+            "Barcode", "Nama Barang", "Kuantitas Stock"
+        };
 
-            var excelPack = new ExcelPackage();
-            var ws = excelPack.Workbook.Worksheets.Add("Stock Opname");
-            ws.Cells["A1"].LoadFromDataTable(table, true);
-            ws.Protection.IsProtected = true;
-            ws.Cells[ws.Dimension.Address].AutoFitColumns();
-
-            Stream stream = new MemoryStream();
-            excelPack.SaveAs(stream);
-
-            return stream;
+        public sealed class SOMap : CsvHelper.Configuration.ClassMap<SODocsCsvViewModel>
+        {
+            public SOMap()
+            {
+                Map(p => p.code).Index(0);
+                Map(p => p.name).Index(1);
+                Map(p => p.quantity).Index(2).TypeConverter<StringConverter>();
+            }
         }
 
-        //public Tuple<bool, List<object>> UploadValidate(ref List<SODocsCsvViewModel> Data, List<KeyValuePair<string, StringValues>> Body, string source)
-        //{
-        //    List<object> ErrorList = new List<object>();
-        //    string ErrorMessage;
-        //    bool Valid = true;
-        //    var storages = GetStorage(source);
-
-        //    foreach (SODocsCsvViewModel productVM in Data)
-        //    {
-        //        //var item = dbContext.Inventories.Where(x => x.ItemCode == productVM.code && x.StorageId == storages.Id).FirstOrDefault();
-        //        ErrorMessage = "";
-
-        //        //if (item == null)
-        //        //{
-        //        //    ErrorMessage = string.Concat(ErrorMessage, "Barang tidak ditemukan, ");
-        //        //}
-
-        //        if (string.IsNullOrWhiteSpace(productVM.code))
-        //        {
-        //            ErrorMessage = string.Concat(ErrorMessage, "Barcode tidak boleh kosong, ");
-        //        }
-        //        else if (Data.Any(d => d != productVM && d.code.Equals(productVM.code)))
-        //        {
-        //            ErrorMessage = string.Concat(ErrorMessage, "Barcode tidak boleh duplikat, ");
-        //        }
-        //        if (string.IsNullOrWhiteSpace(productVM.name))
-        //        {
-        //            ErrorMessage = string.Concat(ErrorMessage, "Nama tidak boleh kosong, ");
-        //        }
-        //        else if (Data.Any(d => d != productVM && d.name.Equals(productVM.name)))
-        //        {
-        //            ErrorMessage = string.Concat(ErrorMessage, "Nama tidak boleh duplikat, ");
-        //        }
-        //        decimal quantity = 0;
-        //        if (string.IsNullOrWhiteSpace(productVM.quantity))
-        //        {
-        //            ErrorMessage = string.Concat(ErrorMessage, "Quantity tidak boleh kosong, ");
-        //        }
-        //        else if (!decimal.TryParse(productVM.quantity, out quantity))
-        //        {
-        //            ErrorMessage = string.Concat(ErrorMessage, "Quantity harus numerik, ");
-        //        }
-        //        if (string.IsNullOrEmpty(ErrorMessage))
-        //        {
-        //            productVM.quantity = quantity;
-        //        }
-        //        else
-        //        {
-        //            ErrorMessage = ErrorMessage.Remove(ErrorMessage.Length - 2);
-        //            var Error = new ExpandoObject() as IDictionary<string, object>;
-        //            Error.Add("Barcode", productVM.code);
-        //            Error.Add("Nama Barang", productVM.name);
-        //            Error.Add("Kuantitas Stock", productVM.quantity);
-        //            Error.Add("Error", ErrorMessage);
-        //            ErrorList.Add(Error);
-        //        }
-        //    }
-
-        //    if (ErrorList.Count > 0)
-        //    {
-        //        Valid = false;
-        //    }
-
-        //    return Tuple.Create(Valid, ErrorList);
-        //}
-
-        //public async Task UploadData(SODocs data, string username)
-        //{            
-        //    foreach (var i in data.Items)
-        //    {
-        //        EntityExtension.FlagForCreate(i, username, USER_AGENT);
-        //    }
-        //    EntityExtension.FlagForCreate(data, username, USER_AGENT);
-        //    dbSetSO.Add(data);
-        //    var result = await dbContext.SaveChangesAsync();
-        //}
-
-        //public async Task<SODocsViewModel> MapToViewModel(List<SODocsCsvViewModel> csv, string source)
-        //{
-        //    List<SODocsItemViewModel> soDocsItems = new List<SODocsItemViewModel>();
-        //    var storages = GetStorage(source);
-        //    foreach (var i in csv)
-        //    {
-        //        var inventoryAvailable = dbContext.Inventories.Where(x => x.ItemCode == i.code && x.StorageId == storages.Id).FirstOrDefault();
-        //        var item = GetItems(i.code);
-
-        //        if(item != null)
-        //        {
-        //            soDocsItems.Add(new SODocsItemViewModel
-        //            {
-        //                item = new ItemViewModel
-        //                {
-        //                    _id = item._id,
-        //                    articleRealizationOrder = item.ArticleRealizationOrder,
-        //                    code = item.code,
-        //                    name = item.name,
-        //                    domesticCOGS = Convert.ToDouble(item.DomesticCOGS),
-        //                    domesticRetail = Convert.ToDouble(item.DomesticRetail),
-        //                    domesticWholesale = Convert.ToDouble(item.DomesticWholesale),
-        //                    domesticSale = Convert.ToDouble(item.DomesticSale),
-        //                    size = item.Size,
-        //                    uom = item.Uom
-        //                },
-        //                qtySO = Convert.ToDouble(i.quantity),
-        //                qtyBeforeSO = inventoryAvailable == null ? 0 : Convert.ToDouble(inventoryAvailable.Quantity),
-        //                remark = ""
-        //            });
-        //        } 
-        //        else
-        //        {
-        //            throw new Exception("data "+i.code+" tidak ada di master barang");
-        //        }
-        //    }
-
-        //    SODocsViewModel soDocs = new SODocsViewModel
-        //    {
-        //        code = GenerateCode("EVR-SO/INT"),
-        //        storage = new StorageViewModel
-        //        {
-        //            _id = storages.Id,
-        //            code = storages.Code, 
-        //            name = storages.Name,
-        //            isCentral = storages.IsCentral 
-        //        },
-        //        items = soDocsItems,
-        //        isProcessed = false
-        //    };
-
-        //    return soDocs;
-        //}
-
-        public async Task<int> Upload(Stream stream, string source, string username)
+        public MemoryStream DownloadTemplate()
         {
-            ExcelPackage excelPackage = new ExcelPackage();
-            excelPackage.Load(stream);
-
-            var created = 0;
-            var ws = excelPackage.Workbook.Worksheets[0];
-            var storages = GetStorage(source);
-            var valid = ValidateUpload(ws, source);
-
-            List<SODocsItem> itemsTemp = new List<SODocsItem>();
-
-            if (valid.Item1)
+            using (MemoryStream stream = new MemoryStream())
             {
-                for (int row = 2; row <= ws.Dimension.End.Row; row++)
+                using (var streamWriter = new StreamWriter(stream))
                 {
-                    var inventoryAvailable = dbContext.Inventories.Where(x => x.ItemCode == ws.Cells[row, 1].Text && x.StorageId == storages.Id).FirstOrDefault();
-                    var item = GetItems(ws.Cells[row, 1].Text);
+                    var configuration = new CsvHelper.Configuration.Configuration();
+                    configuration.Delimiter = ";";
 
-                    if (item != null)
+                    using (var csvWriter = new CsvWriter(streamWriter, configuration))
                     {
-                        var itemTemp = new SODocsItem
+                        foreach (var item in CsvHeader)
                         {
-                            ItemArticleRealizationOrder = inventoryAvailable == null ? item.ArticleRealizationOrder : inventoryAvailable.ItemArticleRealizationOrder,
-                            ItemCode = item.code,
-                            ItemName = item.name,
-                            ItemSize = item.Size,
-                            ItemUom = "PCS",
-                            ItemId = item._id,
-                            ItemDomesticCOGS = inventoryAvailable == null ? Convert.ToDouble(item.DomesticCOGS) : inventoryAvailable.ItemDomesticCOGS,
-                            ItemDomesticSale = inventoryAvailable == null ? Convert.ToDouble(item.DomesticSale) : inventoryAvailable.ItemDomesticSale,
-                            ItemDomesticRetail = inventoryAvailable == null ? Convert.ToDouble(item.DomesticRetail) : inventoryAvailable.ItemDomesticRetail,
-                            ItemDomesticWholeSale = inventoryAvailable == null ? Convert.ToDouble(item.DomesticWholesale) : inventoryAvailable.ItemDomesticWholeSale,
-                            ItemInternationalCOGS = 0,
-                            ItemInternationalRetail = 0,
-                            ItemInternationalSale = 0,
-                            ItemInternationalWholeSale = 0,
-                            IsAdjusted = false,
-                            QtyBeforeSO = inventoryAvailable == null ? 0 : Convert.ToDouble(inventoryAvailable.Quantity),
-                            QtySO = Convert.ToDouble(ws.Cells[row, 3].Text)
-                        };
-
-                        EntityExtension.FlagForCreate(itemTemp, username, USER_AGENT);
-                        itemsTemp.Add(itemTemp);
-                    }
-                    else
-                    {
-                        throw new Exception("item barang ditemukan di master barang");
+                            csvWriter.WriteField(item);
+                        }
+                        csvWriter.NextRecord();
                     }
                 }
-
-                var data = new SODocs
-                {
-                    Code = GenerateCode("EVR-SO/INT"),
-                    StorageCode = storages.Code,
-                    StorageId = storages.Id,
-                    StorageName = storages.Name,
-                    Items = itemsTemp,
-                    IsProcessed = false
-                };
-
-                EntityExtension.FlagForCreate(data, username, USER_AGENT);
-                dbSetSO.Add(data);
-
-                created = await dbContext.SaveChangesAsync();
+                return stream;
             }
-                
-            return created;
-
         }
 
-        public Tuple<bool, List<object>> ValidateUpload(ExcelWorksheet ws, string source)
+        public Tuple<bool, List<object>> UploadValidate(ref List<SODocsCsvViewModel> Data, List<KeyValuePair<string, StringValues>> Body, string source)
         {
             List<object> ErrorList = new List<object>();
-            string ErrorMessage = "";
+            string ErrorMessage;
             bool Valid = true;
+            var storages = GetStorage(source);
 
-            for(int row = 2; row <= ws.Dimension.End.Row; row++)
+            foreach (SODocsCsvViewModel productVM in Data)
             {
-                if(string.IsNullOrWhiteSpace(ws.Cells[row, 1].Text))
+                //var item = dbContext.Inventories.Where(x => x.ItemCode == productVM.code && x.StorageId == storages.Id).FirstOrDefault();
+                ErrorMessage = "";
+
+                //if (item == null)
+                //{
+                //    ErrorMessage = string.Concat(ErrorMessage, "Barang tidak ditemukan, ");
+                //}
+
+                if (string.IsNullOrWhiteSpace(productVM.code))
                 {
-                    ErrorMessage = string.Concat(ErrorMessage, "Barcode Tidak Boleh Kosong, ");
+                    ErrorMessage = string.Concat(ErrorMessage, "Barcode tidak boleh kosong, ");
                 }
-                if (string.IsNullOrWhiteSpace(ws.Cells[row, 2].Text))
+                else if (Data.Any(d => d != productVM && d.code.Equals(productVM.code)))
                 {
-                    ErrorMessage = string.Concat(ErrorMessage, "Nama Barang Tidak Boleh Kosong, ");
+                    ErrorMessage = string.Concat(ErrorMessage, "Barcode tidak boleh duplikat, ");
+                }
+                if (string.IsNullOrWhiteSpace(productVM.name))
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Nama tidak boleh kosong, ");
+                }
+                else if (Data.Any(d => d != productVM && d.name.Equals(productVM.name)))
+                {
+                    ErrorMessage = string.Concat(ErrorMessage, "Nama tidak boleh duplikat, ");
                 }
                 decimal quantity = 0;
-                if (string.IsNullOrWhiteSpace(ws.Cells[row, 3].Text))
+                if (string.IsNullOrWhiteSpace(productVM.quantity))
                 {
                     ErrorMessage = string.Concat(ErrorMessage, "Quantity tidak boleh kosong, ");
                 }
-                else if (!decimal.TryParse(ws.Cells[row, 3].Text, out quantity))
+                else if (!decimal.TryParse(productVM.quantity, out quantity))
                 {
                     ErrorMessage = string.Concat(ErrorMessage, "Quantity harus numerik, ");
                 }
-
-                if (!string.IsNullOrEmpty(ErrorMessage))
+                if (string.IsNullOrEmpty(ErrorMessage))
+                {
+                    productVM.quantity = quantity;
+                }
+                else
                 {
                     ErrorMessage = ErrorMessage.Remove(ErrorMessage.Length - 2);
                     var Error = new ExpandoObject() as IDictionary<string, object>;
-                    Error.Add("Barcode", ws.Cells[row, 1].Text);
-                    Error.Add("Nama Barang", ws.Cells[row, 2].Text);
-                    Error.Add("Kuantitas Stock", ws.Cells[row, 3].Text);
+                    Error.Add("Barcode", productVM.code);
+                    Error.Add("Nama Barang", productVM.name);
+                    Error.Add("Kuantitas Stock", productVM.quantity);
                     Error.Add("Error", ErrorMessage);
                     ErrorList.Add(Error);
                 }
@@ -365,6 +162,71 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             }
 
             return Tuple.Create(Valid, ErrorList);
+        }
+
+        public async Task UploadData(SODocs data, string username)
+        {            
+            foreach (var i in data.Items)
+            {
+                EntityExtension.FlagForCreate(i, username, USER_AGENT);
+            }
+            EntityExtension.FlagForCreate(data, username, USER_AGENT);
+            dbSetSO.Add(data);
+            var result = await dbContext.SaveChangesAsync();
+        }
+
+        public async Task<SODocsViewModel> MapToViewModel(List<SODocsCsvViewModel> csv, string source)
+        {
+            List<SODocsItemViewModel> soDocsItems = new List<SODocsItemViewModel>();
+            var storages = GetStorage(source);
+            foreach (var i in csv)
+            {
+                var inventoryAvailable = dbContext.Inventories.Where(x => x.ItemCode == i.code && x.StorageId == storages.Id).FirstOrDefault();
+                var item = GetItems(i.code);
+
+                if(item != null)
+                {
+                    soDocsItems.Add(new SODocsItemViewModel
+                    {
+                        item = new ItemViewModel
+                        {
+                            _id = item._id,
+                            articleRealizationOrder = item.ArticleRealizationOrder,
+                            code = item.code,
+                            name = item.name,
+                            domesticCOGS = Convert.ToDouble(item.DomesticCOGS),
+                            domesticRetail = Convert.ToDouble(item.DomesticRetail),
+                            domesticWholesale = Convert.ToDouble(item.DomesticWholesale),
+                            domesticSale = Convert.ToDouble(item.DomesticSale),
+                            size = item.Size,
+                            uom = item.Uom
+                        },
+                        qtySO = Convert.ToDouble(i.quantity),
+                        qtyBeforeSO = inventoryAvailable == null ? 0 : Convert.ToDouble(inventoryAvailable.Quantity),
+                        remark = ""
+                    });
+                } 
+                else
+                {
+                    throw new Exception("data "+i.code+" tidak ada di master barang");
+                }
+            }
+
+            SODocsViewModel soDocs = new SODocsViewModel
+            {
+                code = GenerateCode("EVR-SO/INT"),
+                storage = new StorageViewModel
+                {
+                    _id = storages.Id,
+                    code = storages.Code, 
+                    name = storages.Name,
+                    isCentral = storages.IsCentral 
+                },
+                items = soDocsItems,
+                isProcessed = false
+            };
+
+            return soDocs;
         }
 
         public async Task<int> Process(SODocs viewModel, string username, int clientTimeZoneOffset = 7)
