@@ -43,7 +43,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
 
             List<string> searchAttributes = new List<string>()
             {
-                "Code"
+                "Code","DestinationName","SourceName","Reference"
             };
 
             Query = QueryHelper<TransferInDoc>.ConfigureSearch(Query, searchAttributes, Keyword);

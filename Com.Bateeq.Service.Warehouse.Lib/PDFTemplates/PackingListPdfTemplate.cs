@@ -66,29 +66,29 @@ namespace Com.Bateeq.Service.Warehouse.Lib.PDFTemplates
             //bold_font.SetStyle(Font.NORMAL);
 
             PdfPTable tableInternNoteHeader = new PdfPTable(2);
-            tableInternNoteHeader.SetWidths(new float[] { 7.5f, 4.5f });
+            tableInternNoteHeader.SetWidths(new float[] { 6f, 5f });
             PdfPCell cellInternNoteHeaderLeft = new PdfPCell() { Border = Rectangle.NO_BORDER, HorizontalAlignment = Element.ALIGN_LEFT };
             PdfPCell cellInternNoteHeaderRight = new PdfPCell() { Border = Rectangle.NO_BORDER, HorizontalAlignment = Element.ALIGN_LEFT };
 
-            cellInternNoteHeaderLeft.Phrase = new Phrase("PT EFRATA RETAILINDO", bold_font1);
+            cellInternNoteHeaderLeft.Phrase = new Phrase("PT. TABOR ANDALAN RETAILINDO", bold_font1);
             tableInternNoteHeader.AddCell(cellInternNoteHeaderLeft);
 
             cellInternNoteHeaderLeft.Phrase = new Phrase("No. Packing List" + "       : " + viewModel.packingList, normal_font);
             tableInternNoteHeader.AddCell(cellInternNoteHeaderLeft);
 
-            cellInternNoteHeaderRight.Phrase = new Phrase("Kel. Banaran, Kec. Grogol, Kab.Sukoharjo 57193 Jawa Tengah, Indonesia", normal_font);
+            cellInternNoteHeaderRight.Phrase = new Phrase("EQUITY TOWER 15C JL JEND SUDIRMAN KAV. 52-53\nSENAYAN KEBAYORAN BARU\nJAKARTA SELATAN DKI JAKARTA\nNO NPWP : 71.157.388.1-451.000", normal_font);
+            cellInternNoteHeaderRight.Rowspan = 2;
             tableInternNoteHeader.AddCell(cellInternNoteHeaderRight);
 
             cellInternNoteHeaderLeft.Phrase = new Phrase("Password" + "                 : " + viewModel.password, normal_font);
             tableInternNoteHeader.AddCell(cellInternNoteHeaderLeft);
 
-            cellInternNoteHeaderRight.Phrase = new Phrase("", normal_font);
-            tableInternNoteHeader.AddCell(cellInternNoteHeaderRight);
 
             cellInternNoteHeaderLeft.Phrase = new Phrase("Tanggal" + "                    : " + viewModel.CreatedUtc.ToString("dd MMMM yyyy", new CultureInfo("id-ID")) + "\n\n\n" , normal_font);
             tableInternNoteHeader.AddCell(cellInternNoteHeaderLeft);
 
             cellInternNoteHeaderRight.Phrase = new Phrase("Dari" + "                           : " + viewModel.source.name, normal_font);
+            cellInternNoteHeaderRight.Rowspan = 1;
             tableInternNoteHeader.AddCell(cellInternNoteHeaderRight);
 
             cellInternNoteHeaderLeft.Phrase = new Phrase("", normal_font);
@@ -182,7 +182,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.PDFTemplates
 
             PdfPCell cellContent = new PdfPCell(tableContent); // dont remove
             tableContent.ExtendLastRow = false;
-            tableContent.SpacingAfter = 20f;
+            tableContent.SpacingAfter = 0f;
             document.Add(tableContent);
             #endregion
             #region Total
@@ -197,7 +197,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.PDFTemplates
             tabletotal.AddCell(cellTotalContent);
             PdfPCell cellTotal = new PdfPCell(tabletotal); // dont remove
             tabletotal.ExtendLastRow = false;
-            tabletotal.SpacingBefore = 20f;
+            tabletotal.SpacingBefore = 0f;
             tabletotal.SpacingAfter = 20f;
             document.Add(tabletotal);
             #endregion
