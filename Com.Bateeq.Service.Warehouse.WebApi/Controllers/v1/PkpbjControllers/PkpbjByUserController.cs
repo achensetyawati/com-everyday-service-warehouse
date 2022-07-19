@@ -443,7 +443,8 @@ namespace Com.Bateeq.Service.Warehouse.WebApi.Controllers.v1.PkpbjControllers
             try
             {
                 var model = facade.ReadByReference(reference);
-                model.Password = "";
+                //password minta ditampilkan tanggal 19 Juli 2022
+				//model.Password = "";
                 var viewModel = mapper.Map<SPKDocsViewModel>(model);
                 if (viewModel == null)
                 {
