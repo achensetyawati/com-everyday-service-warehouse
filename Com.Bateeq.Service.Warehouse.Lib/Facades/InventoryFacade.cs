@@ -149,7 +149,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                               ItemSize = a.ItemSize,
                               ItemUom = a.ItemUom,
                               ItemDomesticSale = a.ItemDomesticSale,
-                              Quantity = a.Quantity,
+                              Quantity =  a.Quantity,
                               StorageId = a.StorageId,
                               StorageCode = a.StorageCode,
                               StorageName = a.StorageName
@@ -415,7 +415,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                              ItemSize = c.ItemSize,
                              ItemUom = c.ItemUom,
                              ItemDomesticSale = c.ItemDomesticSale,
-                             Quantity = c.Quantity,
+                             Quantity = c.Type == "OUT"? -c.Quantity : c.Quantity,
                              Before = c.Before,
                              After = c.After,
                              Type = c.Type,
