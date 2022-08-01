@@ -75,11 +75,11 @@ namespace Com.Bateeq.Service.Warehouse.Lib.ViewModels.ExpeditionViewModel
                                 detailError += "sendQuantity: 'sendQuantity can not more than packingList quantity', ";
                             }
                             
-                            if (detail.remark == null || detail.remark == "")
-                            {
-                                detailErrorCount++;
-                                detailError += "remark: 'remark is required', ";
-                            }
+                            //if (detail.remark == null || detail.remark == "")
+                            //{
+                            //    detailErrorCount++;
+                            //    detailError += "remark: 'remark is required', ";
+                            //}
                             detailError += "}, ";
                         }
 
