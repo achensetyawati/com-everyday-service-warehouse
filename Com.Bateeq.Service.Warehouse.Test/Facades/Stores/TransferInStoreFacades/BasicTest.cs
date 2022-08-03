@@ -234,5 +234,20 @@ namespace Com.Bateeq.Service.Warehouse.Test.Facades.Stores.TransferInStoreFacade
             var Response = facade.ReadPending();
             Assert.NotEqual(null, Response);
         }
-    }
+
+		[Fact]
+		public async Task Should_Success_Get_All_Data_PendingStore()
+		{
+
+			DbSet<SPKDocs> dbSetSpk = _dbContext(GetCurrentMethod()).Set<SPKDocs>();
+
+			dbSetSpk.Add(spkDocsModel);
+			await _dbContext(GetCurrentMethod()).SaveChangesAsync();
+			TransferInStoreFacade facade = new TransferInStoreFacade(GetServiceProvider().Object, _dbContext(GetCurrentMethod()));
+
+			var Response = facade.ReadPendingStore("code");
+			Assert.NotEqual(null, Response);
+
+		}
+	}
 }

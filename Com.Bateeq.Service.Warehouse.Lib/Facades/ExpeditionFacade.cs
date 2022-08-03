@@ -263,7 +263,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                 ItemId = d.ItemId,
                                 ItemName = d.ItemName,
                                 ItemSize = d.Size,
-                                Quantity = d.Quantity,
+                                Quantity = d.SendQuantity,
                                 Reference = CodeTransferOut,
                                 Remark = d.Remark,
                                 StorageCode = i.SourceCode,
@@ -284,7 +284,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                 ItemCode = d.ItemCode,
                                 ItemId = d.ItemId,
                                 ItemName = d.ItemName,
-                                Quantity = d.Quantity,
+                                Quantity = d.SendQuantity,
                                 Remark = d.Remark,
                                 Size = d.Size,
                                 Uom = d.Uom
