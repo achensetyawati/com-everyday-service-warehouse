@@ -234,6 +234,65 @@ namespace Com.MM.Service.Warehouse.WebApi.Controllers.v1.InventoryControllers
                 return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
             }
         }
+
+        [HttpGet("get-movements-by-date")]
+        public IActionResult GetMovementsByDate(string storageId, string itemCode, string month, string year, string info, int page = 1, int size = 25, string Order = "{}")
+        {
+            int offset = Convert.ToInt32(Request.Headers["x-timezone-offset"]);
+            identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
+            string accept = Request.Headers["Accept"];
+
+            try
+            {
+                var data = facade.GetMovementsByDate(storageId, itemCode, month, year, info, Order, offset, identityService.Username, page, size);
+
+                return Ok(new
+                {
+                    apiVersion = ApiVersion,
+                    data = data.Item1,
+                    info = new { total = data.Item2 },
+                    message = General.OK_MESSAGE,
+                    statusCode = General.OK_STATUS_CODE
+                });
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+
+        [HttpGet("get-movements-by-date/download")]
+        public IActionResult GetMovementsByDateXls(string storageId, string itemCode, string month, string year)
+        {
+            try
+            {
+                byte[] xlsInBytes;
+                string filename;
+
+                var _month = Convert.ToInt32(month);
+                var _year = Convert.ToInt32(year);
+                var date = new DateTime(_year, _month, 1);
+
+                var xls = facade.GenerateExcelReportMovementByDate(storageId, itemCode, month, year);
+                filename = String.Format("Report Movement Stock - {0}.xlsx", date.ToString("MM-yyyy"));
+
+                xlsInBytes = xls.ToArray();
+                var file = File(xlsInBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
+
+                return file;
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+
         #endregion
 
         #region Age Inventory
