@@ -213,7 +213,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                             inventorymovement.Before = inven.Quantity;
                             inven.Quantity = inven.Quantity - i.Quantity;
                         }
-                        inventorymovement.After = inventorymovement.Before + i.Quantity;
+                        inventorymovement.After = inventorymovement.Before - i.Quantity;
                         inventorymovement.Date = DateTimeOffset.UtcNow;
                         inventorymovement.ItemCode = i.ItemCode;
                         inventorymovement.ItemDomesticCOGS = i.ItemDomesticCOGS;
