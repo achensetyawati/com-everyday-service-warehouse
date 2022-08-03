@@ -269,7 +269,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                                 StorageCode = i.SourceCode,
                                 StorageIsCentral = i.SourceName.Contains("GUDANG") ? true : false,
                                 StorageId = i.SourceId,
-                                StorageName = i.DestinationName,
+                                StorageName = i.SourceName,
                                 Type = "OUT"
                             };
 
