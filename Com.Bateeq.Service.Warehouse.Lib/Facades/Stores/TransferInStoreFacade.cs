@@ -61,13 +61,21 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
             return Tuple.Create(Data, TotalData, OrderDictionary);
         }
 
-        public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadPending(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
+		public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadPendingStore(string destinationName,int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
         {
-            IQueryable<SPKDocs> Query = this.dbSetSpk.Include(m => m.Items).Where(i=>i.IsDistributed == true && i.IsReceived == false);
+			String[] strlist = destinationName.Split(";");
 
-            List<string> searchAttributes = new List<string>()
+			List<string> destName = new List<string>();
+			foreach (String s in strlist)
+			{
+				destName.Add(s);
+			}
+			IQueryable<SPKDocs> Query = this.dbSetSpk.Include(m => m.Items).Where(i=>i.IsDistributed == true && i.IsReceived == false && destName.Contains(i.DestinationCode) && i.DestinationCode != "GDG.01" );
+
+
+			List<string> searchAttributes = new List<string>()
             {
-                "Code"
+                "Code","DestinationName","SourceName","Reference","PackingList"
             };
 
             foreach(var i in Query)
@@ -111,7 +119,57 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades.Stores
             return Tuple.Create(Data, TotalData, OrderDictionary);
         }
 
-        public TransferInDoc ReadById(int id)
+		public Tuple<List<SPKDocs>, int, Dictionary<string, string>> ReadPending(int Page = 1, int Size = 25, string Order = "{}", string Keyword = null, string Filter = "{}")
+		{
+			IQueryable<SPKDocs> Query = this.dbSetSpk.Include(m => m.Items).Where(i => i.IsDistributed == true && i.IsReceived == false);
+
+			List<string> searchAttributes = new List<string>()
+			{
+				"Code","DestinationName","SourceName","Reference","PackingList"
+			};
+
+			foreach (var i in Query)
+			{
+				if (/*i.Reference != null || i.Reference != ""*/ !String.IsNullOrWhiteSpace(i.Reference) && i.Reference.Contains("RTT"))
+				{
+					var transferout = dbContext.TransferOutDocs.Where(x => x.Code == i.Reference).FirstOrDefault();
+					if (transferout != null)
+					{
+						i.SourceId = transferout.SourceId;
+						i.SourceCode = transferout.SourceCode;
+						i.SourceName = transferout.SourceName;
+						i.DestinationId = transferout.DestinationId;
+						i.DestinationName = transferout.DestinationName;
+						i.DestinationCode = transferout.DestinationCode;
+					}
+					else
+					{
+						i.SourceId = 0;
+						i.SourceCode = "-";
+						i.SourceName = "-";
+						i.DestinationId = 0;
+						i.DestinationName = "-";
+						i.DestinationCode = "-";
+					}
+				}
+			}
+
+			Query = QueryHelper<SPKDocs>.ConfigureSearch(Query, searchAttributes, Keyword);
+
+			Dictionary<string, string> FilterDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Filter);
+			Query = QueryHelper<SPKDocs>.ConfigureFilter(Query, FilterDictionary);
+
+			Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
+			Query = QueryHelper<SPKDocs>.ConfigureOrder(Query, OrderDictionary);
+
+			Pageable<SPKDocs> pageable = new Pageable<SPKDocs>(Query, Page - 1, Size);
+			List<SPKDocs> Data = pageable.Data.ToList();
+			int TotalData = pageable.TotalCount;
+
+			return Tuple.Create(Data, TotalData, OrderDictionary);
+		}
+
+		public TransferInDoc ReadById(int id)
         {
             var model = dbSet.Where(m => m.Id == id)
                  .Include(m => m.Items)
