@@ -508,6 +508,114 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
         }
         #endregion
 
+        #region Inventory Movement By Date
+        public IQueryable<InventoryMovementsReportViewModel> GetMovementByDateQuery(string storageId, string itemCode, DateTime firstDay, DateTime lastDay)
+        {
+            var Query = (from c in dbContext.InventoryMovements
+                         where c.IsDeleted == false
+                         && c.StorageId == Convert.ToInt64((string.IsNullOrWhiteSpace(storageId) ? c.StorageId.ToString() : storageId))
+                         && c.ItemCode == (string.IsNullOrWhiteSpace(itemCode) ? c.ItemCode : itemCode)
+                         && c.CreatedUtc >= firstDay
+                         && c.CreatedUtc <= lastDay
+
+                         select new InventoryMovementsReportViewModel
+                         {
+                             Date = c.Date,
+                             ItemCode = c.ItemCode,
+                             ItemName = c.ItemName,
+                             ItemArticleRealizationOrder = c.ItemArticleRealizationOrder,
+                             ItemSize = c.ItemSize,
+                             ItemUom = c.ItemUom,
+                             ItemDomesticSale = c.ItemDomesticSale,
+                             Quantity = c.Type == "OUT" ? -c.Quantity : c.Quantity,
+                             Before = c.Before,
+                             After = c.After,
+                             Type = c.Type,
+                             Reference = c.Reference,
+                             Remark = c.Remark,
+                             StorageId = c.StorageId,
+                             StorageCode = c.StorageCode,
+                             StorageName = c.StorageName,
+                             CreatedUtc = c.CreatedUtc,
+                         });
+            return Query;
+        }
+
+        public Tuple<List<InventoryMovementsReportViewModel>, int> GetMovementsByDate(string storageId, string itemCode, string _month, string _year, string info, string Order, int offset, string username, int page = 1, int size = 25)
+        {
+            var month = Convert.ToInt32(_month);
+            var year = Convert.ToInt32(_year);
+
+            var firstDay = new DateTime(year, month, 1);
+            var lastDay = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+
+            var Query = GetMovementByDateQuery(storageId, itemCode, firstDay, lastDay);
+
+            Dictionary<string, string> OrderDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(Order);
+            if (OrderDictionary.Count.Equals(0))
+            {
+                Query = Query.OrderByDescending(b => b.LastModifiedUtc);
+            }
+            else
+            {
+                string Key = OrderDictionary.Keys.First();
+                string OrderType = OrderDictionary[Key];
+
+                Query = Query.OrderBy(string.Concat(Key, " ", OrderType));
+            }
+
+            Pageable<InventoryMovementsReportViewModel> pageable = new Pageable<InventoryMovementsReportViewModel>(Query, page - 1, size);
+            List<InventoryMovementsReportViewModel> Data = pageable.Data.ToList<InventoryMovementsReportViewModel>();
+            int TotalData = pageable.TotalCount;
+
+            return Tuple.Create(Data, TotalData);
+        }
+
+        public MemoryStream GenerateExcelReportMovementByDate(string storecode, string itemCode, string _month, string _year)
+        {
+
+            var month = Convert.ToInt32(_month);
+            var year = Convert.ToInt32(_year);
+
+            var firstDay = new DateTime(year, month, 1);
+            var lastDay = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+
+            var Query = GetMovementByDateQuery(storecode, itemCode, firstDay, lastDay);
+            DataTable result = new DataTable();
+
+            result.Columns.Add(new DataColumn() { ColumnName = "No", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Kode Toko", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Nama", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Barcode", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Nama Barang", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Tanggal", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Referensi", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Tipe", DataType = typeof(String) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Sebelum", DataType = typeof(double) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Kuantitas", DataType = typeof(double) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Setelah", DataType = typeof(double) });
+            result.Columns.Add(new DataColumn() { ColumnName = "Keterangan", DataType = typeof(String) });
+
+            if (Query.ToArray().Count() == 0)
+                result.Rows.Add("", "", "", "", "", "", "", "", 0, 0, 0, "");
+            // to allow column name to be generated properly for empty data as template
+            else
+            {
+                int index = 0;
+                foreach (var item in Query)
+                {
+                    index++;
+                    string date = item.Date == null ? "-" : item.Date.ToOffset(new TimeSpan(7, 0, 0)).ToString("dd MMM yyyy - HH:mm:ss", new CultureInfo("id-ID"));
+                    result.Rows.Add(index, item.StorageCode, item.StorageName, item.ItemCode, item.ItemName, date,
+                        item.Reference, item.Type, item.Before, item.Quantity, item.After, item.Remark);
+                }
+
+            }
+
+            return Excel.CreateExcel(new List<KeyValuePair<DataTable, string>>() { new KeyValuePair<DataTable, string>(result, "Territory") }, true);
+        }
+        #endregion
+
         #region Stock Availability
 
         private List<StoreViewModel> getNearestStore(string code)
