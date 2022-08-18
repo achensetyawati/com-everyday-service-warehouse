@@ -546,6 +546,104 @@ namespace Com.Bateeq.Service.Warehouse.Test.Controllers.InvetoriesTests
 			Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", response.GetType().GetProperty("ContentType").GetValue(response, null));
 		}
 		#endregion
+		#region get-movement-by-date
+		[Fact]
+		public void Should_InternalServerError_Get_Data_Movement_By_Date()
+		{
+			//Setup
+			WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+			Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+			Mock<IMapper> imapper = new Mock<IMapper>();
+
+			InventoryFacade service = new InventoryFacade(serviceProvider.Object, dbContext);
+
+			serviceProvider.Setup(s => s.GetService(typeof(InventoryFacade))).Returns(service);
+			serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+			var identityService = new IdentityService();
+
+			InventoryMovement testData = GetTestDataMovement(dbContext);
+
+			//Act
+			IActionResult response = GetController(identityService, imapper.Object, service).GetMovementsByDate("a","1",It.IsAny<int>(), It.IsAny<int>());
+
+			//Assert
+			int statusCode = this.GetStatusCode(response);
+			Assert.Equal((int)HttpStatusCode.InternalServerError, statusCode);
+		}
+
+		[Fact]
+		public void Should_Success_Get_Data_Movement_By_Date()
+		{
+			//Setup
+			WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+			Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+			Mock<IMapper> imapper = new Mock<IMapper>();
+
+			InventoryFacade service = new InventoryFacade(serviceProvider.Object, dbContext);
+
+			serviceProvider.Setup(s => s.GetService(typeof(InventoryFacade))).Returns(service);
+			serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+			var identityService = new IdentityService();
+
+			InventoryMovement testData = GetTestDataMovement(dbContext);
+
+			//Act
+			IActionResult response = GetController(identityService, imapper.Object, service).GetMovementsByDate("1" ,"0001", 1, 25);
+
+			//Assert
+			int statusCode = this.GetStatusCode(response);
+			Assert.Equal((int)HttpStatusCode.OK, statusCode);
+		}
+
+		[Fact]
+		public void Should_Success_Get_Xls_Movement_By_Date()
+		{
+			//Setup
+			WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+			Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+			Mock<IMapper> imapper = new Mock<IMapper>();
+
+			InventoryFacade service = new InventoryFacade(serviceProvider.Object, dbContext);
+
+			serviceProvider.Setup(s => s.GetService(typeof(InventoryFacade))).Returns(service);
+			serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+			var identityService = new IdentityService();
+
+			InventoryMovement testData = GetTestDataMovement(dbContext);
+			Inventory testDataInven = GetTestData(dbContext);
+
+			//Act
+			IActionResult response = GetController(identityService, imapper.Object, service).GetMovementsByDateXls("1","0001");
+
+			//Assert
+			Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", response.GetType().GetProperty("ContentType").GetValue(response, null));
+		}
+
+		[Fact]
+		public void Should_InternalServerError_Get_Xls_Movement_By_Date()
+		{
+			//Setup
+			WarehouseDbContext dbContext = _dbContext(GetCurrentAsyncMethod());
+			Mock<IServiceProvider> serviceProvider = GetServiceProvider();
+			Mock<IMapper> imapper = new Mock<IMapper>();
+
+			InventoryFacade service = new InventoryFacade(serviceProvider.Object, dbContext);
+
+			serviceProvider.Setup(s => s.GetService(typeof(InventoryFacade))).Returns(service);
+			serviceProvider.Setup(s => s.GetService(typeof(WarehouseDbContext))).Returns(dbContext);
+			var identityService = new IdentityService();
+
+			InventoryMovement testData = GetTestDataMovement(dbContext);
+			Inventory testDataInven = GetTestData(dbContext);
+
+			//Act
+			IActionResult response = GetController(identityService, imapper.Object, service).GetMovementsByDateXls("a", "0001");
+
+			//Assert
+			int statusCode = this.GetStatusCode(response);
+			Assert.Equal((int)HttpStatusCode.OK, statusCode);
+		}
+		#endregion
 		#region stockAvailability
 
 		[Fact]
