@@ -620,8 +620,8 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
         public IQueryable<InventoryMovementsReportViewModel> GetMovementByDateQuery(DateTime firstDay, DateTime lastDay)
         {
             var Query = (from c in dbContext.InventoryMovements
-                         join d in dbContext.Inventories 
-                         on new {c.ItemCode, c.StorageCode} equals new {d.ItemCode, d.StorageCode}
+                         join d in dbContext.Inventories
+                         on new { c.ItemCode, c.StorageCode } equals new { d.ItemCode, d.StorageCode }
                          where c.IsDeleted == false
                          && c.CreatedUtc >= firstDay
                          && c.CreatedUtc <= lastDay
@@ -645,6 +645,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                              StorageCode = c.StorageCode,
                              StorageName = c.StorageName,
                              CreatedUtc = c.CreatedUtc,
+                             DestinationName = c.Type == "OUT" ? dbContext.TransferOutDocs.Where(a => a.Code == c.Reference).Select(a => a.DestinationName).FirstOrDefault() : dbContext.TransferInDocs.Where(a => a.Code == c.Reference).Select(a => a.SourceName).FirstOrDefault()
                          }).OrderBy(a=>a.Date.Date).ThenBy(a=>a.StorageCode).ThenBy(a=>a.ItemCode);
 
             return Query;
