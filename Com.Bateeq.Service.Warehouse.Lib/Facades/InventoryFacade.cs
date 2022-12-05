@@ -658,7 +658,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             SqlConnection conn = new SqlConnection("Server=everyday-db-server.database.windows.net,1433;Database=everyday-db-warehouse;User=everydayprd;password=Everyday123.;Trusted_Connection=False;Encrypt=True;MultipleActiveResultSets=true");
             conn.Open();
             SqlCommand command = new SqlCommand(
-                "SELECT[After], a.CreatedUtc,[Before], a.[Date],[ItemArticleRealizationOrder],[ItemCode],[ItemDomesticSale],[ItemInternationalSale],[ItemName] " +
+                "SELECT[After], a.CreatedUtc,[Before],  CONVERT(Date, a.Date) Date,[ItemArticleRealizationOrder],[ItemCode],[ItemDomesticSale],[ItemInternationalSale],[ItemName] " +
                 ",[ItemSize],[ItemUom],[Quantity], a.[Reference], a.[Remark],[StorageCode],[StorageId],[StorageName],[Type]" +
                 ", case when type = 'IN' then(select top 1 SourceName from TransferInDocs where isdeleted = 0) " +
                 "		else (select top 1 SourceName from TransferOutDocs where isdeleted = 0) end as SourceName" +
