@@ -655,7 +655,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
         public IQueryable<InventoryMovementsMonthlyReportViewModel> GetMovementByDateQuery(DateTime firstDay, DateTime lastDay)
         {
-            SqlConnection conn = new SqlConnection("Server=everyday-db-server.database.windows.net,1433;Database=everyday-db-warehouse;User=everydayprd;password=Everyday123.;Trusted_Connection=False;Encrypt=True;MultipleActiveResultSets=true");
+            SqlConnection conn = new SqlConnection("Server=everyday-db-server.database.windows.net,1433;Database=everyday-db-warehouse;User=everydayprd;password=EveryDay123.;Trusted_Connection=False;Encrypt=True;MultipleActiveResultSets=true");
             conn.Open();
             SqlCommand command = new SqlCommand(
                 "SELECT[After], a.CreatedUtc,[Before],  CONVERT(Date, a.Date) Date,[ItemArticleRealizationOrder],[ItemCode],[ItemDomesticSale],[ItemInternationalSale],[ItemName] " +
