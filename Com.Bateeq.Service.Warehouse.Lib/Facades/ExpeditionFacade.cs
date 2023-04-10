@@ -230,6 +230,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         string CodeTransferOut = GenerateCode("EVR-KB/EXP");
                         var SPK = dbContext.SPKDocs.Where(x => x.PackingList == i.PackingList).Single();
                         SPK.IsDistributed = true;
+                        i.SPKDocsId = SPK.Id;
                         transferOutDoc.Code = CodeTransferOut;
                         transferOutDoc.Reference = model.Code;
                         transferOutDoc.DestinationId = i.DestinationId;
@@ -247,6 +248,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
 
                             InventoryMovement movement = new InventoryMovement
                             {
+
                                 After = inven.Quantity - d.SendQuantity,
                                 Before = inven.Quantity,
                                 Date = DateTimeOffset.Now,
