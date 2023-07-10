@@ -283,7 +283,7 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
                         SourceId = (int)sPKDocs.SourceId,
                         SourceName = sPKDocs.SourceName,
                         //SPKDocsId = (int)dbContext.SPKDocs.OrderByDescending(x => x.Id).FirstOrDefault().Id + 1,
-                        SPKDocsId = (int)sPKDocs.Id,
+                        SPKDocsId = (int)spk.Id,
                         Weight = sPKDocs.Weight,
                         Details = expeditionDetails
                     });
