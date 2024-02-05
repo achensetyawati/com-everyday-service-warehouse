@@ -689,6 +689,62 @@ namespace Com.MM.Service.Warehouse.WebApi.Controllers.v1.InventoryControllers
         }
         #endregion
 
+        #region getStockByPeriode All
+        [HttpGet("get-stock-by-period")]
+        public IActionResult GetStockByPeriod(string storage, DateTime dateTo, string group, string category, string style, string collection, string season, string color, string sizes, string info, int page = 1, int size = 100, string Order = "{}")
+        {
+            int offset = Convert.ToInt32(Request.Headers["x-timezone-offset"]);
+            identityService.Username = User.Claims.Single(p => p.Type.Equals("username")).Value;
+            string accept = Request.Headers["Accept"];
+            if (storage == null) { storage = "0"; }
+            try
+            {
+                var data = facade.GetStockByPeriod(storage, dateTo, group, category, style, collection, season, color, sizes, page, size);
+
+                return Ok(new
+                {
+                    apiVersion = ApiVersion,
+                    data = data.Item1,
+                    info = new { total = data.Item2 },
+                    message = General.OK_MESSAGE,
+                    statusCode = General.OK_STATUS_CODE
+                });
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.StackTrace)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+
+        [HttpGet("get-stock-by-period/download")]
+        public IActionResult GetStockByPeriodXls(string storage, DateTime dateTo, string group, string category, string style, string collection, string season, string color, string sizes)
+        {
+            try
+            {
+                byte[] xlsInBytes;
+                string filename;
+                if (storage == null) { storage = "0"; }
+
+                var xls = facade.GetXLSStockByPeriod(storage, dateTo, group, category, style, collection, season, color, sizes);
+                filename = String.Format("Laporan Stock.xlsx");
+
+                xlsInBytes = xls.ToArray();
+                var file = File(xlsInBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
+
+                return file;
+            }
+            catch (Exception e)
+            {
+                Dictionary<string, object> Result =
+                    new ResultFormatter(ApiVersion, General.INTERNAL_ERROR_STATUS_CODE, e.Message)
+                    .Fail();
+                return StatusCode(General.INTERNAL_ERROR_STATUS_CODE, Result);
+            }
+        }
+        #endregion
 
     }
 }
