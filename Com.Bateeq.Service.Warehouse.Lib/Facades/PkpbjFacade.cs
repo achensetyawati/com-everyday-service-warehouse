@@ -395,9 +395,9 @@ namespace Com.Bateeq.Service.Warehouse.Lib.Facades
             foreach (SPKDocsCsvViewModel productVM in Data)
             {
                 ErrorMessage = "";
-                if (!(productVM.PackingList.Contains("BTQ")))
+                if (!(productVM.PackingList.Contains("EVR")))
                 {
-                    ErrorMessage = string.Concat(ErrorMessage, "Format Packing List harus 'xxxx/BTQ-FN/xx/xx, ");
+                    ErrorMessage = string.Concat(ErrorMessage, "Format Packing List harus 'xxxx/EVR-FN/xx/xx, ");
                 }
                 if (string.IsNullOrWhiteSpace(productVM.PackingList))
                 {
