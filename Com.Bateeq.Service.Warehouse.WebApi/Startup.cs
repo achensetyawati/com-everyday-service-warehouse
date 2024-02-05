@@ -153,11 +153,20 @@ namespace Com.Bateeq.Service.Warehouse.WebApi
             string env = Configuration.GetValue<string>(Constant.ASPNETCORE_ENVIRONMENT);
             string connectionStringLocalCashFlow = Configuration.GetConnectionString("LocalDbCashFlowConnection") ?? Configuration["LocalDbCashFlowConnection"];
             APIEndpoint.ConnectionString = Configuration.GetConnectionString("DefaultConnection") ?? Configuration["DefaultConnection"];
+            
+            string coreConnectionString = Configuration.GetConnectionString("CoreDbConnection") ?? Configuration["CoreDbConnection"];
+            string posConnectionString = Configuration.GetConnectionString("PosDbConnection") ?? Configuration["PosDbConnection"];
+
+            APIEndpoint.CoreConnectionString = Configuration.GetConnectionString("CoreDbConnection") ?? Configuration["CoreDbConnection"];
+            APIEndpoint.PosConnectionString = Configuration.GetConnectionString("PosDbConnection") ?? Configuration["PosDbConnection"];
 
             /* Register */
             //services.AddDbContext<PurchasingDbContext>(options => options.UseSqlServer(connectionString));
+
             services.AddDbContext<WarehouseDbContext>(options => options.UseSqlServer(connectionString, sqlServerOptions => sqlServerOptions.CommandTimeout(1000 * 60 * 20)));
             services.AddTransient<ILocalDbCashFlowDbContext>(s => new LocalDbCashFlowDbContext(connectionStringLocalCashFlow));
+            services.AddTransient<ILocalDbCashFlowDbContext>(s => new LocalDbCashFlowDbContext(coreConnectionString));
+            services.AddTransient<ILocalDbCashFlowDbContext>(s => new LocalDbCashFlowDbContext(posConnectionString));
             RegisterEndpoints();
             RegisterFacades(services);
             RegisterServices(services, env.Equals("Test"));
